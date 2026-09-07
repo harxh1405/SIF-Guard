@@ -34,14 +34,29 @@ export const Navigation: React.FC<Props> = ({
   isCollapsed,
   onToggleCollapse,
 }) => {
-  const tabs = [
-    { id: 'dashboard' as TabId, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'ingestion' as TabId, label: 'Data Ingestion', icon: UploadCloud },
-    { id: 'explorer' as TabId, label: 'Incident Explorer', icon: FileText },
-    { id: 'clusters' as TabId, label: 'Precursor Clusters', icon: Boxes },
-    { id: 'analytics' as TabId, label: 'Analytics & Trends', icon: BarChart3 },
-    { id: 'knowledge' as TabId, label: 'LSR & Knowledge', icon: BookOpen },
-    { id: 'review' as TabId, label: 'Review Queue', icon: UserCheck },
+  const sections = [
+    {
+      title: 'INTELLIGENCE',
+      items: [
+        { id: 'dashboard' as TabId, label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'analytics' as TabId, label: 'Analytics & Trends', icon: BarChart3 },
+        { id: 'clusters' as TabId, label: 'Precursor Clusters', icon: Boxes },
+      ],
+    },
+    {
+      title: 'OPERATIONS',
+      items: [
+        { id: 'explorer' as TabId, label: 'Incident Explorer', icon: FileText },
+        { id: 'review' as TabId, label: 'Review Queue', icon: UserCheck },
+      ],
+    },
+    {
+      title: 'KNOWLEDGE',
+      items: [
+        { id: 'knowledge' as TabId, label: 'LSR & Knowledge', icon: BookOpen },
+        { id: 'ingestion' as TabId, label: 'Data Ingestion', icon: UploadCloud },
+      ],
+    },
   ];
 
   return (
@@ -51,10 +66,10 @@ export const Navigation: React.FC<Props> = ({
       style={{
         background: 'var(--background-secondary)',
         borderRight: '1px solid var(--border)',
-        padding: isCollapsed ? '20px 8px' : '24px 14px',
+        padding: isCollapsed ? '20px 8px' : '20px 12px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '6px',
+        gap: '12px',
         zIndex: 50,
         overflowX: 'hidden',
         overflowY: 'auto',
@@ -69,9 +84,9 @@ export const Navigation: React.FC<Props> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'space-between',
-          padding: isCollapsed ? '0 0 14px 0' : '0 10px 14px 10px',
+          padding: isCollapsed ? '0 0 12px 0' : '0 8px 12px 8px',
           borderBottom: '1px solid var(--border-subtle)',
-          marginBottom: '8px',
+          marginBottom: '4px',
         }}
       >
         {!isCollapsed && (
@@ -86,7 +101,7 @@ export const Navigation: React.FC<Props> = ({
               whiteSpace: 'nowrap',
             }}
           >
-            INTELLIGENCE SUITE
+            SIF-GUARD PLATFORM
           </span>
         )}
 
@@ -110,55 +125,73 @@ export const Navigation: React.FC<Props> = ({
         </button>
       </div>
 
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-
-        return (
-          <motion.button
-            key={tab.id}
-            whileHover={{ x: isActive ? 0 : 2 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onTabChange(tab.id)}
-            title={isCollapsed ? tab.label : undefined}
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: isCollapsed ? 'center' : 'flex-start',
-              gap: isCollapsed ? '0' : '12px',
-              padding: isCollapsed ? '12px 0' : '11px 14px',
-              borderRadius: '12px',
-              border: 'none',
-              background: isActive
-                ? 'var(--primary)'
-                : 'transparent',
-              color: isActive ? '#FFFFFF' : 'var(--text-secondary)',
-              fontWeight: isActive ? 600 : 500,
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'background-color 0.15s ease-out, color 0.15s ease-out',
-              boxShadow: isActive ? '0 6px 20px rgba(255, 106, 0, 0.20)' : 'none',
-              width: '100%',
-            }}
-          >
-            <Icon
-              size={18}
-              color={isActive ? '#FFFFFF' : 'var(--text-muted)'}
+      {sections.map((section, sIdx) => (
+        <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {!isCollapsed && (
+            <div
               style={{
-                transition: 'color 0.15s ease-out',
-                flexShrink: 0,
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                color: 'var(--text-muted)',
+                letterSpacing: '0.08em',
+                fontFamily: 'var(--font-mono)',
+                padding: '4px 10px 2px 10px',
+                textTransform: 'uppercase',
               }}
-            />
-            {!isCollapsed && (
-              <span style={{ fontFamily: 'var(--font-main)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
-                {tab.label}
-              </span>
-            )}
-          </motion.button>
-        );
-      })}
+            >
+              {section.title}
+            </div>
+          )}
+
+          {section.items.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+
+            return (
+              <motion.button
+                key={tab.id}
+                whileHover={{ x: isActive ? 0 : 2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onTabChange(tab.id)}
+                title={isCollapsed ? tab.label : undefined}
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                  gap: isCollapsed ? '0' : '12px',
+                  padding: isCollapsed ? '10px 0' : '9px 12px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
+                  background: isActive ? 'rgba(255, 106, 0, 0.14)' : 'transparent',
+                  color: isActive ? '#FFFFFF' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 600 : 500,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'background-color 0.15s ease-out, color 0.15s ease-out, border-color 0.15s ease-out',
+                  width: '100%',
+                }}
+              >
+                <Icon
+                  size={17}
+                  color={isActive ? 'var(--primary)' : 'var(--text-muted)'}
+                  style={{
+                    transition: 'color 0.15s ease-out',
+                    flexShrink: 0,
+                  }}
+                />
+                {!isCollapsed && (
+                  <span style={{ fontFamily: 'var(--font-main)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                    {tab.label}
+                  </span>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+      ))}
     </motion.aside>
   );
 };

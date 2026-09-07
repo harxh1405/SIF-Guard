@@ -35,6 +35,19 @@ export function App() {
     localStorage.setItem('sif_guard_theme', theme);
   }, [theme]);
 
+  const handleNavigate = (tab: TabId) => {
+    setActiveTab(tab);
+    mainContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
   // Global Keyboard Shortcuts (Tabs 1-7, '?' for shortcuts modal, 'Esc' to close modal)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -60,19 +73,6 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [shortcutsOpen]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
-
-  const toggleCollapse = () => {
-    setIsCollapsed((prev) => !prev);
-  };
-
-  const handleNavigate = (tab: TabId) => {
-    setActiveTab(tab);
-    mainContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)', overflow: 'hidden' }}>
       <Header
@@ -94,7 +94,7 @@ export function App() {
           {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
           {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
           {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}
-          {activeTab === 'analytics' && <AnalyticsPage />}
+          {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
           {activeTab === 'knowledge' && <KnowledgeLSRPage />}
           {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
         </main>
