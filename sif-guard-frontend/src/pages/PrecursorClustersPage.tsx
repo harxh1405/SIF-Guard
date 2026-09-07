@@ -4,7 +4,8 @@ import type { PrecursorCluster } from '../types/api';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { TabId } from '../components/layout/Navigation';
 
 interface Props {
@@ -49,10 +50,14 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
   };
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)' }}>
+          <h2 className="section-title">
             Recurring Precursor Pattern Clusters
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
@@ -78,14 +83,22 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
-          {clusters.map((c) => {
+          {clusters.map((c, idx) => {
             const densityPct = (c.sif_density * 100).toFixed(1);
 
             return (
-              <div key={c.id || c.cluster_id} className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <motion.div
+                key={c.id || c.cluster_id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                whileHover={{ y: -3 }}
+                className="glass-card"
+                style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+              >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(0,141,218,0.15)', color: 'var(--accent-cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '6px', background: 'rgba(0,200,255,0.12)', color: 'var(--accent-cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)', border: '1px solid rgba(0,200,255,0.25)' }}>
                       Cluster #{c.cluster_id}
                     </span>
                     <span className="badge badge-sif" style={{ fontSize: '0.75rem' }}>
@@ -93,7 +106,7 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
                     </span>
                   </div>
 
-                  <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '1.15rem', color: 'var(--text-primary)', marginBottom: '8px', fontFamily: 'var(--font-display)' }}>
                     {c.name}
                   </h3>
 
@@ -101,39 +114,39 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
                     {c.description}
                   </p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '10px', marginBottom: '16px', border: '1px solid var(--border-color)' }}>
                     <div>
-                      <span style={{ color: 'var(--text-muted)' }}>Dominant Activity:</span>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.dominant_activity || 'General'}</div>
+                      <span className="micro-label">Dominant Activity:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{c.dominant_activity || 'General'}</div>
                     </div>
                     <div>
-                      <span style={{ color: 'var(--text-muted)' }}>Dominant Hazard:</span>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.dominant_hazard || 'Unspecified'}</div>
+                      <span className="micro-label">Dominant Hazard:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{c.dominant_hazard || 'Unspecified'}</div>
                     </div>
                     <div>
-                      <span style={{ color: 'var(--text-muted)' }}>Barrier Failure:</span>
-                      <div style={{ fontWeight: 600, color: 'var(--accent-sif-red)' }}>{c.dominant_barrier_failure || 'Unspecified'}</div>
+                      <span className="micro-label">Barrier Failure:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--accent-sif-red)', marginTop: '2px' }}>{c.dominant_barrier_failure || 'Unspecified'}</div>
                     </div>
                     <div>
-                      <span style={{ color: 'var(--text-muted)' }}>Dominant LSR:</span>
-                      <div style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>{c.dominant_lsr || 'Unspecified'}</div>
+                      <span className="micro-label">Dominant LSR:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--accent-cyan)', marginTop: '2px' }}>{c.dominant_lsr || 'Unspecified'}</div>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--border-color)', fontSize: '0.8rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    Reports: <strong>{c.report_count}</strong> | SIF Precursors: <strong style={{ color: 'var(--accent-sif-red)' }}>{c.sif_precursor_count}</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid var(--border-color)', fontSize: '0.8rem' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                    Reports: <strong>{c.report_count}</strong> | SIF: <strong style={{ color: 'var(--accent-sif-red)' }}>{c.sif_precursor_count}</strong>
                   </span>
-                  <button onClick={() => onNavigate('explorer')} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                    Explore Reports
+                  <button onClick={() => onNavigate('explorer')} className="btn btn-secondary" style={{ padding: '5px 12px', fontSize: '0.75rem' }}>
+                    Explore Reports <ArrowRight size={14} />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

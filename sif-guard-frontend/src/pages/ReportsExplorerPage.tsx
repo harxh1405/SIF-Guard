@@ -6,6 +6,7 @@ import { SIFBadge } from '../components/common/SIFBadge';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
+import { motion } from 'motion/react';
 import {
   Search,
   Filter,
@@ -58,8 +59,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
     setSelectedReport(report);
     setAnalysisData(null);
     setSimilarReports([]);
-    
-    // Automatically trigger analyze API if not analyzed yet, or retrieve similarity
+
     if (!report.sif_potential) {
       handleRunAnalysis(report.id);
     } else {
@@ -75,7 +75,6 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
       .then((res) => {
         setAnalysisData(res);
         setAnalyzing(false);
-        // Refresh list to update badge
         fetchReports();
         getSimilarReports(reportId, 4)
           .then((sim) => setSimilarReports(sim.similar_reports))
@@ -98,10 +97,14 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
   });
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)' }}>
+          <h2 className="section-title">
             Incident & Observation Intelligence Explorer
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
@@ -125,36 +128,38 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             style={{
               width: '100%',
               padding: '10px 12px 10px 38px',
-              borderRadius: '8px',
+              borderRadius: '10px',
               border: '1px solid var(--border-color)',
-              background: 'rgba(7, 15, 30, 0.8)',
+              background: 'var(--bg-input)',
               color: 'var(--text-primary)',
-              fontSize: '0.875rem'
+              fontSize: '0.875rem',
+              outline: 'none',
+              fontFamily: 'var(--font-main)',
             }}
           />
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Filter size={16} color="var(--accent-cyan)" />
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>SIF Potential:</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>SIF Classification:</span>
           <select
             value={sifFilter}
             onChange={(e) => setSifFilter(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '8px', background: 'rgba(7, 15, 30, 0.8)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+            style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}
           >
             <option value="ALL">All Classifications</option>
-            <option value="SIF_POTENTIAL">SIF Potential Only</option>
+            <option value="SIF_POTENTIAL">SIF Only</option>
             <option value="NON_SIF">Non SIF Only</option>
             <option value="UNCERTAIN">Uncertain Only</option>
           </select>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Dataset:</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>Dataset:</span>
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '8px', background: 'rgba(7, 15, 30, 0.8)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+            style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}
           >
             <option value="ALL">All Sources</option>
             <option value="osha_severe">OSHA Severe Injury</option>
@@ -194,21 +199,21 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             <tbody>
               {filteredReports.map((r) => (
                 <tr key={r.id} onClick={() => handleOpenReport(r)}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 700 }}>
                     {r.source_record_id}
                   </td>
-                  <td><span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)' }}>{r.source_dataset}</span></td>
+                  <td><span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.06)', fontFamily: 'var(--font-mono)' }}>{r.source_dataset}</span></td>
                   <td style={{ fontWeight: 600 }}>{r.site || r.employer || 'Unspecified'}</td>
                   <td>{r.activity || 'Unspecified'}</td>
                   <td>{r.hazard || 'Unspecified'}</td>
-                  <td style={{ color: r.barrier_failure ? 'var(--accent-sif-red)' : 'var(--text-muted)' }}>
+                  <td style={{ color: r.barrier_failure ? 'var(--accent-sif-red)' : 'var(--text-muted)', fontWeight: r.barrier_failure ? 600 : 400 }}>
                     {r.barrier_failure || 'None Detected'}
                   </td>
                   <td>
                     <SIFBadge status={r.sif_potential} score={r.sif_score} />
                   </td>
                   <td>
-                    <button onClick={(e) => { e.stopPropagation(); handleOpenReport(r); }} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                    <button onClick={(e) => { e.stopPropagation(); handleOpenReport(r); }} className="btn btn-secondary" style={{ padding: '5px 12px', fontSize: '0.75rem' }}>
                       <Eye size={14} /> Inspect
                     </button>
                   </td>
@@ -229,11 +234,11 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                   <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', fontWeight: 700 }}>
                     #{selectedReport.source_record_id}
                   </span>
-                  <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '4px' }}>
+                  <span style={{ fontSize: '0.72rem', background: 'var(--accent-primary-bg)', color: 'var(--accent-cyan)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
                     {selectedReport.source_dataset}
                   </span>
                 </div>
-                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>
+                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
                   {selectedReport.site || selectedReport.employer || 'Safety Incident Intelligence Analysis'}
                 </h3>
               </div>
@@ -243,8 +248,8 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             </div>
 
             {/* Incident Narrative */}
-            <div style={{ background: 'rgba(7, 15, 30, 0.9)', padding: '16px', borderRadius: '10px', border: '1px solid var(--border-color)', marginBottom: '24px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+            <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '10px', border: '1px solid var(--border-color)', marginBottom: '24px' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px', fontFamily: 'var(--font-mono)' }}>
                 Incident Free-Text Narrative:
               </div>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
@@ -255,7 +260,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             {/* Analysis Action / SIF Summary Banner */}
             <div style={{ marginBottom: '24px' }}>
               {!selectedReport.sif_potential && !analysisData ? (
-                <div style={{ textAlign: 'center', padding: '24px', background: 'rgba(0,141,218,0.08)', borderRadius: '10px' }}>
+                <div style={{ textAlign: 'center', padding: '24px', background: 'var(--accent-primary-bg)', borderRadius: '10px', border: '1px solid var(--border-hover)' }}>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>This report has not been analyzed by the NLP engine yet.</p>
                   <button onClick={() => handleRunAnalysis(selectedReport.id)} disabled={analyzing} className="btn btn-primary">
                     <Play size={16} /> {analyzing ? 'Running NLP Extraction & SIF Model...' : 'Analyze Report Now'}
@@ -265,15 +270,23 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                 <div style={{
                   padding: '20px',
                   borderRadius: '12px',
-                  background: (analysisData?.sif.classification || selectedReport.sif_potential) === 'SIF_POTENTIAL'
-                    ? 'linear-gradient(135deg, rgba(231,76,60,0.15) 0%, rgba(13,27,46,0.9) 100%)'
-                    : 'linear-gradient(135deg, rgba(0,230,118,0.15) 0%, rgba(13,27,46,0.9) 100%)',
-                  border: `1px solid ${(analysisData?.sif.classification || selectedReport.sif_potential) === 'SIF_POTENTIAL' ? 'rgba(231,76,60,0.4)' : 'rgba(0,230,118,0.4)'}`
+                  background: (() => {
+                    const status = analysisData?.sif.classification || selectedReport.sif_potential;
+                    if (status === 'SIF_POTENTIAL') return 'var(--accent-sif-bg)';
+                    if (status === 'UNCERTAIN') return 'var(--accent-uncertain-bg)';
+                    return 'var(--accent-nonsif-bg)';
+                  })(),
+                  border: `1px solid ${(() => {
+                    const status = analysisData?.sif.classification || selectedReport.sif_potential;
+                    if (status === 'SIF_POTENTIAL') return 'var(--accent-sif-red)';
+                    if (status === 'UNCERTAIN') return 'var(--accent-uncertain-amber)';
+                    return 'var(--accent-nonsif-green)';
+                  })()}`
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <SIFBadge status={analysisData?.sif.classification || selectedReport.sif_potential} score={analysisData?.sif.score || selectedReport.sif_score} showScore />
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                         Model Confidence: <strong>{((analysisData?.sif.confidence || selectedReport.sif_confidence || 0) * 100).toFixed(0)}%</strong>
                       </span>
                     </div>
@@ -293,49 +306,49 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
 
             {/* 10-Dimension Precursor Fingerprint Grid */}
             <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '1rem', marginBottom: '12px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h4 style={{ fontSize: '1rem', marginBottom: '12px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-display)' }}>
                 <Layers size={18} color="var(--accent-cyan)" /> Safety Precursor Fingerprint
               </h4>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Activity / Task:</span>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Activity / Task:</span>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
                     {analysisData?.extraction.activity || selectedReport.activity || 'Unspecified'}
                   </div>
                 </div>
 
-                <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Hazard Present:</span>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Hazard Present:</span>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
                     {analysisData?.extraction.hazard || selectedReport.hazard || 'Unspecified'}
                   </div>
                 </div>
 
-                <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Exposure Mode:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-cyan)' }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Exposure Mode:</span>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-cyan)', fontWeight: 600, marginTop: '2px' }}>
                     {analysisData?.extraction.exposure || selectedReport.exposure || 'None Detected'}
                   </div>
                 </div>
 
-                <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Barrier Failure:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-sif-red)', fontWeight: 600 }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Barrier Failure:</span>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-sif-red)', fontWeight: 700, marginTop: '2px' }}>
                     {analysisData?.extraction.barrier_failure || selectedReport.barrier_failure || 'None Detected'}
                   </div>
                 </div>
 
-                <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Energy Source:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Energy Source:</span>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', marginTop: '2px' }}>
                     {analysisData?.extraction.energy_source || selectedReport.energy_source || 'Unspecified'}
                   </div>
                 </div>
 
-                <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Potential Consequence:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-sif-red)' }}>
+                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Potential Consequence:</span>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-sif-red)', fontWeight: 600, marginTop: '2px' }}>
                     {analysisData?.extraction.potential_consequence || selectedReport.potential_consequence || 'Unspecified'}
                   </div>
                 </div>
@@ -344,12 +357,12 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
 
             {/* Matched Life-Saving Rules */}
             <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)' }}>
+              <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
                 Matched IOGP Life-Saving Rules
               </h4>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 {(analysisData?.life_saving_rules || selectedReport.life_saving_rules || []).map((lsr: any, idx: number) => (
-                  <span key={idx} style={{ padding: '6px 14px', borderRadius: '20px', background: 'rgba(0,141,218,0.15)', border: '1px solid rgba(0,141,218,0.3)', color: 'var(--accent-cyan)', fontSize: '0.8rem', fontWeight: 600 }}>
+                  <span key={idx} style={{ padding: '6px 14px', borderRadius: '20px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)', color: 'var(--accent-cyan)', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
                     {lsr.rule_name || lsr} ({(lsr.score ? lsr.score * 100 : 80).toFixed(0)}% Match)
                   </span>
                 ))}
@@ -359,12 +372,12 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             {/* Similar Reports Recommendations */}
             {similarReports.length > 0 && (
               <div>
-                <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)' }}>
+                <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
                   Vector-Similar Safety Reports
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {similarReports.map((sim) => (
-                    <div key={sim.id} style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={sim.id} style={{ padding: '10px 14px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>#{sim.source_record_id}</span>
                         <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{sim.report_text}</p>
@@ -380,6 +393,6 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

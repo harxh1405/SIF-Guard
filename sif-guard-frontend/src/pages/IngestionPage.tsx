@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { importReports, analyzeBatch, getJobStatus } from '../api/reports';
 import type { ImportSummary, JobStatus } from '../types/api';
 import { ErrorBanner } from '../components/common/ErrorBanner';
@@ -156,9 +157,13 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
   }, [batchJobId]);
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', fontWeight: 700, letterSpacing: '-0.02em' }}>
           Data Ingestion & Import Center
         </h2>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
@@ -170,15 +175,15 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '28px' }}>
         {/* Upload Form */}
-        <div className="glass-card" style={{ padding: '28px' }}>
+        <motion.div className="glass-card" style={{ padding: '28px' }} whileHover={{ y: -2 }}>
           <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <UploadCloud size={20} color="var(--accent-cyan)" /> Import Dataset File
           </h3>
 
           <form onSubmit={handleImportSubmit}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                Select Source Dataset Type:
+              <label className="micro-label" style={{ display: 'block', marginBottom: '8px' }}>
+                Select Source Dataset Type
               </label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer' }}>
@@ -228,8 +233,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   borderRadius: '12px',
                   padding: '28px 16px',
                   textAlign: 'center',
-                  background: isDragging ? 'rgba(0, 141, 218, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                  background: isDragging ? 'rgba(0, 141, 218, 0.12)' : 'rgba(255, 255, 255, 0.02)',
                   cursor: 'pointer',
+                  backdropFilter: 'blur(10px)',
                   transition: 'all 0.2s ease',
                 }}
               >
@@ -293,10 +299,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               )}
             </button>
           </form>
-        </div>
+        </motion.div>
 
         {/* Import Summary Results */}
-        <div className="glass-card" style={{ padding: '28px' }}>
+        <motion.div className="glass-card" style={{ padding: '28px' }} whileHover={{ y: -2 }}>
           <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Database size={20} color="var(--accent-nonsif-green)" /> Ingestion Results
           </h3>
@@ -313,24 +319,24 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Records Received</span>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{importResult.records_received}</div>
+                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <span className="micro-label">Records Received</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem' }}>{importResult.records_received}</div>
                 </div>
 
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(0,141,218,0.1)', border: '1px solid rgba(0,141,218,0.3)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>Imported & Stored</span>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>{importResult.records_imported}</div>
+                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)' }}>
+                  <span className="micro-label" style={{ color: 'var(--accent-cyan)' }}>Imported & Stored</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--accent-cyan)' }}>{importResult.records_imported}</div>
                 </div>
 
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.3)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-uncertain-amber)' }}>Duplicates Skipped</span>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-uncertain-amber)' }}>{importResult.duplicates}</div>
+                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--accent-uncertain-bg)', border: '1px solid var(--accent-uncertain-amber)' }}>
+                  <span className="micro-label" style={{ color: 'var(--accent-uncertain-amber)' }}>Duplicates Skipped</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--accent-uncertain-amber)' }}>{importResult.duplicates}</div>
                 </div>
 
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-sif-red)' }}>Invalid Records</span>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-sif-red)' }}>{importResult.invalid}</div>
+                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--accent-sif-bg)', border: '1px solid var(--accent-sif-red)' }}>
+                  <span className="micro-label" style={{ color: 'var(--accent-sif-red)' }}>Invalid Records</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--accent-sif-red)' }}>{importResult.invalid}</div>
                 </div>
               </div>
 
@@ -339,11 +345,11 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               </button>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* Batch Processing Queue Trigger Card */}
-      <div className="glass-card" style={{ padding: '24px' }}>
+      <motion.div className="glass-card" style={{ padding: '24px' }} whileHover={{ y: -2 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -361,7 +367,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
 
         {/* Batch Job Status Monitor */}
         {jobStatus && (
-          <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'rgba(0,141,218,0.08)', border: '1px solid rgba(0,141,218,0.25)' }}>
+          <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
                 Job Status: {jobStatus.status.toUpperCase()}
@@ -378,8 +384,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
+
 

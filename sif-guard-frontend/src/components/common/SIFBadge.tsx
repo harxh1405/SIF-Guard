@@ -12,7 +12,7 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false }) 
     return (
       <span className="badge badge-sif" title="High Serious Injury or Fatality Precursor Potential">
         <AlertTriangle size={14} />
-        SIF POTENTIAL {showScore && score !== undefined && score !== null ? `(${(score * 100).toFixed(0)}%)` : ''}
+        SIF {showScore && score !== undefined && score !== null ? `(${(score * 100).toFixed(0)}%)` : ''}
       </span>
     );
   }
