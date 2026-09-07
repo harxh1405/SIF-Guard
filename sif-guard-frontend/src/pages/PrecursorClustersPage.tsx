@@ -98,7 +98,7 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                    <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '6px', background: 'rgba(0,200,255,0.12)', color: 'var(--accent-cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)', border: '1px solid rgba(0,200,255,0.25)' }}>
+                    <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '6px', background: 'var(--accent-primary-bg)', color: 'var(--accent-cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)', border: '1px solid var(--border-hover)' }}>
                       Cluster #{c.cluster_id}
                     </span>
                     <span className="badge badge-sif" style={{ fontSize: '0.75rem' }}>
@@ -114,7 +114,7 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
                     {c.description}
                   </p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '10px', marginBottom: '16px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.8rem', background: 'var(--bg-badge)', padding: '12px', borderRadius: '10px', marginBottom: '16px', border: '1px solid var(--border-color)' }}>
                     <div>
                       <span className="micro-label">Dominant Activity:</span>
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{c.dominant_activity || 'General'}</div>

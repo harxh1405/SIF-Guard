@@ -22,13 +22,37 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const getTrendColorStyle = () => {
     switch (trendColor) {
       case 'red':
-        return { color: 'var(--accent-sif-red)', bg: 'var(--accent-sif-bg)', border: 'rgba(255, 77, 77, 0.3)' };
+        return {
+          color: 'var(--accent-sif-red)',
+          bg: 'var(--accent-sif-bg)',
+          border: 'rgba(248, 113, 113, 0.3)',
+          glow: 'rgba(248, 113, 113, 0.15)',
+          topBorder: 'var(--accent-sif-red)',
+        };
       case 'green':
-        return { color: 'var(--accent-nonsif-green)', bg: 'var(--accent-nonsif-bg)', border: 'rgba(0, 230, 118, 0.3)' };
+        return {
+          color: 'var(--accent-nonsif-green)',
+          bg: 'var(--accent-nonsif-bg)',
+          border: 'rgba(52, 211, 153, 0.3)',
+          glow: 'rgba(52, 211, 153, 0.15)',
+          topBorder: 'var(--accent-nonsif-green)',
+        };
       case 'amber':
-        return { color: 'var(--accent-uncertain-amber)', bg: 'var(--accent-uncertain-bg)', border: 'rgba(242, 169, 59, 0.3)' };
+        return {
+          color: 'var(--accent-uncertain-amber)',
+          bg: 'var(--accent-uncertain-bg)',
+          border: 'rgba(251, 191, 36, 0.3)',
+          glow: 'rgba(251, 191, 36, 0.15)',
+          topBorder: 'var(--accent-uncertain-amber)',
+        };
       default:
-        return { color: 'var(--accent-cyan)', bg: 'rgba(0, 200, 255, 0.12)', border: 'rgba(0, 200, 255, 0.25)' };
+        return {
+          color: 'var(--accent-cyan)',
+          bg: 'var(--accent-primary-bg)',
+          border: 'rgba(56, 189, 248, 0.3)',
+          glow: 'rgba(56, 189, 248, 0.15)',
+          topBorder: 'var(--accent-cyan)',
+        };
     }
   };
 
@@ -41,8 +65,25 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       whileHover={{ y: -3, scale: 1.01 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       className="glass-card"
-      style={{ padding: '22px' }}
+      style={{
+        padding: '22px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
     >
+      {/* Subtle top indicator bar */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '20px',
+          right: '20px',
+          height: '2px',
+          background: `linear-gradient(90deg, transparent 0%, ${trendStyle.topBorder} 50%, transparent 100%)`,
+          opacity: 0.7,
+        }}
+      />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <span className="micro-label">
@@ -70,13 +111,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             width: '46px',
             height: '46px',
             borderRadius: '12px',
-            background: 'rgba(0, 200, 255, 0.08)',
-            border: '1px solid rgba(0, 200, 255, 0.25)',
+            background: 'var(--accent-primary-bg)',
+            border: '1px solid var(--border-hover)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--accent-cyan)',
-            boxShadow: '0 4px 14px rgba(0, 200, 255, 0.15)',
+            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.2)',
           }}
         >
           <Icon size={22} />

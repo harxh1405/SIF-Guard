@@ -59,6 +59,9 @@ export const Navigation: React.FC<Props> = ({
         gap: '6px',
         zIndex: 50,
         overflowX: 'hidden',
+        overflowY: 'auto',
+        flexShrink: 0,
+        height: '100%',
         transition: 'background-color 0.3s ease, border-color 0.3s ease',
       }}
     >
@@ -162,7 +165,7 @@ export const Navigation: React.FC<Props> = ({
               size={18}
               color={isActive ? 'var(--accent-cyan)' : 'var(--text-muted)'}
               style={{
-                filter: isActive ? 'drop-shadow(0 0 6px rgba(0, 200, 255, 0.5))' : 'none',
+                filter: isActive ? 'drop-shadow(0 0 6px var(--accent-cyan))' : 'none',
                 transition: 'all 0.2s ease',
                 flexShrink: 0,
               }}

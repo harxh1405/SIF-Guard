@@ -1,12 +1,40 @@
 import uuid
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
+from app.main import app as fastapi_app
+from app.db.database import Base, engine, SessionLocal
+from app.db.models.lsr import LifeSavingRule
+from app.services.lsr.matcher import IOGP_LSR_DEFINITIONS
 
-client = TestClient(app)
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_db():
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        if db.query(LifeSavingRule).count() == 0:
+            for rule_def in IOGP_LSR_DEFINITIONS:
+                rule_obj = LifeSavingRule(
+                    id=f"lsr_{rule_def['code']}",
+                    rule_code=rule_def["code"],
+                    rule_name=rule_def["name"],
+                    description=rule_def["description"],
+                    keywords=rule_def["keywords"]
+                )
+                db.add(rule_obj)
+            db.commit()
+    finally:
+        db.close()
+    yield
 
 
-def test_health_endpoint():
+@pytest.fixture
+def client():
+    with TestClient(fastapi_app) as test_client:
+        yield test_client
+
+
+def test_health_endpoint(client):
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
@@ -14,14 +42,14 @@ def test_health_endpoint():
     assert "SIF-Guard" in data["service"]
 
 
-def test_lsr_rules_endpoint():
+def test_lsr_rules_endpoint(client):
     response = client.get("/api/v1/lsr/rules")
     assert response.status_code == 200
     data = response.json()
     assert len(data) >= 9
 
 
-def test_lsr_map_endpoint():
+def test_lsr_map_endpoint(client):
     response = client.post("/api/v1/lsr/map", json={"text": "Worker entered vessel without gas testing."})
     assert response.status_code == 200
     data = response.json()
@@ -29,7 +57,7 @@ def test_lsr_map_endpoint():
     assert data[0]["rule_name"] == "Confined Space"
 
 
-def test_dashboard_summary_endpoint():
+def test_dashboard_summary_endpoint(client):
     response = client.get("/api/v1/dashboard/summary")
     assert response.status_code == 200
     data = response.json()
@@ -45,7 +73,7 @@ def test_dashboard_summary_endpoint():
     ("BFT-009", "Maintenance work was being performed near a moving vehicle route. The work area was not barricaded and pedestrians were allowed to enter the vehicle operating zone.", "exclusion zone / barricading"),
     ("BFT-010", "A worker began maintenance on a pressurized system without confirming that the upstream valve was isolated and the system had been depressurized. No independent isolation verification was performed.", "pressure isolation / depressurization"),
 ])
-def test_bft_analysis_end_to_end(bft_id, text, expected_barrier):
+def test_bft_analysis_end_to_end(client, bft_id, text, expected_barrier):
     unique_key = f"{bft_id.lower()}_{uuid.uuid4().hex[:8]}"
     json_data = [{
         "id": unique_key,

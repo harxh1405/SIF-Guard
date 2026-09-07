@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { listReports, analyzeReport } from '../api/reports';
 import { getSimilarReports } from '../api/patterns';
 import type { SafetyReportRead, AnalysisResponse, SimilarReport } from '../types/api';
@@ -6,7 +6,9 @@ import { SIFBadge } from '../components/common/SIFBadge';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
-import { motion } from 'motion/react';
+import { EvidenceHighlighter } from '../components/common/EvidenceHighlighter';
+import { AIExplanationPanel } from '../components/common/AIExplanationPanel';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
   Filter,
@@ -14,6 +16,8 @@ import {
   Eye,
   Layers,
   X,
+  Sparkles,
+  Download,
 } from 'lucide-react';
 import type { TabId } from '../components/layout/Navigation';
 
@@ -37,6 +41,8 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
   const [similarReports, setSimilarReports] = useState<SimilarReport[]>([]);
   const [analyzing, setAnalyzing] = useState<boolean>(false);
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const fetchReports = () => {
     setLoading(true);
     setError(null);
@@ -54,6 +60,21 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
   useEffect(() => {
     fetchReports();
   }, [sifFilter, sourceFilter]);
+
+  // Global search shortcut '/'
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current) {
+        const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+        if (tag !== 'input' && tag !== 'textarea') {
+          e.preventDefault();
+          searchInputRef.current?.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleOpenReport = (report: SafetyReportRead) => {
     setSelectedReport(report);
@@ -92,9 +113,34 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
       r.report_text.toLowerCase().includes(q) ||
       (r.activity && r.activity.toLowerCase().includes(q)) ||
       (r.hazard && r.hazard.toLowerCase().includes(q)) ||
-      (r.site && r.site.toLowerCase().includes(q))
+      (r.site && r.site.toLowerCase().includes(q)) ||
+      (r.source_record_id && r.source_record_id.toLowerCase().includes(q))
     );
   });
+
+  const exportFilteredCSV = () => {
+    if (filteredReports.length === 0) return;
+    const headers = ['Record ID', 'Source', 'Site', 'Activity', 'Hazard', 'Barrier Failure', 'SIF Classification', 'Confidence', 'Narrative'];
+    const rows = filteredReports.map((r) => [
+      `"${r.source_record_id}"`,
+      `"${r.source_dataset}"`,
+      `"${(r.site || r.employer || '').replace(/"/g, '""')}"`,
+      `"${(r.activity || '').replace(/"/g, '""')}"`,
+      `"${(r.hazard || '').replace(/"/g, '""')}"`,
+      `"${(r.barrier_failure || '').replace(/"/g, '""')}"`,
+      `"${r.sif_potential || 'UNANALYZED'}"`,
+      `"${r.sif_confidence || 0}"`,
+      `"${r.report_text.replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `sif_guard_reports_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <motion.div
@@ -111,9 +157,14 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             Browse, filter, and inspect Serious Injury & Fatality (SIF) precursor intelligence across safety reports
           </p>
         </div>
-        <button onClick={() => onNavigate('ingestion')} className="btn btn-secondary">
-          + Import New Dataset
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={exportFilteredCSV} className="btn btn-secondary">
+            <Download size={15} /> Export CSV
+          </button>
+          <button onClick={() => onNavigate('ingestion')} className="btn btn-primary">
+            + Import New Dataset
+          </button>
+        </div>
       </div>
 
       {/* Filter Controls Bar */}
@@ -121,8 +172,9 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
         <div style={{ flex: 1, minWidth: '260px', position: 'relative' }}>
           <Search size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
+            ref={searchInputRef}
             type="text"
-            placeholder="Search narrative text, activity, hazard, or site..."
+            placeholder="Search narrative text, activity, hazard, or site (Press '/' to focus)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -182,217 +234,211 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
           onAction={() => onNavigate('ingestion')}
         />
       ) : (
-        <div className="glass-card" style={{ overflow: 'hidden' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Record ID</th>
-                <th>Source</th>
-                <th>Site / Employer</th>
-                <th>Activity / Task</th>
-                <th>Hazard</th>
-                <th>Barrier Defect</th>
-                <th>SIF Classification</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredReports.map((r) => (
-                <tr key={r.id} onClick={() => handleOpenReport(r)}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 700 }}>
-                    {r.source_record_id}
-                  </td>
-                  <td><span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.06)', fontFamily: 'var(--font-mono)' }}>{r.source_dataset}</span></td>
-                  <td style={{ fontWeight: 600 }}>{r.site || r.employer || 'Unspecified'}</td>
-                  <td>{r.activity || 'Unspecified'}</td>
-                  <td>{r.hazard || 'Unspecified'}</td>
-                  <td style={{ color: r.barrier_failure ? 'var(--accent-sif-red)' : 'var(--text-muted)', fontWeight: r.barrier_failure ? 600 : 400 }}>
-                    {r.barrier_failure || 'None Detected'}
-                  </td>
-                  <td>
-                    <SIFBadge status={r.sif_potential} score={r.sif_score} />
-                  </td>
-                  <td>
-                    <button onClick={(e) => { e.stopPropagation(); handleOpenReport(r); }} className="btn btn-secondary" style={{ padding: '5px 12px', fontSize: '0.75rem' }}>
-                      <Eye size={14} /> Inspect
-                    </button>
-                  </td>
+        <div className="glass-card" style={{ overflow: 'hidden', width: '100%' }}>
+          <div style={{ width: '100%', overflowX: 'auto' }}>
+            <table className="data-table" style={{ width: '100%', minWidth: '950px' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '130px', whiteSpace: 'nowrap' }}>Record ID</th>
+                  <th style={{ width: '140px', whiteSpace: 'nowrap' }}>Source</th>
+                  <th style={{ minWidth: '150px', maxWidth: '200px' }}>Site / Employer</th>
+                  <th style={{ minWidth: '160px', maxWidth: '220px' }}>Activity / Task</th>
+                  <th style={{ minWidth: '140px', maxWidth: '180px' }}>Hazard</th>
+                  <th style={{ minWidth: '150px', maxWidth: '180px' }}>Barrier Defect</th>
+                  <th style={{ width: '160px', whiteSpace: 'nowrap' }}>SIF Classification</th>
+                  <th style={{ width: '100px', whiteSpace: 'nowrap', textAlign: 'center' }}>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredReports.map((r) => (
+                  <tr key={r.id} onClick={() => handleOpenReport(r)}>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                      {r.source_record_id}
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '6px', background: 'var(--bg-badge)', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                        {r.source_dataset}
+                      </span>
+                    </td>
+                    <td
+                      style={{
+                        fontWeight: 600,
+                        maxWidth: '200px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={r.site || r.employer || 'Unspecified'}
+                    >
+                      {r.site || r.employer || 'Unspecified'}
+                    </td>
+                    <td
+                      style={{
+                        maxWidth: '220px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={r.activity || 'Unspecified'}
+                    >
+                      {r.activity || 'Unspecified'}
+                    </td>
+                    <td
+                      style={{
+                        maxWidth: '180px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={r.hazard || 'Unspecified'}
+                    >
+                      {r.hazard || 'Unspecified'}
+                    </td>
+                    <td
+                      style={{
+                        maxWidth: '180px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: r.barrier_failure ? 'var(--accent-sif-red)' : 'var(--text-muted)',
+                        fontWeight: r.barrier_failure ? 600 : 400,
+                      }}
+                      title={r.barrier_failure || 'None Detected'}
+                    >
+                      {r.barrier_failure || 'None Detected'}
+                    </td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <SIFBadge status={r.sif_potential} score={r.sif_score || r.sif_confidence} showScore />
+                    </td>
+                    <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      <button onClick={(e) => { e.stopPropagation(); handleOpenReport(r); }} className="btn btn-secondary" style={{ padding: '5px 12px', fontSize: '0.75rem' }}>
+                        <Eye size={14} /> Inspect
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {/* Report Intelligence Detail Modal */}
-      {selectedReport && (
-        <div className="modal-backdrop" onClick={() => setSelectedReport(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', fontWeight: 700 }}>
-                    #{selectedReport.source_record_id}
-                  </span>
-                  <span style={{ fontSize: '0.72rem', background: 'var(--accent-primary-bg)', color: 'var(--accent-cyan)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
-                    {selectedReport.source_dataset}
-                  </span>
-                </div>
-                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-                  {selectedReport.site || selectedReport.employer || 'Safety Incident Intelligence Analysis'}
-                </h3>
-              </div>
-              <button onClick={() => setSelectedReport(null)} className="btn btn-secondary" style={{ padding: '6px' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Incident Narrative */}
-            <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '10px', border: '1px solid var(--border-color)', marginBottom: '24px' }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px', fontFamily: 'var(--font-mono)' }}>
-                Incident Free-Text Narrative:
-              </div>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
-                "{selectedReport.report_text}"
-              </p>
-            </div>
-
-            {/* Analysis Action / SIF Summary Banner */}
-            <div style={{ marginBottom: '24px' }}>
-              {!selectedReport.sif_potential && !analysisData ? (
-                <div style={{ textAlign: 'center', padding: '24px', background: 'var(--accent-primary-bg)', borderRadius: '10px', border: '1px solid var(--border-hover)' }}>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>This report has not been analyzed by the NLP engine yet.</p>
-                  <button onClick={() => handleRunAnalysis(selectedReport.id)} disabled={analyzing} className="btn btn-primary">
-                    <Play size={16} /> {analyzing ? 'Running NLP Extraction & SIF Model...' : 'Analyze Report Now'}
-                  </button>
-                </div>
-              ) : (
-                <div style={{
-                  padding: '20px',
-                  borderRadius: '12px',
-                  background: (() => {
-                    const status = analysisData?.sif.classification || selectedReport.sif_potential;
-                    if (status === 'SIF_POTENTIAL') return 'var(--accent-sif-bg)';
-                    if (status === 'UNCERTAIN') return 'var(--accent-uncertain-bg)';
-                    return 'var(--accent-nonsif-bg)';
-                  })(),
-                  border: `1px solid ${(() => {
-                    const status = analysisData?.sif.classification || selectedReport.sif_potential;
-                    if (status === 'SIF_POTENTIAL') return 'var(--accent-sif-red)';
-                    if (status === 'UNCERTAIN') return 'var(--accent-uncertain-amber)';
-                    return 'var(--accent-nonsif-green)';
-                  })()}`
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <SIFBadge status={analysisData?.sif.classification || selectedReport.sif_potential} score={analysisData?.sif.score || selectedReport.sif_score} showScore />
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-                        Model Confidence: <strong>{((analysisData?.sif.confidence || selectedReport.sif_confidence || 0) * 100).toFixed(0)}%</strong>
-                      </span>
-                    </div>
+      <AnimatePresence>
+        {selectedReport && (
+          <motion.div
+            className="modal-backdrop"
+            onClick={() => setSelectedReport(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="modal-content"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              style={{ padding: '32px', maxWidth: '850px' }}
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                      #{selectedReport.source_record_id}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', background: 'var(--accent-primary-bg)', color: 'var(--accent-cyan)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                      {selectedReport.source_dataset}
+                    </span>
                   </div>
+                  <h3 style={{ fontSize: '1.3rem', color: 'var(--text-primary)', margin: 0 }}>
+                    {selectedReport.site || selectedReport.employer || 'Safety Incident Intelligence Analysis'}
+                  </h3>
+                </div>
+                <button onClick={() => setSelectedReport(null)} className="btn btn-secondary" style={{ padding: '6px' }}>
+                  <X size={20} />
+                </button>
+              </div>
 
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                    Explainable Risk Factors & Precursor Signals:
+              {/* Incident Narrative with Evidence Highlighting */}
+              <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '10px', border: '1px solid var(--border-color)', marginBottom: '24px' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} color="var(--accent-cyan)" /> Incident Free-Text Narrative:
+                </div>
+                <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
+                  <EvidenceHighlighter
+                    text={selectedReport.report_text}
+                    energySource={selectedReport.energy_source}
+                    barrierFailure={selectedReport.barrier_failure}
+                    hazard={selectedReport.hazard}
+                  />
+                </div>
+              </div>
+
+              {/* Analysis Action / SIF Summary Banner */}
+              <div style={{ marginBottom: '24px' }}>
+                {!selectedReport.sif_potential && !analysisData ? (
+                  <div style={{ textAlign: 'center', padding: '24px', background: 'var(--accent-primary-bg)', borderRadius: '10px', border: '1px solid var(--border-hover)' }}>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>This report has not been analyzed by the NLP engine yet.</p>
+                    <button onClick={() => handleRunAnalysis(selectedReport.id)} disabled={analyzing} className="btn btn-primary">
+                      <Play size={16} /> {analyzing ? 'Running NLP Extraction & SIF Model...' : 'Analyze Report Now'}
+                    </button>
                   </div>
-                  <ul style={{ paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    {(analysisData?.sif.risk_factors || []).map((rf, idx) => (
-                      <li key={idx}>{rf}</li>
+                ) : (
+                  <AIExplanationPanel
+                    sifResult={analysisData?.sif}
+                    sifStatus={selectedReport.sif_potential}
+                    sifScore={selectedReport.sif_score || selectedReport.sif_confidence}
+                    actualSeverity={selectedReport.actual_severity}
+                    extracted={analysisData?.extraction || {
+                      activity: selectedReport.activity || null,
+                      hazard: selectedReport.hazard || null,
+                      barrier_failure: selectedReport.barrier_failure || null,
+                      energy_source: selectedReport.energy_source || null,
+                    }}
+                    lsrMatches={analysisData?.life_saving_rules || selectedReport.life_saving_rules || []}
+                  />
+                )}
+              </div>
+
+              {/* Similar Precursor Incidents (Vector Cosine Search) */}
+              {similarReports.length > 0 && (
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+                  <h4 style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Layers size={16} color="var(--accent-cyan)" /> Historically Similar Precursor Incidents (HNSW Semantic Retrieval)
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    {similarReports.map((sim, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          padding: '12px',
+                          borderRadius: '8px',
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-cyan)', fontSize: '0.75rem' }}>
+                            #{sim.source_record_id}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                            {(sim.similarity * 100).toFixed(0)}% Similarity
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {sim.report_text}
+                        </p>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
-            </div>
-
-            {/* 10-Dimension Precursor Fingerprint Grid */}
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '1rem', marginBottom: '12px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-display)' }}>
-                <Layers size={18} color="var(--accent-cyan)" /> Safety Precursor Fingerprint
-              </h4>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <span className="micro-label">Activity / Task:</span>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
-                    {analysisData?.extraction.activity || selectedReport.activity || 'Unspecified'}
-                  </div>
-                </div>
-
-                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <span className="micro-label">Hazard Present:</span>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
-                    {analysisData?.extraction.hazard || selectedReport.hazard || 'Unspecified'}
-                  </div>
-                </div>
-
-                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <span className="micro-label">Exposure Mode:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-cyan)', fontWeight: 600, marginTop: '2px' }}>
-                    {analysisData?.extraction.exposure || selectedReport.exposure || 'None Detected'}
-                  </div>
-                </div>
-
-                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <span className="micro-label">Barrier Failure:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-sif-red)', fontWeight: 700, marginTop: '2px' }}>
-                    {analysisData?.extraction.barrier_failure || selectedReport.barrier_failure || 'None Detected'}
-                  </div>
-                </div>
-
-                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <span className="micro-label">Energy Source:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', marginTop: '2px' }}>
-                    {analysisData?.extraction.energy_source || selectedReport.energy_source || 'Unspecified'}
-                  </div>
-                </div>
-
-                <div style={{ padding: '12px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <span className="micro-label">Potential Consequence:</span>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--accent-sif-red)', fontWeight: 600, marginTop: '2px' }}>
-                    {analysisData?.extraction.potential_consequence || selectedReport.potential_consequence || 'Unspecified'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Matched Life-Saving Rules */}
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-                Matched IOGP Life-Saving Rules
-              </h4>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {(analysisData?.life_saving_rules || selectedReport.life_saving_rules || []).map((lsr: any, idx: number) => (
-                  <span key={idx} style={{ padding: '6px 14px', borderRadius: '20px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)', color: 'var(--accent-cyan)', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
-                    {lsr.rule_name || lsr} ({(lsr.score ? lsr.score * 100 : 80).toFixed(0)}% Match)
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Similar Reports Recommendations */}
-            {similarReports.length > 0 && (
-              <div>
-                <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-                  Vector-Similar Safety Reports
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {similarReports.map((sim) => (
-                    <div key={sim.id} style={{ padding: '10px 14px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>#{sim.source_record_id}</span>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{sim.report_text}</p>
-                      </div>
-                      <span className="badge badge-uncertain" style={{ fontSize: '0.7rem' }}>
-                        {(sim.similarity * 100).toFixed(0)}% Similarity
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

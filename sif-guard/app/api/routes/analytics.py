@@ -37,5 +37,5 @@ def get_lsr_analytics(limit: int = Query(10, ge=1, le=100), db: Session = Depend
 
 
 @router.get("/analytics/trends", response_model=List[TrendData])
-def get_trend_analytics(grouping: str = Query("month", regex="^(month|quarter)$"), db: Session = Depends(get_db)):
+def get_trend_analytics(grouping: str = Query("month", pattern="^(month|quarter)$"), db: Session = Depends(get_db)):
     return trend_service.calculate_trends(db, grouping=grouping)

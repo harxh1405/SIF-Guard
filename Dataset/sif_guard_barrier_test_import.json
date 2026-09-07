@@ -1,0 +1,52 @@
+[
+  {
+    "id": "BFT-001",
+    "report_type": "near_miss",
+    "report_text": "During maintenance of a centrifugal pump, the worker started removing the coupling guard without applying lockout/tagout. The pump was not electrically isolated and another operator was able to start the equipment from the control panel."
+  },
+  {
+    "id": "BFT-002",
+    "report_type": "near_miss",
+    "report_text": "A technician opened a process line after the valve was closed, but zero pressure was not verified before loosening the flange. Residual pressure was released unexpectedly."
+  },
+  {
+    "id": "BFT-003",
+    "report_type": "near_miss",
+    "report_text": "A worker entered a storage tank for cleaning without atmospheric testing. No oxygen, H2S, or LEL measurement was performed before entry."
+  },
+  {
+    "id": "BFT-004",
+    "report_type": "near_miss",
+    "report_text": "A worker was performing maintenance approximately 8 meters above ground on an elevated platform. No safety harness or lifeline was provided, and the worker was operating close to the unprotected edge."
+  },
+  {
+    "id": "BFT-005",
+    "report_type": "near_miss",
+    "report_text": "During operation of a grinding machine, the machine guard had been removed to make access easier. The equipment continued to operate without the guard installed."
+  },
+  {
+    "id": "BFT-006",
+    "report_type": "near_miss",
+    "report_text": "A crane was lifting a heavy valve while workers were standing underneath the suspended load. The lifting area had not been barricaded and no exclusion zone was established."
+  },
+  {
+    "id": "BFT-007",
+    "report_type": "near_miss",
+    "report_text": "Welding was performed near hydrocarbon-containing equipment without completing the required gas test. No valid hot-work permit was available at the work location."
+  },
+  {
+    "id": "BFT-008",
+    "report_type": "near_miss",
+    "report_text": "Workers entered a 2.5-meter-deep excavation without shoring or a suitable protective system. The excavation walls showed signs of instability."
+  },
+  {
+    "id": "BFT-009",
+    "report_type": "near_miss",
+    "report_text": "Maintenance work was being performed near a moving vehicle route. The work area was not barricaded and pedestrians were allowed to enter the vehicle operating zone."
+  },
+  {
+    "id": "BFT-010",
+    "report_type": "near_miss",
+    "report_text": "A worker began maintenance on a pressurized system without confirming that the upstream valve was isolated and the system had been depressurized. No independent isolation verification was performed."
+  }
+]

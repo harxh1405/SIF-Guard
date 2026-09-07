@@ -233,7 +233,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   borderRadius: '12px',
                   padding: '28px 16px',
                   textAlign: 'center',
-                  background: isDragging ? 'rgba(0, 141, 218, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                  background: isDragging ? 'var(--accent-primary-bg)' : 'var(--bg-badge)',
                   cursor: 'pointer',
                   backdropFilter: 'blur(10px)',
                   transition: 'all 0.2s ease',
@@ -258,7 +258,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             </div>
 
             {/* Quick Sample Dataset Selection */}
-            <div style={{ marginBottom: '20px', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
+            <div style={{ marginBottom: '20px', padding: '12px', borderRadius: '8px', background: 'var(--bg-badge)', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Zap size={13} color="var(--accent-cyan)" /> Quick Demo: Load Sample Datasets
               </div>
@@ -314,7 +314,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             </div>
           ) : (
             <div>
-              <div style={{ padding: '12px 16px', borderRadius: '8px', background: 'rgba(0,230,118,0.1)', border: '1px solid rgba(0,230,118,0.3)', color: 'var(--accent-nonsif-green)', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+              <div style={{ padding: '12px 16px', borderRadius: '8px', background: 'var(--accent-nonsif-bg)', border: '1px solid var(--accent-nonsif-green)', color: 'var(--accent-nonsif-green)', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                 <CheckCircle2 size={18} /> Ingestion Successful!
               </div>
 

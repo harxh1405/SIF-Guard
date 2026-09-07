@@ -1,0 +1,107 @@
+{
+  "description": "SIF-Guard barrier failure detection test dataset",
+  "purpose": "Test whether the application detects failed or missing safety barriers from near-miss reports.",
+  "recommended_report_type": "near_miss",
+  "test_cases": [
+    {
+      "test_id": 1,
+      "report_type": "near_miss",
+      "report_text": "During maintenance of a centrifugal pump, the worker started removing the coupling guard without applying lockout/tagout. The pump was not electrically isolated and another operator was able to start the equipment from the control panel.",
+      "expected": {
+        "barrier": "Energy Isolation / LOTO",
+        "barrier_failure": "Lockout/tagout not applied",
+        "life_saving_rule": "Energy Isolation"
+      }
+    },
+    {
+      "test_id": 2,
+      "report_type": "near_miss",
+      "report_text": "A technician opened a process line after the valve was closed, but zero pressure was not verified before loosening the flange. Residual pressure was released unexpectedly.",
+      "expected": {
+        "barrier": "Energy Isolation / Pressure Isolation",
+        "barrier_failure": "Zero energy / pressure not verified",
+        "life_saving_rule": "Energy Isolation"
+      }
+    },
+    {
+      "test_id": 3,
+      "report_type": "near_miss",
+      "report_text": "A worker entered a storage tank for cleaning without atmospheric testing. No oxygen, H2S, or LEL measurement was performed before entry.",
+      "expected": {
+        "barrier": "Atmospheric Testing",
+        "barrier_failure": "Gas testing not performed",
+        "life_saving_rule": "Confined Space"
+      }
+    },
+    {
+      "test_id": 4,
+      "report_type": "near_miss",
+      "report_text": "A worker was performing maintenance approximately 8 meters above ground on an elevated platform. No safety harness or lifeline was provided, and the worker was operating close to the unprotected edge.",
+      "expected": {
+        "barrier": "Fall Protection",
+        "barrier_failure": "Fall protection not provided/used",
+        "life_saving_rule": "Work at Height"
+      }
+    },
+    {
+      "test_id": 5,
+      "report_type": "near_miss",
+      "report_text": "During operation of a grinding machine, the machine guard had been removed to make access easier. The equipment continued to operate without the guard installed.",
+      "expected": {
+        "barrier": "Machine Guarding",
+        "barrier_failure": "Guard removed/bypassed",
+        "life_saving_rule": "Bypass Safety Controls"
+      }
+    },
+    {
+      "test_id": 6,
+      "report_type": "near_miss",
+      "report_text": "A crane was lifting a heavy valve while workers were standing underneath the suspended load. The lifting area had not been barricaded and no exclusion zone was established.",
+      "expected": {
+        "barrier": "Exclusion Zone / Lifting Controls",
+        "barrier_failure": "Exclusion zone not established/enforced",
+        "life_saving_rule": "Safe Mechanical Lifting"
+      }
+    },
+    {
+      "test_id": 7,
+      "report_type": "near_miss",
+      "report_text": "Welding was performed near hydrocarbon-containing equipment without completing the required gas test. No valid hot-work permit was available at the work location.",
+      "expected": {
+        "barrier": "Hot Work Permit / Gas Testing",
+        "barrier_failure": "Permit and gas testing not completed",
+        "life_saving_rule": "Hot Work"
+      }
+    },
+    {
+      "test_id": 8,
+      "report_type": "near_miss",
+      "report_text": "Workers entered a 2.5-meter-deep excavation without shoring or a suitable protective system. The excavation walls showed signs of instability.",
+      "expected": {
+        "barrier": "Excavation Protection",
+        "barrier_failure": "Shoring/protective system not provided",
+        "life_saving_rule": "Excavation"
+      }
+    },
+    {
+      "test_id": 9,
+      "report_type": "near_miss",
+      "report_text": "Maintenance work was being performed near a moving vehicle route. The work area was not barricaded and pedestrians were allowed to enter the vehicle operating zone.",
+      "expected": {
+        "barrier": "Barricading / Traffic Segregation",
+        "barrier_failure": "Work area not barricaded",
+        "life_saving_rule": "Line of Fire"
+      }
+    },
+    {
+      "test_id": 10,
+      "report_type": "near_miss",
+      "report_text": "A worker began maintenance on a pressurized system without confirming that the upstream valve was isolated and the system had been depressurized. No independent isolation verification was performed.",
+      "expected": {
+        "barrier": "Isolation / Depressurization",
+        "barrier_failure": "Isolation and depressurization not verified",
+        "life_saving_rule": "Energy Isolation"
+      }
+    }
+  ]
+}

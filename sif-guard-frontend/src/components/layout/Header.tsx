@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldAlert, Server, CheckCircle2, XCircle, Sun, Moon } from 'lucide-react';
+import { ShieldAlert, Server, CheckCircle2, XCircle, Keyboard } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
 import { motion } from 'motion/react';
+import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
 
 interface Props {
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  onOpenShortcuts?: () => void;
 }
 
-export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
+export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts }) => {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [error, setError] = useState<boolean>(false);
 
@@ -95,7 +97,7 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         {/* Backend Status Badge */}
         <div
           style={{
@@ -139,42 +141,48 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
           )}
         </div>
 
-        {/* Theme Switcher Toggle */}
-        <motion.button
-          onClick={onToggleTheme}
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.94 }}
-          style={{
-            padding: '8px 14px',
-            borderRadius: '20px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            boxShadow: 'var(--shadow-glass)',
-            transition: 'all 0.2s ease',
-          }}
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun size={15} color="#f2a93b" />
-              <span>Light Mode</span>
-            </>
-          ) : (
-            <>
-              <Moon size={15} color="#00c8ff" />
-              <span>Dark Mode</span>
-            </>
-          )}
-        </motion.button>
+        {/* Keyboard Shortcuts Helper Button */}
+        {onOpenShortcuts && (
+          <motion.button
+            onClick={onOpenShortcuts}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94 }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '20px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              boxShadow: 'var(--shadow-glass)',
+              transition: 'all 0.2s ease',
+            }}
+            title="Keyboard Shortcuts (Press '?')"
+          >
+            <Keyboard size={15} color="var(--accent-cyan)" />
+            <span>Shortcuts</span>
+            <kbd
+              style={{
+                background: 'var(--bg-badge)',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                fontSize: '0.7rem',
+                border: '1px solid var(--border-color)',
+              }}
+            >
+              ?
+            </kbd>
+          </motion.button>
+        )}
+
+        {/* Glass Theme Toggle Switch */}
+        <ThemeToggleSwitch theme={theme} onToggle={onToggleTheme} />
       </div>
     </header>
   );
 };
-
