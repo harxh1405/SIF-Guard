@@ -1,7 +1,7 @@
 import uuid
 import datetime
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db, SessionLocal
 from app.db.models.report import SafetyReport
@@ -94,7 +94,7 @@ def analyze_report(report_id: str, db: Session = Depends(get_db)):
     return run_single_report_analysis(db, report)
 
 
-def process_batch_job(job_id: str):
+def process_batch_job(job_id: str, force: bool = False):
     db = SessionLocal()
     try:
         job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
@@ -104,18 +104,26 @@ def process_batch_job(job_id: str):
         job.status = "running"
         db.commit()
 
-        unprocessed = db.query(SafetyReport).filter(SafetyReport.sif_potential.is_(None)).all()
-        job.total = len(unprocessed)
+        if force:
+            reports_to_process = db.query(SafetyReport).all()
+        else:
+            reports_to_process = db.query(SafetyReport).filter(SafetyReport.sif_potential.is_(None)).all()
+            if not reports_to_process:
+                # If no unanalyzed reports exist, re-analyze all reports in database
+                reports_to_process = db.query(SafetyReport).all()
+
+        job.total = len(reports_to_process)
         db.commit()
 
         processed_count = 0
         failed_count = 0
 
-        for r in unprocessed:
+        for r in reports_to_process:
             try:
                 run_single_report_analysis(db, r)
                 processed_count += 1
             except Exception as e:
+                logger.error(f"Batch analysis error for report {r.id}: {e}")
                 failed_count += 1
             
             job.processed = processed_count
@@ -135,13 +143,18 @@ def process_batch_job(job_id: str):
 
 
 @router.post("/reports/analyze-batch")
-def analyze_batch(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def analyze_batch(force: bool = Query(False), background_tasks: BackgroundTasks = None, db: Session = Depends(get_db)):
     job_id = f"job_{uuid.uuid4().hex[:12]}"
-    unprocessed_count = db.query(SafetyReport).filter(SafetyReport.sif_potential.is_(None)).count()
+    
+    if force:
+        total_count = db.query(SafetyReport).count()
+    else:
+        unprocessed_count = db.query(SafetyReport).filter(SafetyReport.sif_potential.is_(None)).count()
+        total_count = unprocessed_count if unprocessed_count > 0 else db.query(SafetyReport).count()
 
     job = AnalysisJob(
         id=job_id,
-        total=unprocessed_count,
+        total=total_count,
         processed=0,
         failed=0,
         status="pending"
@@ -149,12 +162,13 @@ def analyze_batch(background_tasks: BackgroundTasks, db: Session = Depends(get_d
     db.add(job)
     db.commit()
 
-    background_tasks.add_task(process_batch_job, job_id)
+    if background_tasks:
+        background_tasks.add_task(process_batch_job, job_id, force)
 
     return {
         "job_id": job_id,
         "status": "pending",
-        "total_reports_queued": unprocessed_count
+        "total_reports_queued": total_count
     }
 
 

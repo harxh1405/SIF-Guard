@@ -17,6 +17,8 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [clustering, setClustering] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [lastRunTime, setLastRunTime] = useState<string | null>(null);
 
   const fetchClusters = () => {
     setLoading(true);
@@ -38,13 +40,18 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
 
   const handleRunClustering = () => {
     setClustering(true);
-    triggerClustering(3)
+    setError(null);
+    setSuccessMessage(null);
+    triggerClustering(2)
       .then((res) => {
         setClusters(res.clusters);
         setClustering(false);
+        const now = new Date().toLocaleTimeString();
+        setLastRunTime(now);
+        setSuccessMessage(`HDBSCAN clustering completed successfully! Discovered ${res.clusters_discovered} recurring precursor pattern clusters.`);
       })
       .catch((err) => {
-        setError(err.message || 'Failed to run clustering');
+        setError(err.message || 'Failed to run HDBSCAN clustering');
         setClustering(false);
       });
   };
@@ -62,13 +69,21 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
             Semantic HDBSCAN clustering discovering recurring precursor patterns across safety reports
+            {lastRunTime && <span style={{ color: 'var(--accent-cyan)', marginLeft: '12px', fontFamily: 'var(--font-mono)' }}>• Last run: {lastRunTime}</span>}
           </p>
         </div>
-        <button onClick={handleRunClustering} disabled={clustering} className="btn btn-primary">
+        <button onClick={handleRunClustering} disabled={clustering} className="btn btn-primary" style={{ minWidth: '220px', justifyContent: 'center' }}>
           <RefreshCw size={16} className={clustering ? 'animate-spin' : ''} />
-          {clustering ? 'Running HDBSCAN Clustering...' : 'Re-Run HDBSCAN Clustering'}
+          {clustering ? 'Executing HDBSCAN...' : 'Re-Run HDBSCAN Clustering'}
         </button>
       </div>
+
+      {successMessage && (
+        <div style={{ padding: '12px 18px', borderRadius: '10px', background: 'rgba(0, 230, 118, 0.1)', border: '1px solid rgba(0, 230, 118, 0.3)', color: 'var(--accent-nonsif-green)', fontSize: '0.875rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>✓ {successMessage}</span>
+          <button onClick={() => setSuccessMessage(null)} style={{ background: 'none', border: 'none', color: 'var(--accent-nonsif-green)', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+        </div>
+      )}
 
       {error && <ErrorBanner message={error} onRetry={fetchClusters} />}
 

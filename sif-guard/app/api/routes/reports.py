@@ -11,6 +11,8 @@ from app.services.ingestion.osha_severe import OSHASevereInjuryAdapter
 from app.services.ingestion.osha_construction import OSHAConstructionAdapter
 from app.services.ingestion.oil import OILHSSEAdapter
 from app.services.preprocessing.cleaner import TextCleaner
+from app.api.routes.analysis import run_single_report_analysis
+from app.core.logging import logger
 
 router = APIRouter()
 cleaner = TextCleaner()
@@ -63,6 +65,7 @@ async def import_reports(
 
     imported_count = 0
     duplicate_count = 0
+    newly_added = []
 
     for r in reports:
         # Preprocess report text
@@ -76,8 +79,16 @@ async def import_reports(
         
         db.add(r)
         imported_count += 1
+        newly_added.append(r)
 
     db.commit()
+
+    # Automatically analyze all newly imported reports immediately upon ingestion
+    for r in newly_added:
+        try:
+            run_single_report_analysis(db, r)
+        except Exception as e:
+            logger.error(f"Error auto-analyzing report {r.id} during import: {e}")
 
     return ImportSummary(
         records_received=total_received,
@@ -102,7 +113,25 @@ def list_reports(
     if sif_potential:
         query = query.filter(SafetyReport.sif_potential == sif_potential)
     
-    return query.offset(skip).limit(limit).all()
+    reports = query.offset(skip).limit(limit).all()
+
+    # Automatically analyze any unanalyzed reports on retrieval
+    unanalyzed = [r for r in reports if not r.sif_potential]
+    if unanalyzed:
+        for r in unanalyzed:
+            try:
+                run_single_report_analysis(db, r)
+            except Exception as e:
+                logger.error(f"Error auto-analyzing report {r.id} on list: {e}")
+        # Re-fetch updated objects
+        query = db.query(SafetyReport)
+        if source:
+            query = query.filter(SafetyReport.source_dataset == source)
+        if sif_potential:
+            query = query.filter(SafetyReport.sif_potential == sif_potential)
+        reports = query.offset(skip).limit(limit).all()
+
+    return reports
 
 
 @router.get("/reports/{report_id}", response_model=SafetyReportRead)
@@ -110,4 +139,11 @@ def get_report(report_id: str, db: Session = Depends(get_db)):
     report = db.query(SafetyReport).filter(SafetyReport.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail=f"Safety report '{report_id}' not found")
+    
+    if not report.sif_potential:
+        try:
+            run_single_report_analysis(db, report)
+        except Exception as e:
+            logger.error(f"Error auto-analyzing report {report_id} on get: {e}")
+
     return report

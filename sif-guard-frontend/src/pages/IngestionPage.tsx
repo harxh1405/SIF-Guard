@@ -125,10 +125,21 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
 
   const handleTriggerBatch = () => {
     setTriggeringBatch(true);
-    analyzeBatch()
+    setError(null);
+    analyzeBatch(true)
       .then((res) => {
         setBatchJobId(res.job_id);
         setTriggeringBatch(false);
+        setJobStatus({
+          job_id: res.job_id,
+          status: 'pending',
+          total: res.total_reports_queued,
+          processed: 0,
+          failed: 0,
+          created_at: new Date().toISOString(),
+          completed_at: null,
+          error_message: null
+        });
       })
       .catch((err) => {
         setError(err.message || 'Failed to trigger batch processing');
@@ -151,7 +162,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
         .catch(() => {
           clearInterval(interval);
         });
-    }, 2000);
+    }, 1200);
 
     return () => clearInterval(interval);
   }, [batchJobId]);
@@ -356,31 +367,67 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               <Layers size={20} color="var(--accent-cyan)" /> Asynchronous Batch Analysis Queue
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-              Queue background execution to run NLP extraction, SIF scoring, LSR mapping, and precursor fingerprints over all unanalyzed reports.
+              Trigger background execution for NLP extraction, SIF scoring, LSR mapping, and precursor fingerprints over all dataset reports.
             </p>
           </div>
-          <button onClick={handleTriggerBatch} disabled={triggeringBatch} className="btn btn-primary">
-            {triggeringBatch ? <RefreshCw size={16} className="animate-spin" /> : <Play size={16} />}
-            Trigger Batch Processing
+          <button onClick={handleTriggerBatch} disabled={triggeringBatch || (jobStatus?.status === 'running')} className="btn btn-primary" style={{ minWidth: '220px', justifyContent: 'center' }}>
+            {triggeringBatch || (jobStatus?.status === 'running') ? (
+              <>
+                <RefreshCw size={16} className="animate-spin" /> Processing Batch...
+              </>
+            ) : (
+              <>
+                <Play size={16} /> Trigger Batch Processing
+              </>
+            )}
           </button>
         </div>
 
         {/* Batch Job Status Monitor */}
         {jobStatus && (
-          <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
-                Job Status: {jobStatus.status.toUpperCase()}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Job ID: {jobStatus.job_id}
+          <div style={{ marginTop: '20px', padding: '20px', borderRadius: '12px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className={`badge ${jobStatus.status === 'completed' ? 'badge-nonsif' : jobStatus.status === 'failed' ? 'badge-sif' : 'badge-uncertain'}`}>
+                  {jobStatus.status === 'running' && <RefreshCw size={12} className="animate-spin" style={{ marginRight: '6px' }} />}
+                  STATUS: {jobStatus.status.toUpperCase()}
+                </span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                  Job ID: <strong style={{ color: 'var(--accent-cyan)' }}>{jobStatus.job_id}</strong>
+                </span>
+              </div>
+
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                {jobStatus.total > 0 ? `${((jobStatus.processed / jobStatus.total) * 100).toFixed(0)}% Complete` : '100%'}
               </span>
             </div>
 
-            <div style={{ display: 'flex', gap: '20px', fontSize: '0.85rem' }}>
-              <span>Total Queued: <strong>{jobStatus.total}</strong></span>
-              <span>Processed: <strong>{jobStatus.processed}</strong></span>
-              <span>Failed: <strong>{jobStatus.failed}</strong></span>
+            {/* Live Progress Bar */}
+            <div style={{ height: '8px', width: '100%', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden', marginBottom: '14px' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: `${jobStatus.total > 0 ? Math.min(100, Math.max(5, (jobStatus.processed / jobStatus.total) * 100)) : 100}%`,
+                  background: jobStatus.status === 'completed' ? 'var(--accent-nonsif-green)' : jobStatus.status === 'failed' ? 'var(--accent-sif-red)' : 'linear-gradient(90deg, var(--accent-cyan), var(--accent-primary))',
+                  borderRadius: '4px',
+                  transition: 'width 0.4s ease-in-out'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '0.85rem' }}>
+              <div style={{ background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <span className="micro-label">Total Queued:</span>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>{jobStatus.total}</div>
+              </div>
+              <div style={{ background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <span className="micro-label">Successfully Processed:</span>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{jobStatus.processed}</div>
+              </div>
+              <div style={{ background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <span className="micro-label">Failed:</span>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: jobStatus.failed > 0 ? 'var(--accent-sif-red)' : 'var(--text-muted)' }}>{jobStatus.failed}</div>
+              </div>
             </div>
           </div>
         )}

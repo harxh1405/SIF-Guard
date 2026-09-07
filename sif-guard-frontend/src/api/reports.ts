@@ -46,12 +46,14 @@ export async function analyzeReport(reportId: string): Promise<AnalysisResponse>
   return res.data;
 }
 
-export async function analyzeBatch(): Promise<{
+export async function analyzeBatch(force: boolean = true): Promise<{
   job_id: string;
   status: string;
   total_reports_queued: number;
 }> {
-  const res = await apiClient.post('/reports/analyze-batch');
+  const res = await apiClient.post('/reports/analyze-batch', null, {
+    params: { force }
+  });
   return res.data;
 }
 
