@@ -72,11 +72,20 @@ export const AnalyticsPage: React.FC = () => {
       });
   }, []);
 
+  const tooltipStyle = {
+    background: '#17110D',
+    border: '1px solid #33251C',
+    borderRadius: '10px',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
+    color: '#F5EEE8',
+    fontSize: '0.85rem',
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
     >
       <div style={{ marginBottom: '24px' }}>
         <h2 className="section-title">
@@ -89,14 +98,14 @@ export const AnalyticsPage: React.FC = () => {
 
       {/* Analytics Dimension Sub-Tabs */}
       <div
-        className="glass-card"
+        className="card"
         style={{
-          padding: '10px',
+          padding: '8px',
           marginBottom: '24px',
           display: 'flex',
-          gap: '10px',
+          gap: '8px',
           flexWrap: 'wrap',
-          background: 'var(--bg-card)',
+          background: 'var(--surface)',
         }}
       >
         {[
@@ -114,9 +123,9 @@ export const AnalyticsPage: React.FC = () => {
               key={t.id}
               onClick={() => setActiveTab(t.id as any)}
               className={`btn ${isActive ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: '0.85rem' }}
+              style={{ fontSize: '0.82rem', padding: '8px 14px' }}
             >
-              <Icon size={16} /> {t.label}
+              <Icon size={15} /> {t.label}
             </button>
           );
         })}
@@ -131,41 +140,32 @@ export const AnalyticsPage: React.FC = () => {
           key={activeTab}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.2 }}
         >
           {/* Sites Tab */}
           {activeTab === 'sites' && (
-            <div className="glass-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', fontFamily: 'var(--font-display)' }}>
+            <div className="card" style={{ padding: '28px' }}>
+              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', color: 'var(--text-primary)' }}>
                 Highest SIF Precursor Density by Site / Facility
               </h3>
               <div className="chart-container-wrapper" style={{ height: '400px', width: '100%', marginBottom: '24px' }}>
                 <ResponsiveContainer width="100%" height="100%" minWidth={400}>
                   <BarChart data={siteData} margin={{ top: 20, right: 30, left: 10, bottom: 65 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                     <XAxis
                       dataKey="site"
-                      stroke="var(--text-secondary)"
-                      tick={{ fontSize: 11, fontFamily: 'var(--font-mono)' }}
+                      stroke="var(--text-muted)"
+                      tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }}
                       interval={0}
                       angle={-20}
                       textAnchor="end"
                       height={65}
                     />
-                    <YAxis stroke="var(--text-secondary)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)' }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-hover)',
-                        borderRadius: '10px',
-                        boxShadow: 'var(--shadow-glass)',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.85rem',
-                      }}
-                    />
+                    <YAxis stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
+                    <Tooltip contentStyle={tooltipStyle} />
                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                    <Bar dataKey="sif_count" name="SIF Precursor Count" fill="var(--accent-sif-red)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="total_reports" name="Total Reports" fill="var(--accent-blue)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="sif_count" name="SIF Precursors" fill="#E85D5D" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="total_reports" name="Total Reports" fill="#FF6A00" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -183,9 +183,9 @@ export const AnalyticsPage: React.FC = () => {
                   {siteData.map((s, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 600 }}>{s.site}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{s.total_reports}</td>
-                      <td style={{ color: 'var(--accent-sif-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{s.sif_count}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}><strong>{(s.sif_density * 100).toFixed(1)}%</strong></td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{s.total_reports}</td>
+                      <td style={{ color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{s.sif_count}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}><strong>{(s.sif_density * 100).toFixed(1)}%</strong></td>
                     </tr>
                   ))}
                 </tbody>
@@ -195,26 +195,18 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* Activities Tab */}
           {activeTab === 'activities' && (
-            <div className="glass-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', fontFamily: 'var(--font-display)' }}>
+            <div className="card" style={{ padding: '28px' }}>
+              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', color: 'var(--text-primary)' }}>
                 Highest Risk Operational Activities
               </h3>
               <div className="chart-container-wrapper" style={{ height: '420px', width: '100%', marginBottom: '24px' }}>
                 <ResponsiveContainer width="100%" height="100%" minWidth={400}>
                   <BarChart data={activityData} layout="vertical" margin={{ top: 10, right: 30, left: 140, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis type="number" stroke="var(--text-secondary)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)' }} />
-                    <YAxis dataKey="activity" type="category" stroke="var(--text-secondary)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)' }} width={140} />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-hover)',
-                        borderRadius: '10px',
-                        boxShadow: 'var(--shadow-glass)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
-                    <Bar dataKey="sif_count" name="SIF Precursor Count" fill="var(--accent-sif-red)" radius={[0, 4, 4, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
+                    <XAxis type="number" stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
+                    <YAxis dataKey="activity" type="category" stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} width={140} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar dataKey="sif_count" name="SIF Precursor Count" fill="#FF6A00" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -232,9 +224,9 @@ export const AnalyticsPage: React.FC = () => {
                   {activityData.map((a, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 600 }}>{a.activity}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{a.total_reports}</td>
-                      <td style={{ color: 'var(--accent-sif-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{a.sif_count}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}><strong>{(a.sif_density * 100).toFixed(1)}%</strong></td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{a.total_reports}</td>
+                      <td style={{ color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{a.sif_count}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}><strong>{(a.sif_density * 100).toFixed(1)}%</strong></td>
                     </tr>
                   ))}
                 </tbody>
@@ -244,8 +236,8 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* Hazards Tab */}
           {activeTab === 'hazards' && (
-            <div className="glass-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', fontFamily: 'var(--font-display)' }}>
+            <div className="card" style={{ padding: '28px' }}>
+              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', color: 'var(--text-primary)' }}>
                 Recurring Precursor Hazards
               </h3>
               <table className="data-table">
@@ -260,10 +252,10 @@ export const AnalyticsPage: React.FC = () => {
                 <tbody>
                   {hazardData.map((h, idx) => (
                     <tr key={idx}>
-                      <td style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>{h.hazard}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{h.total_reports}</td>
-                      <td style={{ color: 'var(--accent-sif-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{h.sif_count}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}><strong>{(h.sif_density * 100).toFixed(1)}%</strong></td>
+                      <td style={{ fontWeight: 600, color: 'var(--primary-bright)' }}>{h.hazard}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.total_reports}</td>
+                      <td style={{ color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.sif_count}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}><strong>{(h.sif_density * 100).toFixed(1)}%</strong></td>
                     </tr>
                   ))}
                 </tbody>
@@ -273,8 +265,8 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* Barrier Failures Tab */}
           {activeTab === 'barriers' && (
-            <div className="glass-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', fontFamily: 'var(--font-display)' }}>
+            <div className="card" style={{ padding: '28px' }}>
+              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', color: 'var(--text-primary)' }}>
                 Failed, Missing, or Bypassed Safety Barriers
               </h3>
               <table className="data-table">
@@ -289,10 +281,10 @@ export const AnalyticsPage: React.FC = () => {
                 <tbody>
                   {barrierData.map((b, idx) => (
                     <tr key={idx}>
-                      <td style={{ fontWeight: 600, color: 'var(--accent-sif-red)' }}>{b.barrier_failure}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{b.total_reports}</td>
-                      <td style={{ color: 'var(--accent-sif-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{b.sif_count}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}><strong>{(b.sif_density * 100).toFixed(1)}%</strong></td>
+                      <td style={{ fontWeight: 600, color: 'var(--danger)' }}>{b.barrier_failure}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.total_reports}</td>
+                      <td style={{ color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.sif_count}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}><strong>{(b.sif_density * 100).toFixed(1)}%</strong></td>
                     </tr>
                   ))}
                 </tbody>
@@ -302,8 +294,8 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* Life-Saving Rules Tab */}
           {activeTab === 'lsr' && (
-            <div className="glass-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', fontFamily: 'var(--font-display)' }}>
+            <div className="card" style={{ padding: '28px' }}>
+              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', color: 'var(--text-primary)' }}>
                 IOGP Life-Saving Rules Implication Distribution
               </h3>
               <table className="data-table">
@@ -317,9 +309,9 @@ export const AnalyticsPage: React.FC = () => {
                 <tbody>
                   {lsrData.map((lsr, idx) => (
                     <tr key={idx}>
-                      <td style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>{lsr.rule_name}</td>
-                      <td style={{ fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{lsr.count}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}><strong>{lsr.percentage.toFixed(1)}%</strong></td>
+                      <td style={{ fontWeight: 600, color: 'var(--primary-bright)' }}>{lsr.rule_name}</td>
+                      <td style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{lsr.count}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}><strong>{lsr.percentage.toFixed(1)}%</strong></td>
                     </tr>
                   ))}
                 </tbody>
@@ -329,28 +321,20 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* Trends Tab */}
           {activeTab === 'trends' && (
-            <div className="glass-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', fontFamily: 'var(--font-display)' }}>
+            <div className="card" style={{ padding: '28px' }}>
+              <h3 style={{ fontSize: '1.15rem', marginBottom: '20px', color: 'var(--text-primary)' }}>
                 Temporal SIF Precursor Trends Over Time
               </h3>
               <div className="chart-container-wrapper" style={{ height: '380px', width: '100%', marginBottom: '24px' }}>
                 <ResponsiveContainer width="100%" height="100%" minWidth={400}>
                   <LineChart data={trendData} margin={{ top: 15, right: 30, left: 10, bottom: 25 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="period" stroke="var(--text-secondary)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)' }} />
-                    <YAxis stroke="var(--text-secondary)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)' }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-hover)',
-                        borderRadius: '10px',
-                        boxShadow: 'var(--shadow-glass)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
+                    <XAxis dataKey="period" stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
+                    <YAxis stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
+                    <Tooltip contentStyle={tooltipStyle} />
                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                    <Line type="monotone" dataKey="sif_precursors" name="SIF Precursors" stroke="var(--accent-sif-red)" strokeWidth={3} dot={{ r: 5 }} />
-                    <Line type="monotone" dataKey="total_reports" name="Total Reports" stroke="var(--accent-cyan)" strokeWidth={2} />
+                    <Line type="monotone" dataKey="sif_precursors" name="SIF Precursors" stroke="#E85D5D" strokeWidth={3} dot={{ r: 5, fill: '#E85D5D' }} />
+                    <Line type="monotone" dataKey="total_reports" name="Total Reports" stroke="#FF6A00" strokeWidth={2} dot={{ r: 4, fill: '#FF6A00' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -370,10 +354,10 @@ export const AnalyticsPage: React.FC = () => {
                   {trendData.map((t, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 600 }}>{t.period}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{t.total_reports}</td>
-                      <td style={{ color: 'var(--accent-sif-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{t.sif_precursors}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{(t.sif_density * 100).toFixed(1)}%</td>
-                      <td style={{ color: t.percentage_change > 0 ? 'var(--accent-sif-red)' : 'var(--accent-nonsif-green)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.total_reports}</td>
+                      <td style={{ color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.sif_precursors}</td>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{(t.sif_density * 100).toFixed(1)}%</td>
+                      <td style={{ color: t.percentage_change > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                         {t.percentage_change > 0 ? `+${t.percentage_change}%` : `${t.percentage_change}%`}
                       </td>
                       <td>

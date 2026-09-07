@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Keyboard, X, Command } from 'lucide-react';
 
 interface KeyboardShortcutsModalProps {
@@ -40,7 +40,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
           <motion.div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '520px', padding: '28px' }}
+            style={{ maxWidth: '520px', padding: '28px', borderRadius: 'var(--radius-xl)' }}
             initial={{ scale: 0.95, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -51,7 +51,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: '20px',
-                borderBottom: '1px solid var(--border-color)',
+                borderBottom: '1px solid var(--border)',
                 paddingBottom: '14px',
               }}
             >
@@ -59,9 +59,9 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                 <div
                   style={{
                     padding: '8px',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     background: 'var(--accent-primary-bg)',
-                    color: 'var(--accent-cyan)',
+                    color: 'var(--primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -83,7 +83,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
               {SHORTCUTS.map((s, idx) => (
                 <div
                   key={idx}
@@ -91,10 +91,10 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    background: 'var(--surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
                   }}
                 >
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
@@ -103,14 +103,14 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                   <kbd
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize: '0.8rem',
+                      fontSize: '0.78rem',
                       fontWeight: 700,
-                      background: 'var(--bg-badge)',
-                      border: '1px solid var(--border-color)',
-                      boxShadow: '0 2px 0 var(--border-color)',
+                      background: 'var(--background-secondary)',
+                      border: '1px solid var(--border)',
+                      boxShadow: '0 2px 0 var(--border)',
                       padding: '3px 8px',
                       borderRadius: '6px',
-                      color: 'var(--accent-cyan)',
+                      color: 'var(--primary-bright)',
                     }}
                   >
                     {s.key}
@@ -129,7 +129,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
                 justifyContent: 'center',
               }}
             >
-              <Command size={14} /> Tip: Press <kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 5px', borderRadius: '4px', background: 'var(--bg-badge)', border: '1px solid var(--border-color)' }}>?</kbd> anytime to open this helper.
+              <Command size={14} /> Tip: Press <kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 5px', borderRadius: '4px', background: 'var(--surface-elevated)', border: '1px solid var(--border)' }}>?</kbd> anytime to open this helper.
             </div>
           </motion.div>
         </motion.div>

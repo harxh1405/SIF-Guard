@@ -11,9 +11,9 @@ export const ErrorBanner: React.FC<Props> = ({ message, onRetry }) => {
     <div style={{
       padding: '16px 20px',
       borderRadius: '10px',
-      background: 'var(--accent-sif-bg)',
-      border: '1px solid var(--accent-sif-red)',
-      color: 'var(--accent-sif-red)',
+      background: 'rgba(232, 93, 93, 0.12)',
+      border: '1px solid rgba(232, 93, 93, 0.35)',
+      color: 'var(--danger)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',

@@ -124,13 +124,13 @@ export const EvidenceHighlighter: React.FC<EvidenceHighlighterProps> = ({
               key={index}
               style={{
                 backgroundColor: isCritical
-                  ? 'var(--accent-sif-bg)'
-                  : 'var(--accent-uncertain-bg)',
-                color: isCritical ? 'var(--accent-sif-red)' : 'var(--accent-uncertain-amber)',
+                  ? 'rgba(232, 93, 93, 0.18)'
+                  : 'rgba(235, 160, 54, 0.18)',
+                color: isCritical ? 'var(--danger)' : 'var(--warning)',
                 padding: '2px 6px',
                 borderRadius: '4px',
                 fontWeight: 600,
-                borderBottom: `2px solid ${isCritical ? 'var(--accent-sif-red)' : 'var(--accent-uncertain-amber)'}`,
+                borderBottom: `2px solid ${isCritical ? 'var(--danger)' : 'var(--warning)'}`,
                 margin: '0 1px',
                 fontFamily: 'inherit',
               }}

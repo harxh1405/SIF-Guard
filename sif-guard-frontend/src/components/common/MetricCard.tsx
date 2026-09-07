@@ -23,35 +23,31 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     switch (trendColor) {
       case 'red':
         return {
-          color: 'var(--accent-sif-red)',
-          bg: 'var(--accent-sif-bg)',
-          border: 'rgba(248, 113, 113, 0.3)',
-          glow: 'rgba(248, 113, 113, 0.15)',
-          topBorder: 'var(--accent-sif-red)',
+          color: 'var(--danger)',
+          bg: 'rgba(232, 93, 93, 0.12)',
+          border: 'rgba(232, 93, 93, 0.25)',
+          topBorder: 'var(--danger)',
         };
       case 'green':
         return {
-          color: 'var(--accent-nonsif-green)',
-          bg: 'var(--accent-nonsif-bg)',
-          border: 'rgba(52, 211, 153, 0.3)',
-          glow: 'rgba(52, 211, 153, 0.15)',
-          topBorder: 'var(--accent-nonsif-green)',
+          color: 'var(--success)',
+          bg: 'rgba(32, 217, 151, 0.12)',
+          border: 'rgba(32, 217, 151, 0.25)',
+          topBorder: 'var(--success)',
         };
       case 'amber':
         return {
-          color: 'var(--accent-uncertain-amber)',
-          bg: 'var(--accent-uncertain-bg)',
-          border: 'rgba(251, 191, 36, 0.3)',
-          glow: 'rgba(251, 191, 36, 0.15)',
-          topBorder: 'var(--accent-uncertain-amber)',
+          color: 'var(--warning)',
+          bg: 'rgba(255, 179, 71, 0.12)',
+          border: 'rgba(255, 179, 71, 0.25)',
+          topBorder: 'var(--warning)',
         };
       default:
         return {
-          color: 'var(--accent-cyan)',
-          bg: 'var(--accent-primary-bg)',
-          border: 'rgba(56, 189, 248, 0.3)',
-          glow: 'rgba(56, 189, 248, 0.15)',
-          topBorder: 'var(--accent-cyan)',
+          color: 'var(--primary-bright)',
+          bg: 'rgba(255, 106, 0, 0.12)',
+          border: 'rgba(255, 106, 0, 0.25)',
+          topBorder: 'var(--primary)',
         };
     }
   };
@@ -60,15 +56,18 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -3, scale: 1.01 }}
-      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="glass-card"
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="card"
       style={{
         padding: '22px',
         position: 'relative',
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
       }}
     >
       {/* Subtle top indicator bar */}
@@ -80,7 +79,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           right: '20px',
           height: '2px',
           background: `linear-gradient(90deg, transparent 0%, ${trendStyle.topBorder} 50%, transparent 100%)`,
-          opacity: 0.7,
+          opacity: 0.6,
         }}
       />
 
@@ -92,7 +91,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           <div
             className="numeric-display"
             style={{
-              fontSize: '2.4rem',
+              fontSize: '2rem',
+              fontWeight: 600,
               margin: '8px 0 4px 0',
               color: 'var(--text-primary)',
             }}
@@ -108,19 +108,18 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
         <div
           style={{
-            width: '46px',
-            height: '46px',
+            width: '42px',
+            height: '42px',
             borderRadius: '12px',
-            background: 'var(--accent-primary-bg)',
-            border: '1px solid var(--border-hover)',
+            background: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--accent-cyan)',
-            boxShadow: '0 4px 14px rgba(0, 0, 0, 0.2)',
+            color: 'var(--primary)',
           }}
         >
-          <Icon size={22} />
+          <Icon size={20} />
         </div>
       </div>
 
@@ -135,9 +134,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             background: trendStyle.bg,
             border: `1px solid ${trendStyle.border}`,
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             color: trendStyle.color,
             fontFamily: 'var(--font-mono)',
+            fontVariantNumeric: 'tabular-nums',
+            width: 'fit-content',
           }}
         >
           {trend}

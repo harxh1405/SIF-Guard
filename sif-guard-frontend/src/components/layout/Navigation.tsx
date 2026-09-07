@@ -46,14 +46,12 @@ export const Navigation: React.FC<Props> = ({
 
   return (
     <motion.aside
-      animate={{ width: isCollapsed ? 72 : 250 }}
+      animate={{ width: isCollapsed ? 76 : 250 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       style={{
-        background: 'var(--bg-sidebar)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid var(--border-color)',
-        padding: isCollapsed ? '20px 8px' : '24px 16px',
+        background: 'var(--background-secondary)',
+        borderRight: '1px solid var(--border)',
+        padding: isCollapsed ? '20px 8px' : '24px 14px',
         display: 'flex',
         flexDirection: 'column',
         gap: '6px',
@@ -71,8 +69,8 @@ export const Navigation: React.FC<Props> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'space-between',
-          padding: isCollapsed ? '0 0 14px 0' : '0 12px 14px 12px',
-          borderBottom: '1px solid var(--border-color)',
+          padding: isCollapsed ? '0 0 14px 0' : '0 10px 14px 10px',
+          borderBottom: '1px solid var(--border-subtle)',
           marginBottom: '8px',
         }}
       >
@@ -108,7 +106,7 @@ export const Navigation: React.FC<Props> = ({
           }}
           title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
-          {isCollapsed ? <PanelLeftOpen size={18} color="var(--accent-cyan)" /> : <PanelLeftClose size={18} />}
+          {isCollapsed ? <PanelLeftOpen size={18} color="var(--primary)" /> : <PanelLeftClose size={18} />}
         </button>
       </div>
 
@@ -117,8 +115,10 @@ export const Navigation: React.FC<Props> = ({
         const isActive = activeTab === tab.id;
 
         return (
-          <button
+          <motion.button
             key={tab.id}
+            whileHover={{ x: isActive ? 0 : 2 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onTabChange(tab.id)}
             title={isCollapsed ? tab.label : undefined}
             style={{
@@ -127,46 +127,27 @@ export const Navigation: React.FC<Props> = ({
               alignItems: 'center',
               justifyContent: isCollapsed ? 'center' : 'flex-start',
               gap: isCollapsed ? '0' : '12px',
-              padding: isCollapsed ? '12px 0' : '12px 16px',
-              borderRadius: '10px',
+              padding: isCollapsed ? '12px 0' : '11px 14px',
+              borderRadius: '12px',
               border: 'none',
               background: isActive
-                ? 'var(--accent-primary-bg)'
+                ? 'var(--primary)'
                 : 'transparent',
-              color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-              fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#FFFFFF' : 'var(--text-secondary)',
+              fontWeight: isActive ? 600 : 500,
               fontSize: '0.875rem',
               cursor: 'pointer',
               textAlign: 'left',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: isActive ? 'var(--shadow-glow-cyan)' : 'none',
+              transition: 'background-color 0.15s ease-out, color 0.15s ease-out',
+              boxShadow: isActive ? '0 6px 20px rgba(255, 106, 0, 0.20)' : 'none',
               width: '100%',
             }}
           >
-            {/* Sliding Left Border Indicator */}
-            {isActive && (
-              <motion.div
-                layoutId="navActiveBorder"
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: '15%',
-                  bottom: '15%',
-                  width: '3px',
-                  borderRadius: '0 4px 4px 0',
-                  background: 'var(--accent-cyan)',
-                  boxShadow: '0 0 10px var(--accent-cyan)',
-                }}
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              />
-            )}
-
             <Icon
               size={18}
-              color={isActive ? 'var(--accent-cyan)' : 'var(--text-muted)'}
+              color={isActive ? '#FFFFFF' : 'var(--text-muted)'}
               style={{
-                filter: isActive ? 'drop-shadow(0 0 6px var(--accent-cyan))' : 'none',
-                transition: 'all 0.2s ease',
+                transition: 'color 0.15s ease-out',
                 flexShrink: 0,
               }}
             />
@@ -175,10 +156,9 @@ export const Navigation: React.FC<Props> = ({
                 {tab.label}
               </span>
             )}
-          </button>
+          </motion.button>
         );
       })}
     </motion.aside>
   );
 };
-

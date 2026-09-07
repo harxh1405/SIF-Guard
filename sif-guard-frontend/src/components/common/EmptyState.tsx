@@ -15,14 +15,14 @@ export const EmptyState: React.FC<Props> = ({
   onAction,
 }) => {
   return (
-    <div className="glass-card" style={{ padding: '48px 24px', textAlign: 'center', margin: '24px 0' }}>
+    <div className="card" style={{ padding: '48px 24px', textAlign: 'center', margin: '24px 0' }}>
       <div style={{
         width: '64px',
         height: '64px',
         margin: '0 auto 16px auto',
         borderRadius: '50%',
-        background: 'var(--bg-badge)',
-        border: '1px solid var(--border-color)',
+        background: 'var(--surface-elevated)',
+        border: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

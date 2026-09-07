@@ -73,9 +73,9 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
     >
       {/* Top Header & Status Bar */}
@@ -90,17 +90,17 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                 fontSize: '0.72rem',
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 700,
-                color: 'var(--accent-cyan)',
-                background: 'var(--accent-primary-bg)',
-                border: '1px solid var(--border-hover)',
+                color: 'var(--primary-bright)',
+                background: 'rgba(255, 106, 0, 0.10)',
+                border: '1px solid rgba(255, 106, 0, 0.20)',
                 padding: '3px 10px',
                 borderRadius: '12px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
               }}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 8px var(--accent-cyan)' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }} />
               LIVE TELEMETRY
             </span>
           </div>
@@ -113,7 +113,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
           <button
             onClick={() => onNavigate('explorer')}
             className="btn btn-primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: 'var(--shadow-glow-cyan)' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
             Explore Incidents <ArrowUpRight size={16} />
           </button>
@@ -122,12 +122,12 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
 
       {/* Hero Intelligence & Core Principle Card */}
       <div
-        className="glass-card"
+        className="card"
         style={{
           padding: '24px 28px',
-          background: 'var(--bg-glass-panel)',
-          border: '1px solid var(--border-color)',
-          borderLeft: '4px solid var(--accent-cyan)',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderLeft: '4px solid var(--primary)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -139,7 +139,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             top: '-40px',
             width: '200px',
             height: '200px',
-            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(255, 106, 0, 0.10) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
@@ -148,25 +148,25 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', maxWidth: '750px' }}>
             <div
               style={{
-                width: '44px',
-                height: '44px',
+                width: '42px',
+                height: '42px',
                 borderRadius: '12px',
-                background: 'var(--accent-primary-bg)',
-                border: '1px solid var(--border-hover)',
+                background: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--accent-cyan)',
+                color: 'var(--primary)',
                 flexShrink: 0,
                 marginTop: '2px',
               }}
             >
-              <ShieldCheck size={24} />
+              <ShieldCheck size={22} />
             </div>
             <div>
-              <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Core Safety Principle: Actual Outcome ≠ Potential Outcome
-                <Sparkles size={16} color="var(--accent-cyan)" />
+                <Sparkles size={16} color="var(--primary-bright)" />
               </span>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '6px', lineHeight: 1.5 }}>
                 Heinrich's traditional pyramid fails in high-energy operations. SIF-Guard isolates precursors—hazardous exposures where a barrier defect created fatality potential—regardless of whether workers suffered zero injury, first aid, or severe harm.
@@ -177,26 +177,26 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
           {/* Quick Risk Ratio Pill */}
           <div
             style={{
-              padding: '12px 20px',
-              borderRadius: '12px',
-              background: 'var(--bg-badge)',
-              border: '1px solid var(--border-color)',
+              padding: '14px 20px',
+              borderRadius: '14px',
+              background: 'var(--surface-elevated)',
+              border: '1px solid var(--border)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '6px',
-              minWidth: '220px',
+              gap: '8px',
+              minWidth: '240px',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
-              <span style={{ color: 'var(--accent-sif-red)', fontWeight: 700 }}>SIF Precursors ({densityPercent}%)</span>
-              <span style={{ color: 'var(--accent-nonsif-green)', fontWeight: 700 }}>Non-SIF ({nonSifPercent}%)</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+              <span style={{ color: 'var(--danger)', fontWeight: 600 }}>SIF Precursors ({densityPercent}%)</span>
+              <span style={{ color: 'var(--success)', fontWeight: 600 }}>Non-SIF ({nonSifPercent}%)</span>
             </div>
             {/* Visual Multi-Segment Bar */}
-            <div style={{ height: '8px', width: '100%', borderRadius: '4px', background: 'var(--border-color)', overflow: 'hidden', display: 'flex' }}>
-              <div style={{ width: `${densityPercent}%`, background: 'var(--accent-sif-red)', transition: 'width 0.5s ease' }} />
-              <div style={{ width: `${nonSifPercent}%`, background: 'var(--accent-nonsif-green)', transition: 'width 0.5s ease' }} />
+            <div style={{ height: '8px', width: '100%', borderRadius: '4px', background: 'var(--background-secondary)', overflow: 'hidden', display: 'flex' }}>
+              <div style={{ width: `${densityPercent}%`, background: 'var(--danger)', transition: 'width 0.4s ease' }} />
+              <div style={{ width: `${nonSifPercent}%`, background: 'var(--success)', transition: 'width 0.4s ease' }} />
             </div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
               {data.sif_precursor_count} of {data.total_reports} reports classified as high-potential
             </span>
           </div>
@@ -242,13 +242,13 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Two Column Section: Emerging Precursor Patterns & Top Life-Saving Rules */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '20px' }}>
         {/* Emerging Precursor Patterns */}
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+        <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontFamily: 'var(--font-display)' }}>
-                <Layers size={18} color="var(--accent-cyan)" /> Emerging Precursor Clusters
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Layers size={18} color="var(--primary)" /> Emerging Precursor Clusters
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
                 Unsupervised semantic vector clustering of precursor narratives
@@ -268,19 +268,19 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
               {data.emerging_patterns.slice(0, 4).map((pattern, idx) => (
                 <motion.div
                   key={pattern.id || idx}
-                  whileHover={{ x: 4 }}
+                  whileHover={{ x: 3 }}
                   onClick={() => onNavigate('clusters')}
                   style={{
                     padding: '14px 16px',
                     borderRadius: '12px',
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
+                    background: 'var(--surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     cursor: 'pointer',
-                    transition: 'border-color 0.2s ease, background-color 0.2s ease',
+                    transition: 'border-color 0.15s ease, background-color 0.15s ease',
                   }}
                   className="interactive-row"
                 >
@@ -288,7 +288,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                     <span style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                       {pattern.name}
                     </span>
-                    <span className="badge badge-sif" style={{ fontSize: '0.75rem' }}>
+                    <span className="badge badge-sif" style={{ fontSize: '0.72rem' }}>
                       {(pattern.sif_density * 100).toFixed(0)}% SIF Risk
                     </span>
                   </div>
@@ -298,12 +298,12 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                     </span>
                     {pattern.dominant_activity && (
                       <span>
-                        Activity: <strong style={{ color: 'var(--accent-cyan)' }}>{pattern.dominant_activity}</strong>
+                        Activity: <strong style={{ color: 'var(--primary-bright)' }}>{pattern.dominant_activity}</strong>
                       </span>
                     )}
                     {pattern.dominant_hazard && (
                       <span>
-                        Hazard: <strong style={{ color: 'var(--accent-sif-red)' }}>{pattern.dominant_hazard}</strong>
+                        Hazard: <strong style={{ color: 'var(--danger)' }}>{pattern.dominant_hazard}</strong>
                       </span>
                     )}
                   </div>
@@ -314,11 +314,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         </div>
 
         {/* Top Life-Saving Rule Implication */}
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+        <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontFamily: 'var(--font-display)' }}>
-                <Flame size={18} color="var(--accent-sif-red)" /> Life-Saving Rule (LSR) Violations
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Flame size={18} color="var(--primary)" /> Life-Saving Rule (LSR) Violations
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
                 High-energy precursor correlation to IOGP Life-Saving Rules
@@ -335,15 +335,15 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
               <p style={{ fontSize: '0.875rem' }}>No Life-Saving Rule mappings generated yet.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
               {data.top_lsr.slice(0, 5).map((lsr, idx) => (
                 <div
                   key={idx}
                   style={{
                     padding: '12px 16px',
                     borderRadius: '12px',
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
+                    background: 'var(--surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px',
@@ -356,8 +356,8 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                           width: '22px',
                           height: '22px',
                           borderRadius: '6px',
-                          background: 'var(--accent-primary-bg)',
-                          color: 'var(--accent-cyan)',
+                          background: 'rgba(255, 106, 0, 0.12)',
+                          color: 'var(--primary)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -373,7 +373,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                       </span>
                     </div>
                     <div style={{ textAlign: 'right', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-bright)', fontFamily: 'var(--font-mono)' }}>
                         {lsr.count}
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -383,12 +383,12 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                   </div>
 
                   {/* Progress fill bar */}
-                  <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '4px', background: 'var(--background-secondary)', borderRadius: '2px', overflow: 'hidden' }}>
                     <div
                       style={{
                         height: '100%',
                         width: `${Math.min(100, lsr.percentage * 2.5)}%`,
-                        background: 'linear-gradient(90deg, var(--accent-cyan) 0%, #38bdf8 100%)',
+                        background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-bright) 100%)',
                         borderRadius: '2px',
                       }}
                     />
@@ -401,10 +401,10 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Top Recurring Safety Barrier Failures Table Card */}
-      <div className="glass-card" style={{ padding: '24px' }}>
+      <div className="card" style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
-            <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
+            <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)' }}>
               Recurring Safety Barrier Failures
             </h3>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
@@ -432,28 +432,27 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
               <tbody>
                 {data.top_barrier_failures.slice(0, 5).map((b, idx) => (
                   <tr key={idx}>
-                    <td style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>
+                    <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                       {b.barrier_failure}
                     </td>
-                    <td style={{ fontFamily: 'var(--font-mono)' }}>{b.total_reports}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.total_reports}</td>
                     <td>
-                      <span style={{ color: 'var(--accent-sif-red)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ color: 'var(--danger)', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                         {b.sif_count}
                       </span>
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ flex: 1, height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ flex: 1, height: '6px', background: 'var(--background-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
                           <div
                             style={{
                               height: '100%',
                               width: `${(b.sif_density * 100).toFixed(0)}%`,
-                              background: b.sif_density > 0.5 ? 'var(--accent-sif-red)' : 'var(--accent-cyan)',
-                              boxShadow: b.sif_density > 0.5 ? '0 0 8px rgba(248, 113, 113, 0.4)' : '0 0 8px rgba(56, 189, 248, 0.4)',
+                              background: b.sif_density > 0.5 ? 'var(--danger)' : 'var(--primary)',
                             }}
                           />
                         </div>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 600 }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                           {(b.sif_density * 100).toFixed(1)}%
                         </span>
                       </div>

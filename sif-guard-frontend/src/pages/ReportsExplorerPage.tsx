@@ -8,7 +8,7 @@ import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
 import { EvidenceHighlighter } from '../components/common/EvidenceHighlighter';
 import { AIExplanationPanel } from '../components/common/AIExplanationPanel';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
   Filter,
@@ -144,11 +144,11 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 className="section-title">
             Incident & Observation Intelligence Explorer
@@ -168,7 +168,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="glass-card" style={{ padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="card" style={{ padding: '16px 20px', marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ flex: 1, minWidth: '260px', position: 'relative' }}>
           <Search size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
@@ -181,8 +181,8 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
               width: '100%',
               padding: '10px 12px 10px 38px',
               borderRadius: '10px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-input)',
+              border: '1px solid var(--border)',
+              background: 'var(--surface-elevated)',
               color: 'var(--text-primary)',
               fontSize: '0.875rem',
               outline: 'none',
@@ -192,12 +192,20 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Filter size={16} color="var(--accent-cyan)" />
+          <Filter size={16} color="var(--primary)" />
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>SIF Classification:</span>
           <select
             value={sifFilter}
             onChange={(e) => setSifFilter(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              background: 'var(--surface-elevated)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              fontSize: '0.85rem',
+              fontFamily: 'var(--font-main)',
+            }}
           >
             <option value="ALL">All Classifications</option>
             <option value="SIF_POTENTIAL">SIF Only</option>
@@ -211,7 +219,15 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              background: 'var(--surface-elevated)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              fontSize: '0.85rem',
+              fontFamily: 'var(--font-main)',
+            }}
           >
             <option value="ALL">All Sources</option>
             <option value="osha_severe">OSHA Severe Injury</option>
@@ -234,7 +250,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
           onAction={() => onNavigate('ingestion')}
         />
       ) : (
-        <div className="glass-card" style={{ overflow: 'hidden', width: '100%' }}>
+        <div className="card" style={{ overflow: 'hidden', width: '100%' }}>
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <table className="data-table" style={{ width: '100%', minWidth: '950px' }}>
               <thead>
@@ -252,11 +268,11 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
               <tbody>
                 {filteredReports.map((r) => (
                   <tr key={r.id} onClick={() => handleOpenReport(r)}>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--primary-bright)', fontWeight: 700, whiteSpace: 'nowrap' }}>
                       {r.source_record_id}
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '6px', background: 'var(--bg-badge)', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
                         {r.source_dataset}
                       </span>
                     </td>
@@ -300,7 +316,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
-                        color: r.barrier_failure ? 'var(--accent-sif-red)' : 'var(--text-muted)',
+                        color: r.barrier_failure ? 'var(--danger)' : 'var(--text-muted)',
                         fontWeight: r.barrier_failure ? 600 : 400,
                       }}
                       title={r.barrier_failure || 'None Detected'}
@@ -336,18 +352,18 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
             <motion.div
               className="modal-content"
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              style={{ padding: '32px', maxWidth: '850px' }}
+              style={{ padding: '32px', maxWidth: '850px', borderRadius: 'var(--radius-xl)' }}
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary)', fontWeight: 700 }}>
                       #{selectedReport.source_record_id}
                     </span>
-                    <span style={{ fontSize: '0.72rem', background: 'var(--accent-primary-bg)', color: 'var(--accent-cyan)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ fontSize: '0.72rem', background: 'var(--accent-primary-bg)', color: 'var(--primary-bright)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
                       {selectedReport.source_dataset}
                     </span>
                   </div>
@@ -361,9 +377,9 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
               </div>
 
               {/* Incident Narrative with Evidence Highlighting */}
-              <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '10px', border: '1px solid var(--border-color)', marginBottom: '24px' }}>
+              <div style={{ background: 'var(--surface-elevated)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)', marginBottom: '24px' }}>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={14} color="var(--accent-cyan)" /> Incident Free-Text Narrative:
+                  <Sparkles size={14} color="var(--primary)" /> Incident Free-Text Narrative:
                 </div>
                 <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
                   <EvidenceHighlighter
@@ -378,7 +394,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
               {/* Analysis Action / SIF Summary Banner */}
               <div style={{ marginBottom: '24px' }}>
                 {!selectedReport.sif_potential && !analysisData ? (
-                  <div style={{ textAlign: 'center', padding: '24px', background: 'var(--accent-primary-bg)', borderRadius: '10px', border: '1px solid var(--border-hover)' }}>
+                  <div style={{ textAlign: 'center', padding: '24px', background: 'var(--surface-elevated)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>This report has not been analyzed by the NLP engine yet.</p>
                     <button onClick={() => handleRunAnalysis(selectedReport.id)} disabled={analyzing} className="btn btn-primary">
                       <Play size={16} /> {analyzing ? 'Running NLP Extraction & SIF Model...' : 'Analyze Report Now'}
@@ -403,9 +419,9 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
 
               {/* Similar Precursor Incidents (Vector Cosine Search) */}
               {similarReports.length > 0 && (
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
                   <h4 style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Layers size={16} color="var(--accent-cyan)" /> Historically Similar Precursor Incidents (HNSW Semantic Retrieval)
+                    <Layers size={16} color="var(--primary)" /> Historically Similar Precursor Incidents (HNSW Semantic Retrieval)
                   </h4>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     {similarReports.map((sim, idx) => (
@@ -413,17 +429,17 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                         key={idx}
                         style={{
                           padding: '12px',
-                          borderRadius: '8px',
-                          background: 'var(--bg-card)',
-                          border: '1px solid var(--border-color)',
+                          borderRadius: '10px',
+                          background: 'var(--surface-elevated)',
+                          border: '1px solid var(--border-subtle)',
                           fontSize: '0.8rem',
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-cyan)', fontSize: '0.75rem' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--primary-bright)', fontSize: '0.75rem' }}>
                             #{sim.source_record_id}
                           </span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
                             {(sim.similarity * 100).toFixed(0)}% Similarity
                           </span>
                         </div>

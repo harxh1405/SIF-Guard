@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { getReviewQueue, submitReview } from '../api/review';
 import type { SafetyReportRead } from '../types/api';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
@@ -157,17 +157,17 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 className="section-title">
             Human-in-the-Loop Triage & Review Queue
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            Review ambiguous and border-line incident reports to train and refine the SIF Precursor Intelligence Engine
+            Review ambiguous and borderline incident reports to train and refine the SIF Precursor Intelligence Engine
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -175,14 +175,14 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
             style={{
               fontSize: '0.78rem',
               color: 'var(--text-secondary)',
-              background: 'var(--bg-card)',
-              padding: '6px 12px',
+              background: 'var(--surface-elevated)',
+              padding: '6px 14px',
               borderRadius: '8px',
-              border: '1px solid var(--border-color)',
+              border: '1px solid var(--border)',
               fontFamily: 'var(--font-mono)',
             }}
           >
-            Pending: <strong>{queue.length}</strong> items
+            Pending: <strong style={{ color: 'var(--primary-bright)', fontVariantNumeric: 'tabular-nums' }}>{queue.length}</strong> items
           </div>
         </div>
       </div>
@@ -192,11 +192,11 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
-            padding: '10px 16px',
-            borderRadius: '8px',
-            background: 'rgba(6, 182, 212, 0.15)',
-            border: '1px solid var(--accent-cyan)',
-            color: 'var(--accent-cyan)',
+            padding: '12px 18px',
+            borderRadius: '10px',
+            background: 'rgba(32, 217, 151, 0.12)',
+            border: '1px solid var(--success)',
+            color: 'var(--success)',
             fontWeight: 600,
             fontSize: '0.85rem',
             marginBottom: '16px',
@@ -225,14 +225,14 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '420px 1fr',
+            gridTemplateColumns: '400px 1fr',
             gap: '24px',
             alignItems: 'start',
           }}
         >
           {/* Left Column: Queue List */}
           <div
-            className="glass-card"
+            className="card"
             style={{
               padding: '12px',
               maxHeight: 'calc(100vh - 210px)',
@@ -254,7 +254,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
               }}
             >
               <span>Queue Items ({queue.length})</span>
-              <span>Shortcuts: J/K</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>Keys: J / K</span>
             </div>
 
             {queue.map((report, idx) => {
@@ -266,10 +266,10 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                   style={{
                     padding: '14px',
                     borderRadius: '10px',
-                    background: isSelected ? 'var(--accent-primary-bg)' : 'var(--bg-card)',
-                    border: `1px solid ${isSelected ? 'var(--accent-cyan)' : 'var(--border-color)'}`,
+                    background: isSelected ? 'var(--surface-elevated)' : 'var(--background-secondary)',
+                    border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-subtle)'}`,
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -277,7 +277,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                       style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.8rem',
-                        color: 'var(--accent-cyan)',
+                        color: 'var(--primary-bright)',
                         fontWeight: 700,
                       }}
                     >
@@ -311,15 +311,15 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
 
           {/* Right Column: Deep Inspection & One-Click Triage Panel */}
           {activeReport && (
-            <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Report Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border)', paddingBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', fontWeight: 700, fontSize: '0.9rem' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary-bright)', fontWeight: 700, fontSize: '0.9rem' }}>
                       Report #{activeReport.source_record_id}
                     </span>
-                    <span style={{ fontSize: '0.75rem', background: 'var(--bg-badge)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ fontSize: '0.75rem', background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
                       {activeReport.source_dataset}
                     </span>
                   </div>
@@ -328,7 +328,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                   </h3>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => handleQuickDecision(activeReport, 'SIF_POTENTIAL')}
                     className="btn btn-danger"
@@ -339,8 +339,8 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                   </button>
                   <button
                     onClick={() => handleQuickDecision(activeReport, 'NON_SIF')}
-                    className="btn btn-primary"
-                    style={{ fontSize: '0.8rem', padding: '6px 14px', background: 'var(--accent-nonsif-green)' }}
+                    className="btn"
+                    style={{ fontSize: '0.8rem', padding: '6px 14px', background: 'var(--success)', color: '#0B0806', fontWeight: 600 }}
                     title="Press 'R' key"
                   >
                     <Check size={15} /> Non-SIF (R)
@@ -357,9 +357,9 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
               </div>
 
               {/* Free-Text Narrative with Evidence Highlighting */}
-              <div style={{ background: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ background: 'var(--surface-elevated)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={14} color="var(--accent-cyan)" /> Incident Narrative & AI Evidence Highlight:
+                  <Sparkles size={14} color="var(--primary)" /> Incident Narrative & AI Evidence Highlight:
                 </div>
                 <div style={{ fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>
                   <EvidenceHighlighter
@@ -401,14 +401,14 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
             <motion.div
               className="modal-content"
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              style={{ padding: '32px', maxWidth: '720px' }}
+              style={{ padding: '32px', maxWidth: '720px', borderRadius: 'var(--radius-xl)' }}
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary-bright)', fontWeight: 700 }}>
                     Report #{selectedReport.source_record_id}
                   </span>
                   <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', margin: 0 }}>
@@ -421,12 +421,12 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
               </div>
 
               {successMsg && (
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid var(--accent-nonsif-green)', color: 'var(--accent-nonsif-green)', fontWeight: 600, fontSize: '0.875rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(32, 217, 151, 0.12)', border: '1px solid var(--success)', color: 'var(--success)', fontWeight: 600, fontSize: '0.875rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <CheckCircle2 size={16} /> {successMsg}
                 </div>
               )}
 
-              <div style={{ background: 'var(--bg-card)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
+              <div style={{ background: 'var(--surface-elevated)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)', marginBottom: '20px' }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '6px' }}>Incident Narrative:</div>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.5 }}>
                   "{selectedReport.report_text}"
@@ -451,8 +451,15 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                     <button
                       type="button"
                       onClick={() => setReviewLabel('NON_SIF')}
-                      className={`btn ${reviewLabel === 'NON_SIF' ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ flex: 1, justifyContent: 'center', background: reviewLabel === 'NON_SIF' ? 'var(--accent-nonsif-green)' : undefined }}
+                      className="btn"
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        background: reviewLabel === 'NON_SIF' ? 'var(--success)' : 'var(--surface-elevated)',
+                        color: reviewLabel === 'NON_SIF' ? '#0B0806' : 'var(--text-primary)',
+                        border: '1px solid var(--border)',
+                        fontWeight: 600,
+                      }}
                     >
                       <Check size={16} /> Non SIF
                     </button>
@@ -460,12 +467,13 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                     <button
                       type="button"
                       onClick={() => setReviewLabel('UNCERTAIN')}
-                      className={`btn ${reviewLabel === 'UNCERTAIN' ? 'btn-primary' : 'btn-secondary'}`}
+                      className="btn"
                       style={{
                         flex: 1,
                         justifyContent: 'center',
-                        background: reviewLabel === 'UNCERTAIN' ? 'var(--accent-uncertain-amber)' : undefined,
-                        color: reviewLabel === 'UNCERTAIN' ? '#0f172a' : undefined,
+                        background: reviewLabel === 'UNCERTAIN' ? 'var(--warning)' : 'var(--surface-elevated)',
+                        color: reviewLabel === 'UNCERTAIN' ? '#0B0806' : 'var(--text-primary)',
+                        border: '1px solid var(--border)',
                         fontWeight: reviewLabel === 'UNCERTAIN' ? 700 : 500,
                       }}
                     >
@@ -485,7 +493,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                     step="0.05"
                     value={confidence}
                     onChange={(e) => setConfidence(parseFloat(e.target.value))}
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', accentColor: 'var(--primary)' }}
                   />
                 </div>
 
@@ -497,7 +505,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                     type="text"
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface-elevated)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                   />
                 </div>
 
@@ -510,7 +518,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
                     placeholder="Document justification, barrier deficiency, or recommended corrective action..."
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface-elevated)', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'var(--font-main)' }}
                   />
                 </div>
 

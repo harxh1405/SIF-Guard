@@ -32,26 +32,22 @@ export const ThemeToggleSwitch: React.FC<ThemeToggleSwitchProps> = ({ theme, onT
         className="glass-toggle-track"
         style={{
           position: 'relative',
-          width: '64px',
-          height: '32px',
-          borderRadius: '20px',
+          width: '60px',
+          height: '30px',
+          borderRadius: '16px',
           background: isDark
-            ? 'rgba(15, 23, 42, 0.75)'
-            : 'rgba(255, 255, 255, 0.85)',
+            ? 'var(--surface-elevated)'
+            : 'var(--surface-elevated)',
           border: isDark
-            ? '1px solid rgba(56, 189, 248, 0.35)'
-            : '1px solid rgba(245, 158, 11, 0.45)',
-          boxShadow: isDark
-            ? 'inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 16px rgba(56, 189, 248, 0.15)'
-            : 'inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(245, 158, 11, 0.18)',
+            ? '1px solid var(--border)'
+            : '1px solid var(--border)',
+          boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)',
           cursor: 'pointer',
           padding: '2px',
           display: 'flex',
           alignItems: 'center',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
           outline: 'none',
-          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          transition: 'all 0.2s ease',
         }}
         title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
       >
@@ -59,38 +55,38 @@ export const ThemeToggleSwitch: React.FC<ThemeToggleSwitchProps> = ({ theme, onT
         <div
           style={{
             position: 'absolute',
-            left: '7px',
+            left: '6px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ca8a04',
+            color: 'var(--warning)',
             opacity: isDark ? 0.35 : 0,
-            transition: 'opacity 0.25s ease',
+            transition: 'opacity 0.2s ease',
             pointerEvents: 'none',
           }}
         >
-          <Sun size={14} />
+          <Sun size={12} />
         </div>
         <div
           style={{
             position: 'absolute',
-            right: '7px',
+            right: '6px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#38bdf8',
-            opacity: isDark ? 0 : 0.45,
-            transition: 'opacity 0.25s ease',
+            color: 'var(--primary)',
+            opacity: isDark ? 0 : 0.4,
+            transition: 'opacity 0.2s ease',
             pointerEvents: 'none',
           }}
         >
-          <Moon size={14} />
+          <Moon size={12} />
         </div>
 
         {/* Sliding thumb */}
         <motion.div
           animate={{
-            x: isDark ? 32 : 2,
+            x: isDark ? 30 : 2,
           }}
           transition={{
             type: 'spring',
@@ -98,28 +94,23 @@ export const ThemeToggleSwitch: React.FC<ThemeToggleSwitchProps> = ({ theme, onT
             damping: 30,
           }}
           style={{
-            width: '26px',
-            height: '26px',
+            width: '24px',
+            height: '24px',
             borderRadius: '50%',
             background: isDark
-              ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
-              : 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-            boxShadow: isDark
-              ? '0 2px 8px rgba(2, 132, 199, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
-              : '0 2px 8px rgba(245, 158, 11, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
+              ? 'var(--primary)'
+              : 'linear-gradient(135deg, #FFB347 0%, #FF6A00 100%)',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff',
-            border: isDark
-              ? '1px solid rgba(255, 255, 255, 0.3)'
-              : '1px solid rgba(255, 255, 255, 0.8)',
+            color: '#FFFFFF',
           }}
         >
           {isDark ? (
-            <Moon size={13} strokeWidth={2.5} />
+            <Moon size={12} strokeWidth={2.5} />
           ) : (
-            <Sun size={13} strokeWidth={2.5} />
+            <Sun size={12} strokeWidth={2.5} />
           )}
         </motion.div>
       </button>
@@ -128,14 +119,14 @@ export const ThemeToggleSwitch: React.FC<ThemeToggleSwitchProps> = ({ theme, onT
       <span
         style={{
           fontSize: '0.78rem',
-          fontWeight: 600,
           color: 'var(--text-secondary)',
           fontFamily: 'var(--font-mono)',
-          letterSpacing: '-0.01em',
+          fontWeight: 600,
           userSelect: 'none',
+          minWidth: '38px',
         }}
       >
-        {isDark ? 'DARK' : 'LIGHT'}
+        {isDark ? 'Dark' : 'Light'}
       </span>
     </div>
   );

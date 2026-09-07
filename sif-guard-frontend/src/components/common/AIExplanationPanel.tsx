@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
   ShieldAlert,
   ShieldCheck,
@@ -42,14 +42,14 @@ export const AIExplanationPanel: React.FC<Props> = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
+        gap: '16px',
       }}
     >
       {/* Top Banner: SIF Classification vs Severity Calibration */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '16px',
         }}
       >
@@ -59,16 +59,16 @@ export const AIExplanationPanel: React.FC<Props> = ({
             padding: '18px 20px',
             borderRadius: '12px',
             background: isSIF
-              ? 'var(--accent-sif-bg)'
+              ? 'rgba(232, 93, 93, 0.12)'
               : isNonSIF
-              ? 'var(--accent-nonsif-bg)'
-              : 'var(--accent-uncertain-bg)',
+              ? 'rgba(32, 217, 151, 0.12)'
+              : 'rgba(235, 160, 54, 0.12)',
             border: `1px solid ${
               isSIF
-                ? 'var(--accent-sif-red)'
+                ? 'rgba(232, 93, 93, 0.35)'
                 : isNonSIF
-                ? 'var(--accent-nonsif-green)'
-                : 'var(--accent-uncertain-amber)'
+                ? 'rgba(32, 217, 151, 0.35)'
+                : 'rgba(235, 160, 54, 0.35)'
             }`,
             display: 'flex',
             alignItems: 'center',
@@ -81,14 +81,15 @@ export const AIExplanationPanel: React.FC<Props> = ({
               height: '46px',
               borderRadius: '10px',
               background: isSIF
-                ? 'var(--accent-sif-red)'
+                ? 'var(--danger)'
                 : isNonSIF
-                ? 'var(--accent-nonsif-green)'
-                : 'var(--accent-uncertain-amber)',
+                ? 'var(--success)'
+                : 'var(--warning)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffffff',
+              color: '#0B0806',
+              flexShrink: 0,
             }}
           >
             {isSIF ? (
@@ -117,10 +118,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 fontSize: '1.15rem',
                 fontWeight: 800,
                 color: isSIF
-                  ? 'var(--accent-sif-red)'
+                  ? 'var(--danger)'
                   : isNonSIF
-                  ? 'var(--accent-nonsif-green)'
-                  : 'var(--accent-uncertain-amber)',
+                  ? 'var(--success)'
+                  : 'var(--warning)',
               }}
             >
               {isSIF
@@ -135,6 +136,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 color: 'var(--text-secondary)',
                 marginTop: '4px',
                 fontFamily: 'var(--font-mono)',
+                fontVariantNumeric: 'tabular-nums',
               }}
             >
               Confidence: <strong>{(confidence * 100).toFixed(1)}%</strong> | Score:{' '}
@@ -148,8 +150,8 @@ export const AIExplanationPanel: React.FC<Props> = ({
           style={{
             padding: '18px 20px',
             borderRadius: '12px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
+            background: 'var(--surface-elevated)',
+            border: '1px solid var(--border-subtle)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -191,7 +193,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 style={{
                   fontSize: '0.9rem',
                   fontWeight: 700,
-                  color: isSIF ? 'var(--accent-sif-red)' : 'var(--accent-nonsif-green)',
+                  color: isSIF ? 'var(--danger)' : 'var(--success)',
                 }}
               >
                 {isSIF ? 'Catastrophic / Fatal' : 'Low Potential'}
@@ -205,10 +207,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
       {extracted && (
         <div
           style={{
-            background: 'var(--bg-card)',
+            background: 'var(--surface-elevated)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid var(--border-color)',
+            border: '1px solid var(--border-subtle)',
           }}
         >
           <div
@@ -223,23 +225,23 @@ export const AIExplanationPanel: React.FC<Props> = ({
               gap: '6px',
             }}
           >
-            <Sparkles size={14} color="var(--accent-cyan)" /> Extracted HSE Precursor Entities (Named Entity Recognition)
+            <Sparkles size={14} color="var(--primary-bright)" /> Extracted HSE Precursor Entities (Named Entity Recognition)
           </div>
 
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '14px',
+              gap: '12px',
             }}
           >
             {/* Activity */}
             <div
               style={{
                 padding: '12px',
-                borderRadius: '8px',
-                background: 'var(--accent-primary-bg)',
-                border: '1px solid var(--border-hover)',
+                borderRadius: '10px',
+                background: 'var(--background-secondary)',
+                border: '1px solid var(--border-subtle)',
               }}
             >
               <div
@@ -248,15 +250,15 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   alignItems: 'center',
                   gap: '6px',
                   fontSize: '0.75rem',
-                  color: 'var(--accent-cyan)',
+                  color: 'var(--primary-bright)',
                   fontWeight: 600,
                   marginBottom: '4px',
                 }}
               >
-                <Activity size={14} /> Critical Activity
+                <Activity size={14} /> Operational Task
               </div>
               <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {extracted.activity || 'Not detected'}
+                {extracted.activity || 'Unspecified'}
               </div>
             </div>
 
@@ -264,9 +266,9 @@ export const AIExplanationPanel: React.FC<Props> = ({
             <div
               style={{
                 padding: '12px',
-                borderRadius: '8px',
-                background: 'var(--accent-sif-bg)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '10px',
+                background: 'var(--background-secondary)',
+                border: '1px solid var(--border-subtle)',
               }}
             >
               <div
@@ -275,15 +277,15 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   alignItems: 'center',
                   gap: '6px',
                   fontSize: '0.75rem',
-                  color: 'var(--accent-sif-red)',
+                  color: 'var(--danger)',
                   fontWeight: 600,
                   marginBottom: '4px',
                 }}
               >
-                <Flame size={14} /> Immediate Hazard
+                <Flame size={14} /> Hazard Identified
               </div>
               <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {extracted.hazard || 'Not detected'}
+                {extracted.hazard || 'Unspecified'}
               </div>
             </div>
 
@@ -291,9 +293,9 @@ export const AIExplanationPanel: React.FC<Props> = ({
             <div
               style={{
                 padding: '12px',
-                borderRadius: '8px',
-                background: 'var(--accent-uncertain-bg)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: '10px',
+                background: 'var(--background-secondary)',
+                border: '1px solid var(--border-subtle)',
               }}
             >
               <div
@@ -302,7 +304,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   alignItems: 'center',
                   gap: '6px',
                   fontSize: '0.75rem',
-                  color: 'var(--accent-uncertain-amber)',
+                  color: 'var(--warning)',
                   fontWeight: 600,
                   marginBottom: '4px',
                 }}
@@ -318,9 +320,9 @@ export const AIExplanationPanel: React.FC<Props> = ({
             <div
               style={{
                 padding: '12px',
-                borderRadius: '8px',
-                background: 'var(--accent-purple-bg)',
-                border: '1px solid var(--accent-purple-border)',
+                borderRadius: '10px',
+                background: 'var(--background-secondary)',
+                border: '1px solid var(--border-subtle)',
               }}
             >
               <div
@@ -329,7 +331,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   alignItems: 'center',
                   gap: '6px',
                   fontSize: '0.75rem',
-                  color: 'var(--accent-purple)',
+                  color: 'var(--danger)',
                   fontWeight: 600,
                   marginBottom: '4px',
                 }}
@@ -348,10 +350,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
       {sifResult?.risk_factors && sifResult.risk_factors.length > 0 && (
         <div
           style={{
-            background: 'var(--bg-card)',
+            background: 'var(--surface-elevated)',
             padding: '16px 20px',
             borderRadius: '12px',
-            border: '1px solid var(--border-color)',
+            border: '1px solid var(--border-subtle)',
           }}
         >
           <div
@@ -373,9 +375,9 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   fontSize: '0.78rem',
                   padding: '4px 10px',
                   borderRadius: '6px',
-                  background: 'var(--accent-sif-bg)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: 'var(--accent-sif-red)',
+                  background: 'rgba(232, 93, 93, 0.12)',
+                  border: '1px solid rgba(232, 93, 93, 0.3)',
+                  color: 'var(--danger)',
                   fontWeight: 600,
                 }}
               >
@@ -390,10 +392,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
       {lsrMatches.length > 0 && (
         <div
           style={{
-            background: 'var(--bg-card)',
+            background: 'var(--surface-elevated)',
             padding: '16px 20px',
             borderRadius: '12px',
-            border: '1px solid var(--border-color)',
+            border: '1px solid var(--border-subtle)',
           }}
         >
           <div
@@ -408,7 +410,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
               gap: '6px',
             }}
           >
-            <Layers size={14} color="var(--accent-cyan)" /> Matched IOGP Life-Saving Rules
+            <Layers size={14} color="var(--primary-bright)" /> Matched IOGP Life-Saving Rules
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {lsrMatches.map((m, idx) => (
@@ -420,10 +422,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  background: 'var(--accent-primary-bg)',
-                  border: '1px solid var(--border-hover)',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  background: 'var(--background-secondary)',
+                  border: '1px solid var(--border-subtle)',
                 }}
               >
                 <span
@@ -438,9 +440,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 <span
                   style={{
                     fontSize: '0.75rem',
-                    color: 'var(--accent-cyan)',
+                    color: 'var(--primary-bright)',
                     fontWeight: 700,
                     fontFamily: 'var(--font-mono)',
+                    fontVariantNumeric: 'tabular-nums',
                   }}
                 >
                   {(m.score * 100).toFixed(0)}% Match
