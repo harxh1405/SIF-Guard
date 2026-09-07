@@ -13,6 +13,7 @@ export async function triggerClustering(minClusterSize: number = 3): Promise<{
 }> {
   const res = await apiClient.post('/patterns/cluster-now', null, {
     params: { min_cluster_size: minClusterSize },
+    timeout: 120000,
   });
   return res.data;
 }
