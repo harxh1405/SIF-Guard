@@ -20,8 +20,8 @@ class PrecursorClusteringService:
 
     def cluster_reports(self, db: Session, min_cluster_size: int = 3) -> List[Dict[str, Any]]:
         reports = db.query(SafetyReport).all()
-        if len(reports) < min_cluster_size:
-            logger.warning(f"Not enough reports ({len(reports)}) to perform clustering (min: {min_cluster_size}).")
+        if len(reports) < 2:
+            logger.warning(f"Not enough reports ({len(reports)}) to perform clustering.")
             return []
 
         # 1. Batch encode any un-embedded reports and persist to DB
@@ -41,24 +41,58 @@ class PrecursorClusteringService:
                 embeddings.append(r.embedding)
                 valid_reports.append(r)
 
-        if len(valid_reports) < min_cluster_size:
+        if len(valid_reports) < 2:
             return []
 
         X = np.array(embeddings, dtype=np.float32)
+        # L2 normalization for cosine similarity compatibility with Euclidean distance
+        norms = np.linalg.norm(X, axis=1, keepdims=True)
+        norms[norms == 0] = 1e-10
+        X_norm = X / norms
 
         # 2. Perform HDBSCAN or KMeans clustering
         labels = None
-        if HAS_HDBSCAN and len(valid_reports) >= min_cluster_size * 2:
+        eff_min_size = max(2, min(min_cluster_size, len(valid_reports) // 2))
+
+        if HAS_HDBSCAN and len(valid_reports) >= 4:
             try:
-                clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, metric='euclidean')
-                labels = clusterer.fit_predict(X)
+                clusterer = hdbscan.HDBSCAN(
+                    min_cluster_size=eff_min_size,
+                    min_samples=1,
+                    metric='euclidean',
+                    cluster_selection_epsilon=0.35
+                )
+                raw_labels = clusterer.fit_predict(X_norm)
+                non_noise = set(l for l in raw_labels if l != -1)
+                
+                if len(non_noise) > 0:
+                    labels = np.array(raw_labels, copy=True)
+                    # Reassign noise (-1) points to closest cluster centroid if similarity is sufficiently high
+                    centroids = {}
+                    for cid in non_noise:
+                        centroids[cid] = np.mean(X_norm[labels == cid], axis=0)
+
+                    for idx, label in enumerate(labels):
+                        if label == -1:
+                            best_cid = -1
+                            best_sim = -1.0
+                            vec = X_norm[idx]
+                            for cid, c_vec in centroids.items():
+                                sim = float(np.dot(vec, c_vec))
+                                if sim > best_sim:
+                                    best_sim = sim
+                                    best_cid = cid
+                            if best_sim >= 0.60:
+                                labels[idx] = best_cid
+                else:
+                    logger.info("HDBSCAN resulted in 0 non-noise clusters. Falling back to KMeans.")
             except Exception as e:
                 logger.warning(f"HDBSCAN clustering execution failed ({e}), falling back to KMeans.")
 
-        if labels is None:
-            k = min(max(2, len(valid_reports) // 4), 8)
+        if labels is None or len(set(l for l in labels if l != -1)) == 0:
+            k = max(2, min(6, len(valid_reports) // 2))
             kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-            labels = kmeans.fit_predict(X)
+            labels = kmeans.fit_predict(X_norm)
 
         # 3. Clear old cluster definitions
         db.query(PrecursorCluster).delete()
@@ -73,7 +107,7 @@ class PrecursorClusteringService:
         created_clusters = []
         for cid, group in cluster_groups.items():
             cid_int = int(cid)
-            if cid_int == -1: # Noise in HDBSCAN
+            if cid_int == -1: # Unassigned noise in HDBSCAN
                 continue
 
             total_count = int(len(group))
