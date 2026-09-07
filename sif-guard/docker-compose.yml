@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: sif_guard_api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://sif_user:sif_password@postgres:5432/sif_guard_db
+      - EMBEDDING_MODEL=BAAI/bge-base-en-v1.5
+      - SIF_MODEL_PATH=app/ml/models/sif_xgboost_v1.json
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: sif_guard_postgres
+    environment:
+      POSTGRES_USER: sif_user
+      POSTGRES_PASSWORD: sif_password
+      POSTGRES_DB: sif_guard_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.5.0
+    container_name: sif_guard_mlflow
+    ports:
+      - "5000:5000"
+    command: mlflow server --host 0.0.0.0 --port 5000
+
+volumes:
+  postgres_data:
