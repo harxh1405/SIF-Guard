@@ -10,10 +10,12 @@ import {
   UserCheck,
   PanelLeftClose,
   PanelLeftOpen,
+  Radar,
 } from 'lucide-react';
 
 export type TabId =
   | 'dashboard'
+  | 'facility'
   | 'ingestion'
   | 'explorer'
   | 'clusters'
@@ -39,6 +41,7 @@ export const Navigation: React.FC<Props> = ({
       title: 'INTELLIGENCE',
       items: [
         { id: 'dashboard' as TabId, label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'facility' as TabId, label: 'Facility Digital Twin', icon: Radar },
         { id: 'analytics' as TabId, label: 'Analytics & Trends', icon: BarChart3 },
         { id: 'clusters' as TabId, label: 'Precursor Clusters', icon: Boxes },
       ],

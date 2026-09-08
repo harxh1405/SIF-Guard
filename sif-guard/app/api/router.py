@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import health, reports, analysis, patterns, analytics, lsr, knowledge, review, dashboard
+from app.api.routes import health, reports, analysis, patterns, analytics, lsr, knowledge, review, dashboard, facility
 
 api_router = APIRouter()
 
@@ -12,3 +12,4 @@ api_router.include_router(lsr.router, tags=["Life-Saving Rules"])
 api_router.include_router(knowledge.router, tags=["Knowledge Base"])
 api_router.include_router(review.router, tags=["Human Review"])
 api_router.include_router(dashboard.router, tags=["Dashboard"])
+api_router.include_router(facility.router, tags=["Facility Digital Twin"])

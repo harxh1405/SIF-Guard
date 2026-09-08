@@ -3,6 +3,7 @@ import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import type { TabId } from './components/layout/Navigation';
 import { DashboardPage } from './pages/DashboardPage';
+import { FacilityTwinPage } from './pages/FacilityTwinPage';
 import { IngestionPage } from './pages/IngestionPage';
 import { ReportsExplorerPage } from './pages/ReportsExplorerPage';
 import { PrecursorClustersPage } from './pages/PrecursorClustersPage';
@@ -13,6 +14,7 @@ import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsMod
 
 const TAB_ORDER: TabId[] = [
   'dashboard',
+  'facility',
   'ingestion',
   'explorer',
   'clusters',
@@ -91,6 +93,7 @@ export function App() {
 
         <main ref={mainContentRef} style={{ flex: 1, minWidth: 0, padding: '28px 36px', overflowY: 'auto', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
           {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
+          {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
           {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
           {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
           {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}

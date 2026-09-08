@@ -19,6 +19,7 @@ import {
   ArrowUpRight,
   Layers,
   Flame,
+  Radar,
 } from 'lucide-react';
 import type { TabId } from '../components/layout/Navigation';
 
@@ -110,6 +111,13 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            onClick={() => onNavigate('facility')}
+            className="btn btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Radar size={16} color="var(--primary)" /> Facility Digital Twin
+          </button>
           <button
             onClick={() => onNavigate('explorer')}
             className="btn btn-primary"
