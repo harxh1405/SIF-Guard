@@ -1,6 +1,7 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface MetricCardProps {
   title: string;
@@ -8,6 +9,7 @@ interface MetricCardProps {
   subtitle?: string;
   icon: LucideIcon;
   trend?: string;
+  trendDirection?: 'up' | 'down' | 'neutral';
   trendColor?: 'red' | 'green' | 'amber' | 'blue';
 }
 
@@ -17,6 +19,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   subtitle,
   icon: Icon,
   trend,
+  trendDirection,
   trendColor = 'blue',
 }) => {
   const getTrendColorStyle = () => {
@@ -89,7 +92,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             marginTop: '14px',
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '3px 8px',
+            gap: '5px',
+            padding: '4px 10px',
             borderRadius: '6px',
             background: trendStyle.bg,
             border: `1px solid ${trendStyle.border}`,
@@ -99,9 +103,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             fontFamily: 'var(--font-mono)',
           }}
         >
-          {trend}
+          {trendDirection === 'up' && <TrendingUp size={12} />}
+          {trendDirection === 'down' && <TrendingDown size={12} />}
+          {trendDirection === 'neutral' && <Minus size={12} />}
+          <span>{trend}</span>
         </div>
       )}
     </motion.div>
   );
 };
+

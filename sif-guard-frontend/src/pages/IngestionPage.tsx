@@ -240,6 +240,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 style={{
+<<<<<<< Updated upstream
                   border: isDragging ? '2px dashed var(--accent-cyan)' : '2px dashed var(--border-color)',
                   borderRadius: '12px',
                   padding: '28px 16px',
@@ -248,6 +249,16 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   cursor: 'pointer',
                   backdropFilter: 'blur(10px)',
                   transition: 'all 0.2s ease',
+=======
+                  border: isDragging ? '2px dashed var(--primary)' : '2px dashed var(--border)',
+                  borderRadius: '14px',
+                  padding: '32px 20px',
+                  textAlign: 'center',
+                  background: isDragging ? 'rgba(255, 106, 0, 0.12)' : 'var(--surface-elevated)',
+                  boxShadow: isDragging ? '0 0 25px rgba(255, 106, 0, 0.25)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-out',
+>>>>>>> Stashed changes
                 }}
               >
                 <input
@@ -258,37 +269,69 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   ref={fileInputRef}
                   id="file-upload-input"
                 />
+<<<<<<< Updated upstream
                 <FileCheck2 size={36} color="var(--accent-cyan)" style={{ margin: '0 auto 10px auto' }} />
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+=======
+                <FileCheck2 size={40} color={isDragging ? 'var(--primary-bright)' : 'var(--primary)'} style={{ margin: '0 auto 12px auto' }} />
+                <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+>>>>>>> Stashed changes
                   {selectedFile ? selectedFile.name : 'Click or Drag & Drop CSV, XLSX, JSON file here'}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  {selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB selected` : 'Supports .csv, .xlsx, .json, .jsonl up to 100 MB'}
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                  {selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB selected` : 'Supports enterprise safety callsets up to 100 MB'}
+                </div>
+
+                {/* File Format Format Badges */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '14px' }}>
+                  {['.CSV', '.XLSX', '.JSON', '.JSONL'].map((ext) => (
+                    <span
+                      key={ext}
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        background: 'var(--surface-hover)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-subtle)',
+                        fontFamily: 'var(--font-mono)',
+                      }}
+                    >
+                      {ext}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Quick Sample Dataset Selection */}
+<<<<<<< Updated upstream
             <div style={{ marginBottom: '20px', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Zap size={13} color="var(--accent-cyan)" /> Quick Demo: Load Sample Datasets
+=======
+            <div style={{ marginBottom: '20px', padding: '14px', borderRadius: '12px', background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Zap size={14} color="var(--primary-bright)" /> Quick Demo: Load Sample Datasets
+>>>>>>> Stashed changes
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   type="button"
                   onClick={() => loadSampleDataset('osha')}
                   className="btn btn-secondary"
-                  style={{ fontSize: '0.75rem', padding: '6px 12px', flex: 1, justifyContent: 'center' }}
+                  style={{ fontSize: '0.78rem', padding: '7px 12px', flex: 1, justifyContent: 'center' }}
                 >
-                  <FileSpreadsheet size={13} /> Load OSHA Sample
+                  <FileSpreadsheet size={14} /> Load OSHA Sample
                 </button>
                 <button
                   type="button"
                   onClick={() => loadSampleDataset('oil')}
                   className="btn btn-secondary"
-                  style={{ fontSize: '0.75rem', padding: '6px 12px', flex: 1, justifyContent: 'center' }}
+                  style={{ fontSize: '0.78rem', padding: '7px 12px', flex: 1, justifyContent: 'center' }}
                 >
-                  <FileSpreadsheet size={13} /> Load OIL HSSE Sample
+                  <FileSpreadsheet size={14} /> Load OIL HSSE Sample
                 </button>
               </div>
             </div>

@@ -96,6 +96,17 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
     );
   });
 
+  const exportFilteredJSON = () => {
+    if (sortedReports.length === 0) return;
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(sortedReports, null, 2))}`;
+    const link = document.createElement('a');
+    link.setAttribute('href', jsonString);
+    link.setAttribute('download', `sif_guard_intelligence_export_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -104,6 +115,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
+<<<<<<< Updated upstream
           <h2 className="section-title">
             Incident & Observation Intelligence Explorer
           </h2>
@@ -114,6 +126,59 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
         <button onClick={() => onNavigate('ingestion')} className="btn btn-secondary">
           + Import New Dataset
         </button>
+=======
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              Incident Intelligence Explorer
+            </h2>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '6px',
+                background: 'rgba(255, 106, 0, 0.12)',
+                color: 'var(--primary-bright)',
+                border: '1px solid rgba(255, 106, 0, 0.25)',
+              }}
+            >
+              {sortedReports.length} {sortedReports.length === 1 ? 'RECORD' : 'RECORDS'}
+            </span>
+          </div>
+          <p className="section-subtitle" style={{ marginTop: '4px' }}>
+            Multi-dimensional NLP attribute filtering, vector evidence analysis, and IOGP Life-Saving Rules mapping.
+          </p>
+        </div>
+
+        {/* Header Action Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="btn btn-secondary"
+            style={{ padding: '8px 14px', fontSize: '0.82rem' }}
+            title="Refresh record set"
+          >
+            <RefreshCw size={14} className={isRefreshing ? 'spin' : ''} />
+            <span>Refresh</span>
+          </button>
+
+          <button onClick={exportFilteredCSV} className="btn btn-secondary" style={{ padding: '8px 14px', fontSize: '0.82rem' }} title="Export to CSV format">
+            <Download size={14} />
+            <span>Export CSV</span>
+          </button>
+
+          <button onClick={exportFilteredJSON} className="btn btn-secondary" style={{ padding: '8px 14px', fontSize: '0.82rem' }} title="Export to JSON format">
+            <Download size={14} />
+            <span>Export JSON</span>
+          </button>
+
+          <button onClick={() => onNavigate('ingestion')} className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>
+            + Import New Dataset
+          </button>
+        </div>
+>>>>>>> Stashed changes
       </div>
 
       {/* Filter Controls Bar */}
@@ -355,6 +420,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
               </div>
             </div>
 
+<<<<<<< Updated upstream
             {/* Matched Life-Saving Rules */}
             <div style={{ marginBottom: '24px' }}>
               <h4 style={{ fontSize: '1rem', marginBottom: '10px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
@@ -366,6 +432,361 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                     {lsr.rule_name || lsr} ({(lsr.score ? lsr.score * 100 : 80).toFixed(0)}% Match)
                   </span>
                 ))}
+=======
+              {/* Drawer Body - Scrollable Content */}
+              <div
+                style={{
+                  padding: '24px',
+                  overflowY: 'auto',
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '22px',
+                }}
+              >
+                {/* 1. SIF Classification & Confidence Badge Row */}
+                <div
+                  style={{
+                    padding: '16px',
+                    borderRadius: '12px',
+                    background:
+                      selectedReport.sif_potential === 'SIF_POTENTIAL'
+                        ? 'rgba(232, 93, 93, 0.10)'
+                        : selectedReport.sif_potential === 'NON_SIF'
+                        ? 'rgba(32, 217, 151, 0.10)'
+                        : 'rgba(255, 179, 71, 0.10)',
+                    border: `1px solid ${
+                      selectedReport.sif_potential === 'SIF_POTENTIAL'
+                        ? 'rgba(232, 93, 93, 0.3)'
+                        : selectedReport.sif_potential === 'NON_SIF'
+                        ? 'rgba(32, 217, 151, 0.3)'
+                        : 'rgba(255, 179, 71, 0.3)'
+                    }`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <SIFBadge
+                      status={selectedReport.sif_potential}
+                      score={selectedReport.sif_score || selectedReport.sif_confidence}
+                      showScore
+                      size="lg"
+                    />
+                    {selectedReport.barrier_failure && (
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                          background: 'rgba(232, 93, 93, 0.2)',
+                          color: 'var(--danger)',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                      >
+                        BARRIER DEFECT DETECTED
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    Confidence:{' '}
+                    <strong style={{ color: 'var(--text-primary)' }}>
+                      {Math.round(((selectedReport.sif_confidence || selectedReport.sif_score || 0) > 1 ? (selectedReport.sif_confidence || selectedReport.sif_score || 0) : (selectedReport.sif_confidence || selectedReport.sif_score || 0) * 100))}%
+                    </strong>
+                  </div>
+                </div>
+
+                {/* 2. Free-Text Incident Narrative with Evidence Highlighter */}
+                <div
+                  style={{
+                    background: 'var(--surface-elevated)',
+                    padding: '18px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '0.72rem',
+                      color: 'var(--text-muted)',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      marginBottom: '10px',
+                      fontFamily: 'var(--font-mono)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <Sparkles size={14} color="var(--primary)" /> Incident Free-Text Narrative (NLP Grounding):
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.65 }}>
+                    <EvidenceHighlighter
+                      text={selectedReport.report_text}
+                      energySource={selectedReport.energy_source}
+                      barrierFailure={selectedReport.barrier_failure}
+                      hazard={selectedReport.hazard}
+                      searchQuery={searchQuery}
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Structured Extracted Parameters Grid */}
+                <div>
+                  <div
+                    style={{
+                      fontSize: '0.72rem',
+                      color: 'var(--text-muted)',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      marginBottom: '10px',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    Extracted Precursor Attributes
+                  </div>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '10px',
+                    }}
+                  >
+                    {/* Site */}
+                    <div
+                      style={{
+                        padding: '12px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '9px',
+                        border: '1px solid var(--border-subtle)',
+                      }}
+                    >
+                      <span className="micro-label" style={{ display: 'block', marginBottom: '4px' }}>
+                        Facility / Employer
+                      </span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedReport.site || selectedReport.employer || 'Unspecified'}
+                      </span>
+                    </div>
+
+                    {/* Activity */}
+                    <div
+                      style={{
+                        padding: '12px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '9px',
+                        border: '1px solid var(--border-subtle)',
+                      }}
+                    >
+                      <span className="micro-label" style={{ display: 'block', marginBottom: '4px' }}>
+                        Activity / Task
+                      </span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedReport.activity || 'Unspecified'}
+                      </span>
+                    </div>
+
+                    {/* Hazard */}
+                    <div
+                      style={{
+                        padding: '12px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '9px',
+                        border: '1px solid var(--border-subtle)',
+                      }}
+                    >
+                      <span className="micro-label" style={{ display: 'block', marginBottom: '4px' }}>
+                        Identified Hazard
+                      </span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedReport.hazard || 'Unspecified'}
+                      </span>
+                    </div>
+
+                    {/* Barrier Failure */}
+                    <div
+                      style={{
+                        padding: '12px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '9px',
+                        border: '1px solid var(--border-subtle)',
+                      }}
+                    >
+                      <span className="micro-label" style={{ display: 'block', marginBottom: '4px' }}>
+                        Barrier Defect
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '0.85rem',
+                          fontWeight: selectedReport.barrier_failure ? 700 : 500,
+                          color: selectedReport.barrier_failure ? 'var(--danger)' : 'var(--text-muted)',
+                        }}
+                      >
+                        {selectedReport.barrier_failure || 'None Detected'}
+                      </span>
+                    </div>
+
+                    {/* Energy Source */}
+                    <div
+                      style={{
+                        padding: '12px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '9px',
+                        border: '1px solid var(--border-subtle)',
+                      }}
+                    >
+                      <span className="micro-label" style={{ display: 'block', marginBottom: '4px' }}>
+                        Energy Source
+                      </span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedReport.energy_source || 'Unspecified'}
+                      </span>
+                    </div>
+
+                    {/* Severity / Consequence */}
+                    <div
+                      style={{
+                        padding: '12px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '9px',
+                        border: '1px solid var(--border-subtle)',
+                      }}
+                    >
+                      <span className="micro-label" style={{ display: 'block', marginBottom: '4px' }}>
+                        Actual Severity / Body Part
+                      </span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedReport.actual_severity || selectedReport.affected_body_part || 'Observation / Near Miss'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. AI Explanation & NLP Model Assessment */}
+                <div>
+                  {!selectedReport.sif_potential && !analysisData ? (
+                    <div
+                      style={{
+                        textAlign: 'center',
+                        padding: '20px',
+                        background: 'var(--surface-elevated)',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                        This report has not been evaluated by the NLP SIF classifier.
+                      </p>
+                      <button
+                        onClick={() => handleRunAnalysis(selectedReport.id)}
+                        disabled={analyzing}
+                        className="btn btn-primary"
+                        style={{ padding: '8px 16px', fontSize: '0.82rem' }}
+                      >
+                        <Play size={15} /> {analyzing ? 'Running Extraction...' : 'Analyze Report Now'}
+                      </button>
+                    </div>
+                  ) : (
+                    <AIExplanationPanel
+                      sifResult={analysisData?.sif}
+                      sifStatus={selectedReport.sif_potential}
+                      sifScore={selectedReport.sif_score || selectedReport.sif_confidence}
+                      actualSeverity={selectedReport.actual_severity}
+                      extracted={
+                        analysisData?.extraction || {
+                          activity: selectedReport.activity || null,
+                          hazard: selectedReport.hazard || null,
+                          barrier_failure: selectedReport.barrier_failure || null,
+                          energy_source: selectedReport.energy_source || null,
+                        }
+                      }
+                      lsrMatches={analysisData?.life_saving_rules || selectedReport.life_saving_rules || []}
+                    />
+                  )}
+                </div>
+
+                {/* 5. Historically Similar Incidents (HNSW Semantic Retrieval) */}
+                {similarReports.length > 0 && (
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                    <h4
+                      style={{
+                        fontSize: '0.85rem',
+                        color: 'var(--text-primary)',
+                        marginBottom: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontFamily: 'var(--font-mono)',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      <Layers size={15} color="var(--primary)" /> Similar Historical Precursors (Vector Cosine):
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      {similarReports.map((sim, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            padding: '10px',
+                            borderRadius: '8px',
+                            background: 'var(--surface-elevated)',
+                            border: '1px solid var(--border-subtle)',
+                            fontSize: '0.78rem',
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: '4px',
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontFamily: 'var(--font-mono)',
+                                fontWeight: 700,
+                                color: 'var(--primary-bright)',
+                                fontSize: '0.75rem',
+                              }}
+                            >
+                              #{sim.source_record_id}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                color: 'var(--success)',
+                                fontWeight: 600,
+                                fontFamily: 'var(--font-mono)',
+                              }}
+                            >
+                              {Math.round(sim.similarity * 100)}% Match
+                            </span>
+                          </div>
+                          <p
+                            style={{
+                              margin: 0,
+                              color: 'var(--text-secondary)',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {sim.report_text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+>>>>>>> Stashed changes
               </div>
             </div>
 

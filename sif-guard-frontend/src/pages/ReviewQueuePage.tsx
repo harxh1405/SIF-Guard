@@ -6,7 +6,23 @@ import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
 import { SIFBadge } from '../components/common/SIFBadge';
+<<<<<<< Updated upstream
 import { UserCheck, CheckCircle2, AlertTriangle, Send, X } from 'lucide-react';
+=======
+import { EvidenceHighlighter } from '../components/common/EvidenceHighlighter';
+import { AIExplanationPanel } from '../components/common/AIExplanationPanel';
+import { ToastNotification, type ToastMessage } from '../components/common/ToastNotification';
+import {
+  CheckCircle2,
+  AlertTriangle,
+  Send,
+  X,
+  Check,
+  Sparkles,
+  SlidersHorizontal,
+  Award,
+} from 'lucide-react';
+>>>>>>> Stashed changes
 import type { TabId } from '../components/layout/Navigation';
 
 interface Props {
@@ -27,6 +43,30 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+<<<<<<< Updated upstream
+=======
+  // Toast System state & Daily Progress Counter
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [completedToday, setCompletedToday] = useState<number>(0);
+
+  const addToast = (type: 'success' | 'warning' | 'danger' | 'info', title: string, description?: string) => {
+    const newToast: ToastMessage = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type,
+      title,
+      description,
+    };
+    setToasts((prev) => [...prev, newToast]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
+    }, 4500);
+  };
+
+  const handleDismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+>>>>>>> Stashed changes
   const fetchQueue = () => {
     setLoading(true);
     setError(null);
@@ -53,6 +93,31 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
     setSuccessMsg(null);
   };
 
+<<<<<<< Updated upstream
+=======
+  const handleQuickDecision = (report: SafetyReportRead, label: 'SIF_POTENTIAL' | 'NON_SIF') => {
+    submitReview(report.id, {
+      label,
+      confidence: 0.98,
+      reviewer: reviewerName,
+      comments: `Quick triage action: Classified as ${label}`,
+    })
+      .then(() => {
+        setCompletedToday((prev) => prev + 1);
+        addToast(
+          label === 'SIF_POTENTIAL' ? 'danger' : 'success',
+          `Report #${report.source_record_id} Triaged`,
+          `Recorded decision as ${label === 'SIF_POTENTIAL' ? 'SIF Potential Hazard' : 'Non-SIF Hazard'}`
+        );
+        // Remove from local queue
+        setQueue((prev) => prev.filter((item) => item.id !== report.id));
+      })
+      .catch((err) => {
+        setError(err.message || 'Failed to submit quick review');
+      });
+  };
+
+>>>>>>> Stashed changes
   const handleSubmitFeedback = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReport) return;
@@ -66,11 +131,22 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
     })
       .then(() => {
         setSubmitting(false);
+<<<<<<< Updated upstream
         setSuccessMsg(`Review feedback submitted for Report #${selectedReport.source_record_id}`);
         setTimeout(() => {
           setSelectedReport(null);
           fetchQueue();
         }, 1200);
+=======
+        setCompletedToday((prev) => prev + 1);
+        addToast(
+          'success',
+          `Expert Override Submitted`,
+          `Report #${selectedReport.source_record_id} updated with ${reviewLabel} classification.`
+        );
+        setSelectedReport(null);
+        setQueue((prev) => prev.filter((item) => item.id !== selectedReport.id));
+>>>>>>> Stashed changes
       })
       .catch((err) => {
         setError(err.message || 'Failed to submit review feedback');
@@ -84,6 +160,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
     >
+<<<<<<< Updated upstream
       <div style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', fontWeight: 700, letterSpacing: '-0.02em' }}>
           Human-in-the-Loop Review Queue
@@ -91,6 +168,49 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
           Review ambiguous or low-confidence safety reports to refine SIF precursor classifier accuracy
         </p>
+=======
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h2 className="section-title">
+            Human-in-the-Loop Triage & Review Queue
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            Review ambiguous and borderline incident reports to train and refine the SIF Precursor Intelligence Engine
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div
+            style={{
+              fontSize: '0.78rem',
+              color: 'var(--success)',
+              background: 'rgba(32, 217, 151, 0.12)',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              border: '1px solid rgba(32, 217, 151, 0.25)',
+              fontFamily: 'var(--font-mono)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <Award size={14} /> Triaged Today: <strong style={{ color: 'var(--success)', fontVariantNumeric: 'tabular-nums' }}>{completedToday}</strong>
+          </div>
+
+          <div
+            style={{
+              fontSize: '0.78rem',
+              color: 'var(--text-secondary)',
+              background: 'var(--surface-elevated)',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            Pending: <strong style={{ color: 'var(--primary-bright)', fontVariantNumeric: 'tabular-nums' }}>{queue.length}</strong> items
+          </div>
+        </div>
+>>>>>>> Stashed changes
       </div>
 
       {error && <ErrorBanner message={error} onRetry={fetchQueue} />}
@@ -275,6 +395,8 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ToastNotification toasts={toasts} onDismiss={handleDismissToast} />
     </motion.div>
   );
 };

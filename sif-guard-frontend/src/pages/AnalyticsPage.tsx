@@ -35,6 +35,156 @@ import {
 export const AnalyticsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sites' | 'activities' | 'hazards' | 'barriers' | 'lsr' | 'trends'>('sites');
 
+<<<<<<< Updated upstream
+=======
+type DimensionTab = 'sites' | 'activities' | 'hazards' | 'barriers' | 'lsr' | 'trends';
+type MetricChoice = 'density' | 'sif_count' | 'total_reports';
+
+const CustomRankedTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const density = data.sif_density !== undefined ? (data.sif_density * 100).toFixed(1) : null;
+    const precursors = data.sif_count ?? data.count ?? 0;
+    const total = data.total_reports;
+    const title = data.displayName || data.site || data.activity || data.hazard || data.barrier_failure || data.rule_name;
+
+    const isHighRisk = data.sif_density >= 0.10 || precursors >= 4;
+    const isMediumRisk = data.sif_density > 0 || precursors > 0;
+
+    return (
+      <div
+        style={{
+          background: 'var(--surface-elevated)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          padding: '14px 18px',
+          boxShadow: 'var(--shadow-dropdown)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          minWidth: '220px',
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: '0.92rem',
+            color: 'var(--text-primary)',
+            marginBottom: '10px',
+            borderBottom: '1px solid var(--border-subtle)',
+            paddingBottom: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+          }}
+        >
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
+          {isHighRisk ? (
+            <span
+              style={{
+                fontSize: '0.65rem',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: 'rgba(232, 93, 93, 0.15)',
+                color: 'var(--danger)',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              HIGH RISK
+            </span>
+          ) : isMediumRisk ? (
+            <span
+              style={{
+                fontSize: '0.65rem',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: 'rgba(255, 179, 71, 0.15)',
+                color: 'var(--warning)',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              ELEVATED
+            </span>
+          ) : (
+            <span
+              style={{
+                fontSize: '0.65rem',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: 'rgba(32, 217, 151, 0.15)',
+                color: 'var(--success)',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              NOMINAL
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+            <span>SIF Precursors:</span>
+            <span
+              style={{
+                color: precursors > 0 ? 'var(--danger)' : 'var(--text-primary)',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {precursors}
+            </span>
+          </div>
+
+          {total !== undefined && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>Total Reports:</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                {total}
+              </span>
+            </div>
+          )}
+
+          {density !== null && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', paddingTop: '4px', borderTop: '1px solid var(--border-subtle)' }}>
+              <span>Precursor Density:</span>
+              <span
+                style={{
+                  color: 'var(--primary)',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {density}%
+              </span>
+            </div>
+          )}
+
+          {data.percentage !== undefined && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>Share:</span>
+              <span style={{ color: 'var(--primary)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                {data.percentage.toFixed(1)}%
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
+  const [activeTab, setActiveTab] = useState<DimensionTab>('sites');
+
+  // Analytics Datasets
+>>>>>>> Stashed changes
   const [siteData, setSiteData] = useState<SiteRanking[]>([]);
   const [activityData, setActivityData] = useState<ActivityRanking[]>([]);
   const [hazardData, setHazardData] = useState<HazardRanking[]>([]);

@@ -254,11 +254,30 @@ textarea:focus {
   font-family: var(--font-mono);
 }
 
+@keyframes sifPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(232, 93, 93, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(232, 93, 93, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 93, 93, 0);
+  }
+}
+
 .badge-sif {
+<<<<<<< Updated upstream
   background: var(--accent-sif-bg);
   color: var(--accent-sif-red);
   border: 1px solid var(--accent-sif-bg);
   box-shadow: 0 0 12px var(--accent-sif-bg);
+=======
+  background: rgba(232, 93, 93, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(232, 93, 93, 0.35);
+  animation: sifPulse 2.5s infinite ease-in-out;
+>>>>>>> Stashed changes
 }
 
 .badge-nonsif {
