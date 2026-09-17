@@ -6,7 +6,6 @@ interface EvidenceHighlighterProps {
   energySource?: string | null;
   barrierFailure?: string | null;
   hazard?: string | null;
-  searchQuery?: string;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -60,7 +59,6 @@ export const EvidenceHighlighter: React.FC<EvidenceHighlighterProps> = ({
   energySource,
   barrierFailure,
   hazard,
-  searchQuery,
   className = '',
   style = {},
 }) => {
@@ -68,10 +66,6 @@ export const EvidenceHighlighter: React.FC<EvidenceHighlighterProps> = ({
 
   // Compile keywords list
   const targetPhrases = new Set<string>();
-
-  if (searchQuery && searchQuery.trim().length > 1) {
-    targetPhrases.add(searchQuery.trim().toLowerCase());
-  }
 
   // Add risk factors passed from AI / extraction
   riskFactors.forEach((rf) => {
@@ -115,7 +109,6 @@ export const EvidenceHighlighter: React.FC<EvidenceHighlighterProps> = ({
         const isMatch = sortedPhrases.some((phrase) => phrase === lowerPart || lowerPart.includes(phrase));
 
         if (isMatch) {
-          const isUserQuery = searchQuery && lowerPart.includes(searchQuery.trim().toLowerCase());
           const isCritical =
             lowerPart.includes('without') ||
             lowerPart.includes('no ') ||
@@ -130,20 +123,18 @@ export const EvidenceHighlighter: React.FC<EvidenceHighlighterProps> = ({
             <mark
               key={index}
               style={{
-                backgroundColor: isUserQuery
-                  ? 'rgba(255, 106, 0, 0.25)'
-                  : isCritical
+                backgroundColor: isCritical
                   ? 'rgba(232, 93, 93, 0.18)'
                   : 'rgba(235, 160, 54, 0.18)',
-                color: isUserQuery ? 'var(--primary-bright)' : isCritical ? 'var(--danger)' : 'var(--warning)',
+                color: isCritical ? 'var(--danger)' : 'var(--warning)',
                 padding: '2px 6px',
                 borderRadius: '4px',
                 fontWeight: 600,
-                borderBottom: `2px solid ${isUserQuery ? 'var(--primary)' : isCritical ? 'var(--danger)' : 'var(--warning)'}`,
+                borderBottom: `2px solid ${isCritical ? 'var(--danger)' : 'var(--warning)'}`,
                 margin: '0 1px',
                 fontFamily: 'inherit',
               }}
-              title={isUserQuery ? `Search match: ${part}` : `Evidence token: ${part}`}
+              title={`Evidence token: ${part}`}
             >
               {part}
             </mark>
@@ -155,4 +146,3 @@ export const EvidenceHighlighter: React.FC<EvidenceHighlighterProps> = ({
     </span>
   );
 };
-

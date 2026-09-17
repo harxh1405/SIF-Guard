@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { importReports, analyzeBatch, getJobStatus } from '../api/reports';
 import type { ImportSummary, JobStatus } from '../types/api';
 import { ErrorBanner } from '../components/common/ErrorBanner';
@@ -125,21 +125,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
 
   const handleTriggerBatch = () => {
     setTriggeringBatch(true);
-    setError(null);
-    analyzeBatch(true)
+    analyzeBatch()
       .then((res) => {
         setBatchJobId(res.job_id);
         setTriggeringBatch(false);
-        setJobStatus({
-          job_id: res.job_id,
-          status: 'pending',
-          total: res.total_reports_queued,
-          processed: 0,
-          failed: 0,
-          created_at: new Date().toISOString(),
-          completed_at: null,
-          error_message: null
-        });
       })
       .catch((err) => {
         setError(err.message || 'Failed to trigger batch processing');
@@ -162,70 +151,73 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
         .catch(() => {
           clearInterval(interval);
         });
-    }, 1200);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [batchJobId]);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
     >
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', fontWeight: 700, letterSpacing: '-0.02em' }}>
+        <h2 className="section-title">
           Data Ingestion & Import Center
         </h2>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-          Import OSHA Severe Injury, OSHA Construction, or Oil India Limited (OIL) confidential safety datasets
+          Import OSHA Severe Injury, OSHA Construction, or Oil India Limited (OIL) safety datasets
         </p>
       </div>
 
       {error && <ErrorBanner message={error} />}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px', marginBottom: '24px' }}>
         {/* Upload Form */}
-        <motion.div className="glass-card" style={{ padding: '28px' }} whileHover={{ y: -2 }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <UploadCloud size={20} color="var(--accent-cyan)" /> Import Dataset File
+        <div className="card" style={{ padding: '28px' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+            <UploadCloud size={20} color="var(--primary)" /> Import Dataset File
           </h3>
 
           <form onSubmit={handleImportSubmit}>
             <div style={{ marginBottom: '20px' }}>
-              <label className="micro-label" style={{ display: 'block', marginBottom: '8px' }}>
+              <label className="micro-label" style={{ display: 'block', marginBottom: '10px' }}>
                 Select Source Dataset Type
               </label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer', color: 'var(--text-primary)' }}>
                   <input
                     type="radio"
                     name="source"
                     value="osha_severe"
                     checked={sourceDataset === 'osha_severe'}
                     onChange={(e) => setSourceDataset(e.target.value)}
+                    style={{ accentColor: 'var(--primary)' }}
                   />
-                  <span><strong>OSHA Severe Injury Dataset</strong> (Dataset 1: Final Narrative & Outcomes)</span>
+                  <span><strong>OSHA Severe Injury Dataset</strong> (Final Narrative & Outcomes)</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer', color: 'var(--text-primary)' }}>
                   <input
                     type="radio"
                     name="source"
                     value="osha_construction"
                     checked={sourceDataset === 'osha_construction'}
                     onChange={(e) => setSourceDataset(e.target.value)}
+                    style={{ accentColor: 'var(--primary)' }}
                   />
-                  <span><strong>OSHA Construction Dataset</strong> (Dataset 2: Mechanism & Factors)</span>
+                  <span><strong>OSHA Construction Dataset</strong> (Mechanism & Factors)</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.875rem', cursor: 'pointer', color: 'var(--text-primary)' }}>
                   <input
                     type="radio"
                     name="source"
                     value="oil_hsse"
                     checked={sourceDataset === 'oil_hsse'}
                     onChange={(e) => setSourceDataset(e.target.value)}
+                    style={{ accentColor: 'var(--primary)' }}
                   />
                   <span><strong>OIL HSSE Confidential Data</strong> (UA / UC / Near Miss / Incidents)</span>
                 </label>
@@ -240,25 +232,13 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 style={{
-<<<<<<< Updated upstream
-                  border: isDragging ? '2px dashed var(--accent-cyan)' : '2px dashed var(--border-color)',
+                  border: isDragging ? '2px dashed var(--primary)' : '2px dashed var(--border)',
                   borderRadius: '12px',
                   padding: '28px 16px',
                   textAlign: 'center',
-                  background: isDragging ? 'rgba(0, 141, 218, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                  background: isDragging ? 'rgba(255, 106, 0, 0.08)' : 'var(--surface-elevated)',
                   cursor: 'pointer',
-                  backdropFilter: 'blur(10px)',
-                  transition: 'all 0.2s ease',
-=======
-                  border: isDragging ? '2px dashed var(--primary)' : '2px dashed var(--border)',
-                  borderRadius: '14px',
-                  padding: '32px 20px',
-                  textAlign: 'center',
-                  background: isDragging ? 'rgba(255, 106, 0, 0.12)' : 'var(--surface-elevated)',
-                  boxShadow: isDragging ? '0 0 25px rgba(255, 106, 0, 0.25)' : 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-out',
->>>>>>> Stashed changes
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <input
@@ -269,69 +249,37 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   ref={fileInputRef}
                   id="file-upload-input"
                 />
-<<<<<<< Updated upstream
-                <FileCheck2 size={36} color="var(--accent-cyan)" style={{ margin: '0 auto 10px auto' }} />
+                <FileCheck2 size={36} color="var(--primary)" style={{ margin: '0 auto 10px auto' }} />
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-=======
-                <FileCheck2 size={40} color={isDragging ? 'var(--primary-bright)' : 'var(--primary)'} style={{ margin: '0 auto 12px auto' }} />
-                <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
->>>>>>> Stashed changes
                   {selectedFile ? selectedFile.name : 'Click or Drag & Drop CSV, XLSX, JSON file here'}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                  {selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB selected` : 'Supports enterprise safety callsets up to 100 MB'}
-                </div>
-
-                {/* File Format Format Badges */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '14px' }}>
-                  {['.CSV', '.XLSX', '.JSON', '.JSONL'].map((ext) => (
-                    <span
-                      key={ext}
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        background: 'var(--surface-hover)',
-                        color: 'var(--text-secondary)',
-                        border: '1px solid var(--border-subtle)',
-                        fontFamily: 'var(--font-mono)',
-                      }}
-                    >
-                      {ext}
-                    </span>
-                  ))}
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  {selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB selected` : 'Supports .csv, .xlsx, .json, .jsonl up to 100 MB'}
                 </div>
               </div>
             </div>
 
             {/* Quick Sample Dataset Selection */}
-<<<<<<< Updated upstream
-            <div style={{ marginBottom: '20px', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
+            <div style={{ marginBottom: '20px', padding: '12px', borderRadius: '10px', background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Zap size={13} color="var(--accent-cyan)" /> Quick Demo: Load Sample Datasets
-=======
-            <div style={{ marginBottom: '20px', padding: '14px', borderRadius: '12px', background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Zap size={14} color="var(--primary-bright)" /> Quick Demo: Load Sample Datasets
->>>>>>> Stashed changes
+                <Zap size={13} color="var(--primary-bright)" /> Quick Demo: Load Sample Datasets
               </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => loadSampleDataset('osha')}
                   className="btn btn-secondary"
-                  style={{ fontSize: '0.78rem', padding: '7px 12px', flex: 1, justifyContent: 'center' }}
+                  style={{ fontSize: '0.75rem', padding: '6px 12px', flex: 1, justifyContent: 'center' }}
                 >
-                  <FileSpreadsheet size={14} /> Load OSHA Sample
+                  <FileSpreadsheet size={13} /> Load OSHA Sample
                 </button>
                 <button
                   type="button"
                   onClick={() => loadSampleDataset('oil')}
                   className="btn btn-secondary"
-                  style={{ fontSize: '0.78rem', padding: '7px 12px', flex: 1, justifyContent: 'center' }}
+                  style={{ fontSize: '0.75rem', padding: '6px 12px', flex: 1, justifyContent: 'center' }}
                 >
-                  <FileSpreadsheet size={14} /> Load OIL HSSE Sample
+                  <FileSpreadsheet size={13} /> Load OIL HSSE Sample
                 </button>
               </div>
             </div>
@@ -353,12 +301,12 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               )}
             </button>
           </form>
-        </motion.div>
+        </div>
 
         {/* Import Summary Results */}
-        <motion.div className="glass-card" style={{ padding: '28px' }} whileHover={{ y: -2 }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Database size={20} color="var(--accent-nonsif-green)" /> Ingestion Results
+        <div className="card" style={{ padding: '28px' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+            <Database size={20} color="var(--success)" /> Ingestion Results
           </h3>
 
           {!importResult ? (
@@ -368,29 +316,29 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             </div>
           ) : (
             <div>
-              <div style={{ padding: '12px 16px', borderRadius: '8px', background: 'rgba(0,230,118,0.1)', border: '1px solid rgba(0,230,118,0.3)', color: 'var(--accent-nonsif-green)', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+              <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(32, 217, 151, 0.12)', border: '1px solid var(--success)', color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                 <CheckCircle2 size={18} /> Ingestion Successful!
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <span className="micro-label">Records Received</span>
                   <div className="numeric-display" style={{ fontSize: '1.4rem' }}>{importResult.records_received}</div>
                 </div>
 
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)' }}>
-                  <span className="micro-label" style={{ color: 'var(--accent-cyan)' }}>Imported & Stored</span>
-                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--accent-cyan)' }}>{importResult.records_imported}</div>
+                <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(32, 217, 151, 0.08)', border: '1px solid rgba(32, 217, 151, 0.25)' }}>
+                  <span className="micro-label" style={{ color: 'var(--success)' }}>Imported & Stored</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--success)' }}>{importResult.records_imported}</div>
                 </div>
 
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--accent-uncertain-bg)', border: '1px solid var(--accent-uncertain-amber)' }}>
-                  <span className="micro-label" style={{ color: 'var(--accent-uncertain-amber)' }}>Duplicates Skipped</span>
-                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--accent-uncertain-amber)' }}>{importResult.duplicates}</div>
+                <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(235, 160, 54, 0.08)', border: '1px solid rgba(235, 160, 54, 0.25)' }}>
+                  <span className="micro-label" style={{ color: 'var(--warning)' }}>Duplicates Skipped</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--warning)' }}>{importResult.duplicates}</div>
                 </div>
 
-                <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--accent-sif-bg)', border: '1px solid var(--accent-sif-red)' }}>
-                  <span className="micro-label" style={{ color: 'var(--accent-sif-red)' }}>Invalid Records</span>
-                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--accent-sif-red)' }}>{importResult.invalid}</div>
+                <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(232, 93, 93, 0.08)', border: '1px solid rgba(232, 93, 93, 0.25)' }}>
+                  <span className="micro-label" style={{ color: 'var(--danger)' }}>Invalid Records</span>
+                  <div className="numeric-display" style={{ fontSize: '1.4rem', color: 'var(--danger)' }}>{importResult.invalid}</div>
                 </div>
               </div>
 
@@ -399,84 +347,46 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               </button>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Batch Processing Queue Trigger Card */}
-      <motion.div className="glass-card" style={{ padding: '24px' }} whileHover={{ y: -2 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="card" style={{ padding: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Layers size={20} color="var(--accent-cyan)" /> Asynchronous Batch Analysis Queue
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+              <Layers size={20} color="var(--primary)" /> Asynchronous Batch Analysis Queue
             </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-              Trigger background execution for NLP extraction, SIF scoring, LSR mapping, and precursor fingerprints over all dataset reports.
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px', margin: '4px 0 0 0' }}>
+              Queue background execution to run NLP extraction, SIF scoring, LSR mapping, and precursor fingerprints over all unanalyzed reports.
             </p>
           </div>
-          <button onClick={handleTriggerBatch} disabled={triggeringBatch || (jobStatus?.status === 'running')} className="btn btn-primary" style={{ minWidth: '220px', justifyContent: 'center' }}>
-            {triggeringBatch || (jobStatus?.status === 'running') ? (
-              <>
-                <RefreshCw size={16} className="animate-spin" /> Processing Batch...
-              </>
-            ) : (
-              <>
-                <Play size={16} /> Trigger Batch Processing
-              </>
-            )}
+          <button onClick={handleTriggerBatch} disabled={triggeringBatch} className="btn btn-primary">
+            {triggeringBatch ? <RefreshCw size={16} className="animate-spin" /> : <Play size={16} />}
+            Trigger Batch Processing
           </button>
         </div>
 
         {/* Batch Job Status Monitor */}
         {jobStatus && (
-          <div style={{ marginTop: '20px', padding: '20px', borderRadius: '12px', background: 'var(--accent-primary-bg)', border: '1px solid var(--border-hover)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className={`badge ${jobStatus.status === 'completed' ? 'badge-nonsif' : jobStatus.status === 'failed' ? 'badge-sif' : 'badge-uncertain'}`}>
-                  {jobStatus.status === 'running' && <RefreshCw size={12} className="animate-spin" style={{ marginRight: '6px' }} />}
-                  STATUS: {jobStatus.status.toUpperCase()}
-                </span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-                  Job ID: <strong style={{ color: 'var(--accent-cyan)' }}>{jobStatus.job_id}</strong>
-                </span>
-              </div>
-
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                {jobStatus.total > 0 ? `${((jobStatus.processed / jobStatus.total) * 100).toFixed(0)}% Complete` : '100%'}
+          <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--surface-elevated)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-bright)' }}>
+                Job Status: {jobStatus.status.toUpperCase()}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                Job ID: {jobStatus.job_id}
               </span>
             </div>
 
-            {/* Live Progress Bar */}
-            <div style={{ height: '8px', width: '100%', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden', marginBottom: '14px' }}>
-              <div
-                style={{
-                  height: '100%',
-                  width: `${jobStatus.total > 0 ? Math.min(100, Math.max(5, (jobStatus.processed / jobStatus.total) * 100)) : 100}%`,
-                  background: jobStatus.status === 'completed' ? 'var(--accent-nonsif-green)' : jobStatus.status === 'failed' ? 'var(--accent-sif-red)' : 'linear-gradient(90deg, var(--accent-cyan), var(--accent-primary))',
-                  borderRadius: '4px',
-                  transition: 'width 0.4s ease-in-out'
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '0.85rem' }}>
-              <div style={{ background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <span className="micro-label">Total Queued:</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>{jobStatus.total}</div>
-              </div>
-              <div style={{ background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <span className="micro-label">Successfully Processed:</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{jobStatus.processed}</div>
-              </div>
-              <div style={{ background: 'var(--bg-card)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <span className="micro-label">Failed:</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: jobStatus.failed > 0 ? 'var(--accent-sif-red)' : 'var(--text-muted)' }}>{jobStatus.failed}</div>
-              </div>
+            <div style={{ display: 'flex', gap: '20px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
+              <span>Total Queued: <strong>{jobStatus.total}</strong></span>
+              <span>Processed: <strong style={{ color: 'var(--success)' }}>{jobStatus.processed}</strong></span>
+              <span>Failed: <strong style={{ color: 'var(--danger)' }}>{jobStatus.failed}</strong></span>
             </div>
           </div>
         )}
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
-
-

@@ -1,19 +1,13 @@
 import React from 'react';
 import type { FacilityRiskSummary } from '../../types/facility';
-import { ShieldAlert, ShieldCheck, Flame, Activity, AlertTriangle, Filter } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Flame, Activity, AlertTriangle } from 'lucide-react';
 
 interface FacilityMetricsHUDProps {
   summary: FacilityRiskSummary;
-  activeZoneCount?: number;
-  activeFilter?: string;
-  onSelectFilter?: (filter: string) => void;
+  activeZoneCount: number;
 }
 
-export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
-  summary,
-  activeFilter = 'ALL',
-  onSelectFilter,
-}) => {
+export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({ summary }) => {
   const getRiskColor = (level: string) => {
     switch (level) {
       case 'CRITICAL':
@@ -41,7 +35,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
     >
       {/* Overall Facility Risk Score */}
       <div
-        onClick={() => onSelectFilter && onSelectFilter('ALL')}
         className="glass-card"
         style={{
           padding: '16px 20px',
@@ -51,9 +44,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
           borderLeft: `4px solid ${riskColor}`,
           position: 'relative',
           overflow: 'hidden',
-          cursor: 'pointer',
-          outline: activeFilter === 'ALL' ? `2px solid ${riskColor}` : 'none',
-          transition: 'transform 0.15s ease, outline 0.15s ease',
         }}
       >
         <div
@@ -105,7 +95,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
 
       {/* High-Risk Zones */}
       <div
-        onClick={() => onSelectFilter && onSelectFilter(activeFilter === 'HIGH' ? 'ALL' : 'HIGH')}
         className="glass-card"
         style={{
           padding: '16px 20px',
@@ -113,9 +102,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
           alignItems: 'center',
           gap: '16px',
           borderLeft: '4px solid #FF9500',
-          cursor: 'pointer',
-          outline: activeFilter === 'HIGH' ? '2px solid #FF9500' : 'none',
-          transition: 'transform 0.15s ease, outline 0.15s ease',
         }}
       >
         <div
@@ -135,8 +121,8 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
           <AlertTriangle size={24} />
         </div>
         <div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Elevated Zones {activeFilter === 'HIGH' && <Filter size={10} color="#FF9500" />}
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 600 }}>
+            Elevated Zones
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '2px' }}>
             <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
@@ -149,7 +135,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
 
       {/* SIF Potential Incidents */}
       <div
-        onClick={() => onSelectFilter && onSelectFilter(activeFilter === 'CRITICAL' ? 'ALL' : 'CRITICAL')}
         className="glass-card"
         style={{
           padding: '16px 20px',
@@ -157,9 +142,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
           alignItems: 'center',
           gap: '16px',
           borderLeft: '4px solid #FF3B30',
-          cursor: 'pointer',
-          outline: activeFilter === 'CRITICAL' ? '2px solid #FF3B30' : 'none',
-          transition: 'transform 0.15s ease, outline 0.15s ease',
         }}
       >
         <div
@@ -179,8 +161,8 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
           <ShieldAlert size={24} />
         </div>
         <div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Critical SIF Precursors {activeFilter === 'CRITICAL' && <Filter size={10} color="#FF3B30" />}
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 600 }}>
+            Critical SIF Precursors
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '2px' }}>
             <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
@@ -193,7 +175,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
 
       {/* Total Active Observations */}
       <div
-        onClick={() => onSelectFilter && onSelectFilter('ALL')}
         className="glass-card"
         style={{
           padding: '16px 20px',
@@ -201,9 +182,6 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
           alignItems: 'center',
           gap: '16px',
           borderLeft: '4px solid var(--primary)',
-          cursor: 'pointer',
-          outline: activeFilter === 'ALL' ? '2px solid var(--primary)' : 'none',
-          transition: 'transform 0.15s ease, outline 0.15s ease',
         }}
       >
         <div
@@ -237,4 +215,3 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({
     </div>
   );
 };
-

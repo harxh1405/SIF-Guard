@@ -19,9 +19,6 @@ import {
   Box,
   Map as MapIcon,
   Sparkles,
-  Maximize2,
-  Minimize2,
-  Filter,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -40,8 +37,6 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
   const [isResetting, setIsResetting] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'zones' | 'timeline'>('zones');
   const [simulationToast, setSimulationToast] = useState<{ title: string; zone: string } | null>(null);
-  const [riskFilter, setRiskFilter] = useState<string>('ALL');
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const fetchOverview = useCallback(async (showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -96,6 +91,7 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
       title: res.incident.report_summary || 'New Simulated Precursor',
       zone: res.affected_zone_name,
     });
+    // Clear toast after 6 seconds
     setTimeout(() => {
       setSimulationToast(null);
     }, 6000);
@@ -127,18 +123,8 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
 
   const selectedZone = summary.zones.find((z) => z.id === selectedZoneId) || null;
 
-  // Filtered Zones based on HUD / Toolbar filter selection
-  const filteredZones = summary.zones.filter((zone) => {
-    if (riskFilter === 'ALL') return true;
-    if (riskFilter === 'CRITICAL') return zone.risk_level === 'CRITICAL' || zone.risk_score >= 80;
-    if (riskFilter === 'HIGH') return zone.risk_level === 'HIGH' || zone.risk_score >= 60;
-    if (riskFilter === 'MODERATE') return zone.risk_level === 'MODERATE';
-    if (riskFilter === 'LOW') return zone.risk_level === 'LOW';
-    return true;
-  });
-
-  // Flatten active incidents across filtered zones
-  const allActiveIncidents = filteredZones.flatMap((z) => z.incidents || []);
+  // Flatten active incidents across all zones
+  const allActiveIncidents = summary.zones.flatMap((z) => z.incidents || []);
 
   return (
     <div>
@@ -183,40 +169,6 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
 
         {/* Action Controls & View Mode Toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {/* Risk Level Multi-Filter Selector */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: 'var(--surface)',
-              borderRadius: '8px',
-              padding: '3px 8px',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <Filter size={13} color="var(--primary)" />
-            <select
-              value={riskFilter}
-              onChange={(e) => setRiskFilter(e.target.value)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                outline: 'none',
-              }}
-            >
-              <option value="ALL">Filter: All Risk Levels</option>
-              <option value="CRITICAL">Filter: Critical SIF (80+)</option>
-              <option value="HIGH">Filter: High Risk (60+)</option>
-              <option value="MODERATE">Filter: Moderate Risk</option>
-              <option value="LOW">Filter: Normal / Low</option>
-            </select>
-          </div>
-
           {/* 3D / 2D View Switcher */}
           <div
             style={{
@@ -266,28 +218,6 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
               <MapIcon size={14} /> 2D Map
             </button>
           </div>
-
-          {/* Fullscreen Viewport Button */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--surface-elevated)',
-              border: '1px solid var(--border)',
-              color: isFullscreen ? 'var(--primary)' : 'var(--text-secondary)',
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-            title={isFullscreen ? 'Exit Fullscreen Mode' : 'Enter Fullscreen Mode'}
-          >
-            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            <span>{isFullscreen ? 'Exit' : 'Fullscreen'}</span>
-          </button>
 
           <button
             onClick={() => setIsDemoModalOpen(true)}
@@ -399,34 +329,23 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
         )}
       </AnimatePresence>
 
-      {/* High-Level Executive HUD Metrics with Interactive Filters */}
-      <FacilityMetricsHUD
-        summary={summary}
-        activeZoneCount={filteredZones.length}
-        activeFilter={riskFilter}
-        onSelectFilter={(filter) => setRiskFilter(filter)}
-      />
+      {/* High-Level Executive HUD Metrics */}
+      <FacilityMetricsHUD summary={summary} activeZoneCount={summary.zones.length} />
 
       {/* Main Viewport Grid: 3D Twin / 2D Map on Left, Zone Intelligence on Right */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: isFullscreen ? '1fr' : 'minmax(0, 1.85fr) minmax(340px, 1.15fr)',
+          gridTemplateColumns: 'minmax(0, 1.85fr) minmax(340px, 1.15fr)',
           gap: '20px',
           alignItems: 'start',
-          position: isFullscreen ? 'fixed' : 'relative',
-          inset: isFullscreen ? '0' : 'auto',
-          zIndex: isFullscreen ? 999 : 'auto',
-          backgroundColor: isFullscreen ? 'var(--bg-primary)' : 'transparent',
-          padding: isFullscreen ? '20px' : '0',
-          overflow: isFullscreen ? 'auto' : 'visible',
         }}
       >
         {/* Left: 3D Digital Twin Viewport OR 2D Vector Schematic */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: isFullscreen ? '100%' : 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {viewMode === '3d' ? (
             <RefineryCanvas
-              zones={filteredZones}
+              zones={summary.zones}
               selectedZoneId={selectedZoneId}
               onSelectZone={(zoneId) => setSelectedZoneId(zoneId)}
               hoveredZoneId={hoveredZoneId}
@@ -438,7 +357,7 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
             />
           ) : (
             <FacilitySvg
-              zones={filteredZones}
+              zones={summary.zones}
               selectedZoneId={selectedZoneId}
               onSelectZone={(zoneId) => setSelectedZoneId(zoneId)}
               hoveredZoneId={hoveredZoneId}
@@ -452,72 +371,70 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
           <RiskLegend />
         </div>
 
-        {/* Right: Tabbed Zone Rankings & Real-Time Event Feed (Hidden when Fullscreen) */}
-        {!isFullscreen && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {/* Tabs Switcher */}
-            <div
+        {/* Right: Tabbed Zone Rankings & Real-Time Event Feed */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Tabs Switcher */}
+          <div
+            style={{
+              display: 'flex',
+              backgroundColor: 'var(--surface)',
+              borderRadius: '8px',
+              padding: '4px',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <button
+              onClick={() => setActiveTab('zones')}
               style={{
-                display: 'flex',
-                backgroundColor: 'var(--surface)',
-                borderRadius: '8px',
-                padding: '4px',
-                border: '1px solid var(--border)',
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: activeTab === 'zones' ? 'var(--surface-elevated)' : 'transparent',
+                color: activeTab === 'zones' ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontWeight: activeTab === 'zones' ? 700 : 500,
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
             >
-              <button
-                onClick={() => setActiveTab('zones')}
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: activeTab === 'zones' ? 'var(--surface-elevated)' : 'transparent',
-                  color: activeTab === 'zones' ? 'var(--text-primary)' : 'var(--text-muted)',
-                  fontWeight: activeTab === 'zones' ? 700 : 500,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                Zone SIF Rankings ({filteredZones.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('timeline')}
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: activeTab === 'timeline' ? 'var(--surface-elevated)' : 'transparent',
-                  color: activeTab === 'timeline' ? 'var(--text-primary)' : 'var(--text-muted)',
-                  fontWeight: activeTab === 'timeline' ? 700 : 500,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                Live Telemetry Feed ({summary.recent_timeline.length})
-              </button>
-            </div>
-
-            {activeTab === 'zones' ? (
-              <ZoneStatusList
-                zones={filteredZones}
-                selectedZoneId={selectedZoneId}
-                onSelectZone={(zoneId) => setSelectedZoneId(zoneId)}
-              />
-            ) : (
-              <LiveActivityTimeline
-                timeline={summary.recent_timeline}
-                onSelectZone={(zoneId) => {
-                  setSelectedZoneId(zoneId);
-                  setActiveTab('zones');
-                }}
-              />
-            )}
+              Zone SIF Rankings ({summary.zones.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('timeline')}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: activeTab === 'timeline' ? 'var(--surface-elevated)' : 'transparent',
+                color: activeTab === 'timeline' ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontWeight: activeTab === 'timeline' ? 700 : 500,
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Live Telemetry Feed ({summary.recent_timeline.length})
+            </button>
           </div>
-        )}
+
+          {activeTab === 'zones' ? (
+            <ZoneStatusList
+              zones={summary.zones}
+              selectedZoneId={selectedZoneId}
+              onSelectZone={(zoneId) => setSelectedZoneId(zoneId)}
+            />
+          ) : (
+            <LiveActivityTimeline
+              timeline={summary.recent_timeline}
+              onSelectZone={(zoneId) => {
+                setSelectedZoneId(zoneId);
+                setActiveTab('zones');
+              }}
+            />
+          )}
+        </div>
       </div>
 
       {/* Slide-over Deep Inspection Drawer for Selected Zone */}
@@ -535,4 +452,3 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
     </div>
   );
 };
-
