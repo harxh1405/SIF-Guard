@@ -180,11 +180,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <FileText size={14} color="var(--primary)" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', tracking: '0.05em', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
               Total Reports Analyzed
             </span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', tracking: '-0.02em', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
             {data.total_reports.toLocaleString()}
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Processed narratives</span>
@@ -202,11 +202,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <AlertTriangle size={14} color="var(--danger)" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', tracking: '0.05em', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
               SIF Precursors Identified
             </span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', tracking: '-0.02em', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
             {data.sif_precursor_count.toLocaleString()}
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--danger)', fontWeight: 600 }}>
@@ -226,11 +226,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <TrendingUp size={14} color={data.sif_precursor_density > 0.3 ? 'var(--danger)' : 'var(--success)'} />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', tracking: '0.05em', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
               SIF Precursor Density
             </span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', tracking: '-0.02em', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
             {densityPercent}%
           </div>
           <span style={{ fontSize: '0.72rem', color: data.sif_precursor_density > 0.3 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>
@@ -250,11 +250,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Building2 size={14} color="var(--primary)" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', tracking: '0.05em', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
               Monitored Facilities
             </span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', tracking: '-0.02em', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
             {data.sites}
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Sites / Rigs</span>
@@ -271,11 +271,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Activity size={14} color="var(--primary)" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', tracking: '0.05em', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
               Activities Evaluated
             </span>
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', tracking: '-0.02em', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
             {data.activities}
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Operational Tasks</span>
