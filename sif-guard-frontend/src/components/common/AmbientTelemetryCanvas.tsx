@@ -20,8 +20,17 @@ interface TelemetryStream {
   speed: number;
 }
 
-export const AmbientTelemetryCanvas: React.FC = () => {
+interface AmbientTelemetryCanvasProps {
+  theme?: 'light' | 'dark';
+}
+
+export const AmbientTelemetryCanvas: React.FC<AmbientTelemetryCanvasProps> = ({ theme = 'dark' }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const themeRef = useRef<'light' | 'dark'>(theme);
+
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -109,6 +118,8 @@ export const AmbientTelemetryCanvas: React.FC = () => {
 
       ctx.clearRect(0, 0, width, height);
 
+      const isLight = themeRef.current === 'light';
+
       // 1. Draw subtle curved telemetry streams
       streams.forEach((stream) => {
         stream.progress += stream.speed;
@@ -118,7 +129,7 @@ export const AmbientTelemetryCanvas: React.FC = () => {
         ctx.beginPath();
         ctx.moveTo(stream.p0.x, stream.p0.y);
         ctx.quadraticCurveTo(stream.p1.x, stream.p1.y, stream.p2.x, stream.p2.y);
-        ctx.strokeStyle = 'rgba(255, 106, 0, 0.04)';
+        ctx.strokeStyle = isLight ? 'rgba(217, 91, 11, 0.03)' : 'rgba(255, 106, 0, 0.04)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -129,9 +140,9 @@ export const AmbientTelemetryCanvas: React.FC = () => {
 
         ctx.beginPath();
         ctx.arc(qx, qy, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 106, 0, 0.4)';
-        ctx.shadowColor = '#FF6A00';
-        ctx.shadowBlur = 6;
+        ctx.fillStyle = isLight ? 'rgba(217, 91, 11, 0.35)' : 'rgba(255, 106, 0, 0.4)';
+        ctx.shadowColor = isLight ? '#E65F00' : '#FF6A00';
+        ctx.shadowBlur = isLight ? 4 : 6;
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -162,9 +173,15 @@ export const AmbientTelemetryCanvas: React.FC = () => {
         // Render point
         ctx.beginPath();
         ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.isOrange
-          ? `rgba(255, 106, 0, ${alpha * 1.2})`
-          : `rgba(179, 161, 148, ${alpha})`;
+        if (isLight) {
+          ctx.fillStyle = p.isOrange
+            ? `rgba(217, 91, 11, ${alpha * 0.75})`
+            : `rgba(168, 150, 136, ${alpha * 0.45})`;
+        } else {
+          ctx.fillStyle = p.isOrange
+            ? `rgba(255, 106, 0, ${alpha * 1.2})`
+            : `rgba(179, 161, 148, ${alpha})`;
+        }
         ctx.fill();
 
         // Connect with nearby particles if distance < 110px
@@ -177,13 +194,19 @@ export const AmbientTelemetryCanvas: React.FC = () => {
           if (distSq < 12000) {
             // ~110px
             const dist = Math.sqrt(distSq);
-            const lineAlpha = (1 - dist / 110) * 0.07;
+            const lineAlpha = (1 - dist / 110) * (isLight ? 0.045 : 0.07);
             ctx.beginPath();
             ctx.moveTo(drawX, drawY);
             ctx.lineTo(p2.x + mouseNormX * (p2.radius * 0.4), p2.y + mouseNormY * (p2.radius * 0.4));
-            ctx.strokeStyle = p.isOrange || p2.isOrange
-              ? `rgba(255, 106, 0, ${lineAlpha * 1.5})`
-              : `rgba(82, 67, 56, ${lineAlpha})`;
+            if (isLight) {
+              ctx.strokeStyle = p.isOrange || p2.isOrange
+                ? `rgba(217, 91, 11, ${lineAlpha * 1.1})`
+                : `rgba(195, 180, 168, ${lineAlpha})`;
+            } else {
+              ctx.strokeStyle = p.isOrange || p2.isOrange
+                ? `rgba(255, 106, 0, ${lineAlpha * 1.5})`
+                : `rgba(82, 67, 56, ${lineAlpha})`;
+            }
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }

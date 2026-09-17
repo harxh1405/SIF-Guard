@@ -32,7 +32,11 @@ function AppContent() {
   const [showAuth, setShowAuth] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    return (localStorage.getItem('sif_guard_theme') as 'dark' | 'light') || 'dark';
+    return (
+      (localStorage.getItem('sifguard-theme') as 'dark' | 'light') ||
+      (localStorage.getItem('sif_guard_theme') as 'dark' | 'light') ||
+      'dark'
+    );
   });
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [shortcutsOpen, setShortcutsOpen] = useState<boolean>(false);
@@ -40,6 +44,7 @@ function AppContent() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sifguard-theme', theme);
     localStorage.setItem('sif_guard_theme', theme);
   }, [theme]);
 
@@ -135,7 +140,13 @@ function AppContent() {
     if (showAuth) {
       return <AuthPage onBack={() => setShowAuth(false)} />;
     }
-    return <LandingPage onEnterPlatform={() => setShowAuth(true)} />;
+    return (
+      <LandingPage
+        onEnterPlatform={() => setShowAuth(true)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    );
   }
 
   // Authenticated: Show full existing SIF-Guard Application

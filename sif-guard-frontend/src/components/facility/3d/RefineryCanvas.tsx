@@ -18,59 +18,8 @@ import {
   HelpCircle,
   X,
   MapPin,
-  Zap,
-  Lock,
-  Flame,
 } from 'lucide-react';
 
-interface ProjectedSignal {
-  id: string;
-  code: string;
-  name: string;
-  rule: string;
-  worldPos: [number, number, number];
-  color: string;
-  icon: React.ElementType;
-}
-
-const PROJECTED_SIGNALS: ProjectedSignal[] = [
-  {
-    id: 'pump-station',
-    code: 'Z-02',
-    name: 'Pump Station',
-    rule: 'Energy Isolation',
-    worldPos: [0, 8.5, -25],
-    color: '#FF6A00',
-    icon: Zap,
-  },
-  {
-    id: 'pipeline-corridor',
-    code: 'Z-04',
-    name: 'Pipeline Corridor',
-    rule: 'Line of Fire',
-    worldPos: [0, 7.5, 2],
-    color: '#FF8A1F',
-    icon: AlertTriangle,
-  },
-  {
-    id: 'tank-farm',
-    code: 'Z-03',
-    name: 'Storage Bund',
-    rule: 'Confined Space',
-    worldPos: [35, 13.0, -25],
-    color: '#FF9500',
-    icon: Lock,
-  },
-  {
-    id: 'maintenance-area',
-    code: 'Z-06',
-    name: 'Maintenance Skid',
-    rule: 'Hot Work Permit',
-    worldPos: [0, 10.0, 28],
-    color: '#E05600',
-    icon: Flame,
-  },
-];
 
 interface RefineryCanvasProps {
   zones: FacilityZone[];
@@ -360,7 +309,6 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     // 8. Animation & Render Loop
     let animationFrameId: number;
     const startRenderTime = performance.now();
-    const tempProjVec = new THREE.Vector3();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -418,35 +366,6 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         });
       });
 
-      // Update 3D Projected Safety Signals in Real Time
-      if (minimalOverlay && cameraRef.current && containerRef.current) {
-        const w = containerRef.current.clientWidth;
-        const h = containerRef.current.clientHeight;
-
-        for (let i = 0; i < PROJECTED_SIGNALS.length; i++) {
-          const sig = PROJECTED_SIGNALS[i];
-          const el = document.getElementById(`3d-pin-${sig.id}`);
-          if (!el) continue;
-
-          tempProjVec.set(...sig.worldPos);
-          tempProjVec.project(cameraRef.current);
-
-          // If in front of camera (tempProjVec.z < 1)
-          if (tempProjVec.z < 1) {
-            const screenX = ((tempProjVec.x + 1) / 2) * w;
-            const screenY = ((-tempProjVec.y + 1) / 2) * h;
-
-            if (screenX >= 20 && screenX <= w - 20 && screenY >= 20 && screenY <= h - 20) {
-              el.style.display = 'flex';
-              el.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -100%)`;
-              el.style.opacity = '1';
-              continue;
-            }
-          }
-          el.style.opacity = '0';
-          el.style.display = 'none';
-        }
-      }
 
       controls.update();
       renderer.render(scene, camera);
@@ -491,23 +410,23 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     }
 
     if (ambientLightRef.current) {
-      ambientLightRef.current.intensity = isLight ? 1.3 : 0.6;
+      ambientLightRef.current.intensity = isLight ? 1.15 : 0.75;
     }
     if (hemiLightRef.current) {
       hemiLightRef.current.color.setHex(isLight ? 0xe0f2fe : 0xffaa55);
       hemiLightRef.current.groundColor.setHex(isLight ? 0x94a3b8 : 0x110c08);
-      hemiLightRef.current.intensity = isLight ? 0.9 : 0.4;
+      hemiLightRef.current.intensity = isLight ? 0.85 : 0.7;
     }
     if (dirLight1Ref.current) {
       dirLight1Ref.current.color.setHex(isLight ? 0xfffbeb : 0xffeedd);
-      dirLight1Ref.current.intensity = isLight ? 1.8 : 1.4;
+      dirLight1Ref.current.intensity = isLight ? 1.6 : 1.4;
     }
     if (dirLight2Ref.current) {
       dirLight2Ref.current.color.setHex(isLight ? 0x93c5fd : 0x446688);
-      dirLight2Ref.current.intensity = isLight ? 0.6 : 0.5;
+      dirLight2Ref.current.intensity = isLight ? 0.7 : 0.5;
     }
     if (rendererRef.current) {
-      rendererRef.current.toneMappingExposure = isLight ? 1.15 : 1.0;
+      rendererRef.current.toneMappingExposure = isLight ? 1.2 : 1.32;
     }
 
     // Rebuild structures with updated theme materials
@@ -1178,11 +1097,11 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 gap: '8px',
                 padding: '6px 14px',
                 borderRadius: '9999px',
-                backgroundColor: 'rgba(11, 8, 6, 0.78)',
-                border: '1px solid rgba(255, 106, 0, 0.28)',
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.88)' : 'rgba(11, 8, 6, 0.78)',
+                border: isLight ? '1px solid rgba(226, 217, 207, 0.9)' : '1px solid rgba(255, 106, 0, 0.28)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+                boxShadow: isLight ? '0 4px 16px rgba(0, 0, 0, 0.06)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
                 pointerEvents: 'auto',
               }}
             >
@@ -1200,7 +1119,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                   fontSize: '0.72rem',
                   fontWeight: 700,
                   fontFamily: 'monospace',
-                  color: '#F5EFEB',
+                  color: isLight ? '#1A1613' : '#F5EFEB',
                   letterSpacing: '0.04em',
                 }}
               >
@@ -1210,7 +1129,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 style={{
                   fontSize: '0.66rem',
                   fontFamily: 'monospace',
-                  color: '#FF8A1F',
+                  color: isLight ? '#E65F00' : '#FF8A1F',
                   fontWeight: 600,
                 }}
               >
@@ -1228,88 +1147,33 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 gap: '6px',
                 padding: '6px 12px',
                 borderRadius: '8px',
-                backgroundColor: 'rgba(18, 13, 9, 0.85)',
-                border: '1px solid rgba(51, 37, 28, 0.85)',
-                color: '#B3A194',
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 13, 9, 0.85)',
+                border: isLight ? '1px solid rgba(226, 217, 207, 0.9)' : '1px solid rgba(51, 37, 28, 0.85)',
+                color: isLight ? '#5C5248' : '#B3A194',
                 fontSize: '0.72rem',
                 fontWeight: 600,
                 fontFamily: 'monospace',
                 cursor: 'pointer',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+                boxShadow: isLight ? '0 4px 16px rgba(0, 0, 0, 0.06)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
                 transition: 'all 0.15s ease',
                 pointerEvents: 'auto',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.color = isLight ? '#1A1613' : '#FFFFFF';
                 e.currentTarget.style.borderColor = '#FF6A00';
-                e.currentTarget.style.backgroundColor = 'rgba(255, 106, 0, 0.15)';
+                e.currentTarget.style.backgroundColor = isLight ? '#FFFFFF' : 'rgba(255, 106, 0, 0.15)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#B3A194';
-                e.currentTarget.style.borderColor = 'rgba(51, 37, 28, 0.85)';
-                e.currentTarget.style.backgroundColor = 'rgba(18, 13, 9, 0.85)';
+                e.currentTarget.style.color = isLight ? '#5C5248' : '#B3A194';
+                e.currentTarget.style.borderColor = isLight ? 'rgba(226, 217, 207, 0.9)' : 'rgba(51, 37, 28, 0.85)';
+                e.currentTarget.style.backgroundColor = isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 13, 9, 0.85)';
               }}
             >
               <RotateCcw size={12} />
               <span>RESET VIEW</span>
             </button>
-          </div>
-
-          {/* 3D Projected Safety Signals Container */}
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
-            {PROJECTED_SIGNALS.map((sig) => {
-              const isSelected = selectedZoneId === sig.id;
-              const Icon = sig.icon;
-              return (
-                <div
-                  key={sig.id}
-                  id={`3d-pin-${sig.id}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectZone(sig.id);
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    display: 'none',
-                    alignItems: 'center',
-                    gap: '7px',
-                    padding: '6px 11px',
-                    borderRadius: '8px',
-                    backgroundColor: isSelected ? 'rgba(255, 106, 0, 0.28)' : 'rgba(18, 13, 9, 0.88)',
-                    border: isSelected ? '1px solid #FF6A00' : '1px solid rgba(51, 37, 28, 0.85)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.65)',
-                    cursor: 'pointer',
-                    pointerEvents: 'auto',
-                    userSelect: 'none',
-                    whiteSpace: 'nowrap',
-                    transition: 'background-color 0.2s, border-color 0.2s',
-                  }}
-                >
-                  <Icon size={12} color={sig.color} />
-                  <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#F5EFEB' }}>
-                    {sig.code} {sig.name}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '0.64rem',
-                      color: '#FF8A1F',
-                      fontFamily: 'monospace',
-                      padding: '1px 5px',
-                      borderRadius: '4px',
-                      backgroundColor: 'rgba(255, 106, 0, 0.12)',
-                    }}
-                  >
-                    {sig.rule}
-                  </span>
-                </div>
-              );
-            })}
           </div>
         </>
       )}

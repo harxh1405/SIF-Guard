@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   ShieldAlert,
+  Sun,
+  Moon,
   ArrowRight,
   Zap,
   Lock,
@@ -16,6 +18,8 @@ import type { FacilityZone } from '../types/facility';
 
 interface LandingPageProps {
   onEnterPlatform: () => void;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
 // Fallback facility zones derived from 3D zone configurations
@@ -143,7 +147,31 @@ const LSR_RULES_DATA = [
   },
 ];
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onEnterPlatform,
+  theme = 'dark',
+  onToggleTheme,
+}) => {
+  const isLight = theme === 'light';
+
+  // SIF-Guard Industrial Theme Palette
+  const t = {
+    bg: isLight ? '#F8F6F2' : '#0B0806',
+    bgHeader: isLight ? 'rgba(248, 246, 242, 0.92)' : 'rgba(11, 8, 6, 0.88)',
+    bgCard: isLight ? '#FFFFFF' : 'rgba(23, 17, 13, 0.75)',
+    bgCardSolid: isLight ? '#FFFFFF' : 'rgba(23, 17, 13, 0.9)',
+    bgCardSubtle: isLight ? '#F3EDE6' : 'rgba(11, 8, 6, 0.85)',
+    bgElevated: isLight ? '#F5F0E8' : 'rgba(33, 23, 16, 0.9)',
+    border: isLight ? 'rgba(226, 217, 207, 0.9)' : 'rgba(51, 37, 28, 0.8)',
+    borderSubtle: isLight ? 'rgba(226, 217, 207, 0.6)' : 'rgba(51, 37, 28, 0.6)',
+    textPrimary: isLight ? '#1A1613' : '#F5EFEB',
+    textSecondary: isLight ? '#5C5248' : '#B3A194',
+    textMuted: isLight ? '#8C7F73' : '#736154',
+    accent: '#FF6A00',
+    accentHover: '#FF7A00',
+    accentBright: isLight ? '#E65F00' : '#FF8A1F',
+    cardShadow: isLight ? '0 4px 20px rgba(35, 25, 15, 0.05)' : 'none',
+  };
   const [zones, setZones] = useState<FacilityZone[]>(FALLBACK_ZONES);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [hoveredZoneId, setHoveredZoneId] = useState<string | null>(null);
@@ -212,8 +240,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
   return (
     <div
       style={{
-        backgroundColor: '#0B0806',
-        color: '#F5EFEB',
+        backgroundColor: t.bg,
+        color: t.textPrimary,
+        transition: 'background-color 0.25s ease, color 0.25s ease',
         minHeight: '100vh',
         width: '100%',
         overflowX: 'hidden',
@@ -222,7 +251,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
       }}
     >
       {/* Background Ambient Telemetry Canvas */}
-      <AmbientTelemetryCanvas />
+      <AmbientTelemetryCanvas theme={theme} />
       {/* =============================================================
           1. MINIMAL INDUSTRIAL NAVBAR
           ============================================================= */}
@@ -238,10 +267,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           alignItems: 'center',
           justifyContent: 'space-between',
           transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          backgroundColor: isScrolled ? 'rgba(11, 8, 6, 0.88)' : 'transparent',
+          backgroundColor: isScrolled ? t.bgHeader : 'transparent',
           backdropFilter: isScrolled ? 'blur(16px)' : 'none',
           WebkitBackdropFilter: isScrolled ? 'blur(16px)' : 'none',
-          borderBottom: isScrolled ? '1px solid rgba(51, 37, 28, 0.7)' : '1px solid transparent',
+          borderBottom: isScrolled ? ('1px solid ' + t.border) : '1px solid transparent',
         }}
       >
         {/* Brand */}
@@ -267,7 +296,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 fontSize: '1.1rem',
                 fontWeight: 800,
                 letterSpacing: '-0.02em',
-                color: '#F5EFEB',
+                color: t.textPrimary,
               }}
             >
               SIF-GUARD
@@ -278,7 +307,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 padding: '2px 8px',
                 borderRadius: '4px',
                 backgroundColor: 'rgba(255, 106, 0, 0.08)',
-                color: '#FF8A1F',
+                color: t.accentBright,
                 fontWeight: 700,
                 letterSpacing: '0.06em',
                 border: '1px solid rgba(255, 106, 0, 0.22)',
@@ -311,52 +340,85 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#B3A194',
+                color: t.textSecondary,
                 fontSize: '0.85rem',
                 fontWeight: 500,
                 cursor: 'pointer',
                 transition: 'color 0.15s ease',
                 padding: '4px 0',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#F5EFEB')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#B3A194')}
+              onMouseEnter={(e) => (e.currentTarget.style.color = t.textPrimary)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = t.textSecondary)}
             >
               {item.label}
             </button>
           ))}
         </nav>
 
-        {/* Enter Platform Button */}
-        <button
-          onClick={onEnterPlatform}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '9px 18px',
-            borderRadius: '9999px',
-            backgroundColor: 'rgba(255, 106, 0, 0.12)',
-            border: '1px solid rgba(255, 106, 0, 0.35)',
-            color: '#FF8A1F',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#FF6A00';
-            e.currentTarget.style.color = '#FFFFFF';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 106, 0, 0.12)';
-            e.currentTarget.style.color = '#FF8A1F';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          <span>Enter Platform</span>
-          <span style={{ fontSize: '0.9rem' }}>↗</span>
-        </button>
+                {/* Navbar Actions: Theme Toggle & Enter Platform */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={onToggleTheme}
+            title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            aria-label="Toggle light or dark theme"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '9px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid ' + t.border,
+              color: isLight ? '#5C5248' : '#FF8A1F',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#FF6A00';
+              e.currentTarget.style.color = '#FF6A00';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = t.border;
+              e.currentTarget.style.color = isLight ? '#5C5248' : '#FF8A1F';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            {isLight ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+
+          <button
+            onClick={onEnterPlatform}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 18px',
+              borderRadius: '9999px',
+              backgroundColor: 'rgba(255, 106, 0, 0.12)',
+              border: '1px solid rgba(255, 106, 0, 0.35)',
+              color: t.accentBright,
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#FF6A00';
+              e.currentTarget.style.color = '#FFFFFF';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 106, 0, 0.12)';
+              e.currentTarget.style.color = t.accentBright;
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <span>Enter Platform</span>
+            <span style={{ fontSize: '0.9rem' }}>↗</span>
+          </button>
+        </div>
       </header>
 
       {/* =============================================================
@@ -440,7 +502,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               <br />
               <span
                 style={{
-                  background: 'linear-gradient(180deg, #FFFFFF 20%, #B3A194 100%)',
+                  background: isLight ? 'linear-gradient(180deg, #1A1613 20%, #4A3E34 100%)' : 'linear-gradient(180deg, #FFFFFF 20%, #B3A194 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
@@ -513,9 +575,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   gap: '8px',
                   padding: '13px 26px',
                   borderRadius: '10px',
-                  backgroundColor: 'rgba(23, 17, 13, 0.8)',
-                  border: '1px solid rgba(51, 37, 28, 0.9)',
-                  color: '#F5EFEB',
+                  backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(23, 17, 13, 0.8)',
+                  border: '1px solid ' + t.border,
+                  color: t.textPrimary,
                   fontSize: '0.95rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -528,8 +590,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(51, 37, 28, 0.9)';
-                  e.currentTarget.style.backgroundColor = 'rgba(23, 17, 13, 0.8)';
+                  e.currentTarget.style.borderColor = t.border;
+                  e.currentTarget.style.backgroundColor = isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(23, 17, 13, 0.8)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
@@ -545,7 +607,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '0.76rem',
-                color: '#736154',
+                color: t.textMuted,
                 fontFamily: 'monospace',
               }}
             >
@@ -594,7 +656,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 hoveredZoneId={hoveredZoneId}
                 onHoverZone={(id) => setHoveredZoneId(id)}
                 activeIncidents={[]}
-                theme="dark"
+                theme={theme}
                 minimalOverlay={true}
                 transparentBg={true}
               />
@@ -682,7 +744,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             fontWeight: 800,
             lineHeight: 1.15,
             letterSpacing: '-0.03em',
-            color: '#F5EFEB',
+            color: t.textPrimary,
             margin: '0 0 10px 0',
           }}
         >
@@ -705,7 +767,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
         <p
           style={{
             fontSize: '1.05rem',
-            color: '#B3A194',
+            color: t.textSecondary,
             maxWidth: '680px',
             margin: '0 auto 48px auto',
             lineHeight: 1.6,
@@ -754,8 +816,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             <div
               key={card.id}
               style={{
-                backgroundColor: 'rgba(23, 17, 13, 0.75)',
-                border: '1px solid rgba(51, 37, 28, 0.8)',
+                backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
+                boxShadow: t.cardShadow,
                 borderRadius: '14px',
                 padding: '22px',
                 transition: 'all 0.2s ease',
@@ -765,7 +828,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 e.currentTarget.style.transform = 'translateY(-2px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(51, 37, 28, 0.8)';
+                e.currentTarget.style.borderColor = t.border;
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -777,7 +840,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   marginBottom: '10px',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', color: '#736154', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '0.72rem', color: t.textMuted, fontFamily: 'monospace' }}>
                   {card.id} · {card.type}
                 </span>
                 <span
@@ -794,7 +857,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   {card.flag}
                 </span>
               </div>
-              <p style={{ fontSize: '0.88rem', color: '#F5EFEB', lineHeight: 1.5, margin: '0 0 14px 0' }}>
+              <p style={{ fontSize: '0.88rem', color: t.textPrimary, lineHeight: 1.5, margin: '0 0 14px 0' }}>
                 &ldquo;{card.narrative}&rdquo;
               </p>
               <div
@@ -803,11 +866,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   paddingTop: '12px',
-                  borderTop: '1px solid rgba(51, 37, 28, 0.6)',
+                  borderTop: '1px solid ' + t.borderSubtle,
                   fontSize: '0.75rem',
                 }}
               >
-                <span style={{ color: '#B3A194' }}>{card.zone}</span>
+                <span style={{ color: t.textSecondary }}>{card.zone}</span>
                 <span style={{ color: '#FF6A00', fontWeight: 600 }}>{card.signal}</span>
               </div>
             </div>
@@ -848,7 +911,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '8px 0 12px 0', color: '#FFFFFF' }}>
               From Unstructured Narrative to Dense Precursor Signals
             </h2>
-            <p style={{ color: '#B3A194', maxWidth: '640px', margin: '0 auto', fontSize: '0.95rem' }}>
+            <p style={{ color: t.textSecondary, maxWidth: '640px', margin: '0 auto', fontSize: '0.95rem' }}>
               How SIF-Guard parses oilfield acronyms, evaluates energy potential, and maps barrier integrity.
             </p>
           </div>
@@ -887,10 +950,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               >
                 01
               </div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 8px 0', color: '#F5EFEB' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 8px 0', color: t.textPrimary }}>
                 Acronym &amp; Terminology Expansion
               </h3>
-              <p style={{ fontSize: '0.84rem', color: '#B3A194', lineHeight: 1.5, margin: 0 }}>
+              <p style={{ fontSize: '0.84rem', color: t.textSecondary, lineHeight: 1.5, margin: 0 }}>
                 Domain-specific terminology cleaner automatically resolves oilfield acronyms (<code style={{ color: '#FF8A1F' }}>LOTO</code>, <code style={{ color: '#FF8A1F' }}>PTW</code>, <code style={{ color: '#FF8A1F' }}>H2S</code>, <code style={{ color: '#FF8A1F' }}>SIMOPS</code>) ensuring standard semantic representation.
               </p>
             </div>
@@ -924,7 +987,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 8px 0', color: '#F5EFEB' }}>
                 Dense Semantic Embeddings
               </h3>
-              <p style={{ fontSize: '0.84rem', color: '#B3A194', lineHeight: 1.5, margin: 0 }}>
+              <p style={{ fontSize: '0.84rem', color: t.textSecondary, lineHeight: 1.5, margin: 0 }}>
                 Generates 768-dimensional vector representations via <code style={{ color: '#FF8A1F' }}>BAAI/bge-base-en-v1.5</code> combined with 16 engineered domain indicator flags for energy exposure and consequence.
               </p>
             </div>
@@ -958,7 +1021,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 8px 0', color: '#F5EFEB' }}>
                 Calibrated XGBoost Classification
               </h3>
-              <p style={{ fontSize: '0.84rem', color: '#B3A194', lineHeight: 1.5, margin: 0 }}>
+              <p style={{ fontSize: '0.84rem', color: t.textSecondary, lineHeight: 1.5, margin: 0 }}>
                 Classifier evaluates SIF potential (<code style={{ color: '#FF6A00' }}>SIF_POTENTIAL</code>, <code style={{ color: '#B3A194' }}>NON_SIF</code>, <code style={{ color: '#FF8A1F' }}>UNCERTAIN</code>) alongside probability scores and specific barrier failure explanations.
               </p>
             </div>
@@ -992,7 +1055,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <h2 style={{ fontSize: '2.4rem', fontWeight: 800, margin: '8px 0 14px 0', color: '#FFFFFF' }}>
             How SIF-Guard Operates
           </h2>
-          <p style={{ color: '#B3A194', maxWidth: '640px', margin: '0 auto', fontSize: '1rem' }}>
+          <p style={{ color: t.textSecondary, maxWidth: '640px', margin: '0 auto', fontSize: '1rem' }}>
             Six coordinated intelligence stages transforming raw field notes into preventive operational decisions.
           </p>
         </div>
@@ -1039,8 +1102,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             <div
               key={stage.step}
               style={{
-                backgroundColor: 'rgba(23, 17, 13, 0.75)',
-                border: '1px solid rgba(51, 37, 28, 0.8)',
+                backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
+                boxShadow: t.cardShadow,
                 borderRadius: '14px',
                 padding: '24px',
                 position: 'relative',
@@ -1061,7 +1125,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', margin: '0 0 10px 0' }}>
                 {stage.title}
               </h3>
-              <p style={{ fontSize: '0.85rem', color: '#B3A194', lineHeight: 1.55, margin: 0 }}>
+              <p style={{ fontSize: '0.85rem', color: t.textSecondary, lineHeight: 1.55, margin: 0 }}>
                 {stage.desc}
               </p>
             </div>
@@ -1095,7 +1159,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <h2 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '8px 0 12px 0', color: '#FFFFFF' }}>
             Live Precursor Extraction
           </h2>
-          <p style={{ color: '#B3A194', maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
+          <p style={{ color: t.textSecondary, maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
             Examining how an uninjured maintenance event is instantly analyzed by the SIF-Guard engine.
           </p>
         </div>
@@ -1114,8 +1178,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           {/* Raw Report Box */}
           <div
             style={{
-              backgroundColor: 'rgba(11, 8, 6, 0.85)',
-              border: '1px solid rgba(51, 37, 28, 0.7)',
+              backgroundColor: t.bgCardSubtle,
+              border: '1px solid ' + t.borderSubtle,
               borderRadius: '12px',
               padding: '24px',
               display: 'flex',
@@ -1132,7 +1196,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   marginBottom: '16px',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', fontFamily: 'monospace', color: '#736154' }}>
+                <span style={{ fontSize: '0.72rem', fontFamily: 'monospace', color: t.textMuted }}>
                   RAW INCIDENT NARRATIVE #OIL-2026-881
                 </span>
                 <span style={{ fontSize: '0.68rem', color: '#FF8A1F', fontWeight: 700 }}>
@@ -1159,10 +1223,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 fontSize: '0.75rem',
                 color: '#736154',
                 paddingTop: '14px',
-                borderTop: '1px solid rgba(51, 37, 28, 0.6)',
+                borderTop: '1px solid ' + t.borderSubtle,
               }}
             >
-              Outcome Recorded in Field: <strong style={{ color: '#F5EFEB' }}>No Injury (Near Miss)</strong>
+              Outcome Recorded in Field: <strong style={{ color: t.textPrimary }}>No Injury (Near Miss)</strong>
             </div>
           </div>
 
@@ -1201,7 +1265,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#FF6A00', fontFamily: 'monospace' }}>
                   92%
                 </div>
-                <div style={{ fontSize: '0.65rem', color: '#B3A194' }}>CONFIDENCE: 0.89</div>
+                <div style={{ fontSize: '0.65rem', color: t.textSecondary }}>CONFIDENCE: 0.89</div>
               </div>
             </div>
 
@@ -1237,13 +1301,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   border: '1px solid rgba(51, 37, 28, 0.7)',
                 }}
               >
-                <div style={{ fontSize: '0.66rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+                <div style={{ fontSize: '0.66rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                   {item.label}
                 </div>
-                <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#F5EFEB', margin: '2px 0' }}>
+                <div style={{ fontSize: '0.92rem', fontWeight: 700, color: t.textPrimary, margin: '2px 0' }}>
                   {item.val}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#B3A194' }}>{item.detail}</div>
+                <div style={{ fontSize: '0.78rem', color: t.textSecondary }}>{item.detail}</div>
               </div>
             ))}
           </div>
@@ -1277,7 +1341,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             <div style={{ position: 'relative', width: '220px', height: '220px' }}>
               <svg width="220" height="220" viewBox="0 0 220 220">
                 {/* Background Ring */}
-                <circle cx="110" cy="110" r="88" stroke="rgba(51, 37, 28, 0.6)" strokeWidth="12" fill="none" />
+                <circle cx="110" cy="110" r="88" stroke={isLight ? 'rgba(226, 217, 207, 0.7)' : 'rgba(51, 37, 28, 0.6)'} strokeWidth="12" fill="none" />
                 {/* Active Indicator Ring */}
                 <circle
                   cx="110"
@@ -1308,12 +1372,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 <span style={{ fontSize: '0.72rem', color: '#FF8A1F', fontWeight: 700, letterSpacing: '0.05em' }}>
                   SIF POTENTIAL
                 </span>
-                <span style={{ fontSize: '0.68rem', color: '#736154', marginTop: '2px' }}>
+                <span style={{ fontSize: '0.68rem', color: t.textMuted, marginTop: '2px' }}>
                   HIGH RISK SCORE
                 </span>
               </div>
             </div>
-            <div style={{ marginTop: '16px', fontSize: '0.85rem', color: '#B3A194' }}>
+            <div style={{ marginTop: '16px', fontSize: '0.85rem', color: t.textSecondary }}>
               Calibrated Predictive Precursor Likelihood
             </div>
           </div>
@@ -1322,76 +1386,76 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div
               style={{
-                backgroundColor: 'rgba(23, 17, 13, 0.85)',
-                border: '1px solid rgba(51, 37, 28, 0.8)',
+                backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
                 borderRadius: '12px',
                 padding: '20px',
               }}
             >
-              <div style={{ fontSize: '0.7rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                 PRECURSOR SIGNALS
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FF6A00', margin: '4px 0' }}>
                 3 Active
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#B3A194' }}>
+              <div style={{ fontSize: '0.78rem', color: t.textSecondary }}>
                 Uncontrolled energy, line break, unbolted guard.
               </div>
             </div>
 
             <div
               style={{
-                backgroundColor: 'rgba(23, 17, 13, 0.85)',
-                border: '1px solid rgba(51, 37, 28, 0.8)',
+                backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
                 borderRadius: '12px',
                 padding: '20px',
               }}
             >
-              <div style={{ fontSize: '0.7rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                 BARRIER FAILURES
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FF6A00', margin: '4px 0' }}>
                 2 Breaches
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#B3A194' }}>
+              <div style={{ fontSize: '0.78rem', color: t.textSecondary }}>
                 Lockout padlock omitted, pressure un-vented.
               </div>
             </div>
 
             <div
               style={{
-                backgroundColor: 'rgba(23, 17, 13, 0.85)',
-                border: '1px solid rgba(51, 37, 28, 0.8)',
+                backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
                 borderRadius: '12px',
                 padding: '20px',
               }}
             >
-              <div style={{ fontSize: '0.7rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                 PRECURSOR DENSITY
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#F5EFEB', margin: '4px 0' }}>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: t.textPrimary, margin: '4px 0' }}>
                 24.8%
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#B3A194' }}>
+              <div style={{ fontSize: '0.78rem', color: t.textSecondary }}>
                 SIF Potential vs Total Near-Miss Reports.
               </div>
             </div>
 
             <div
               style={{
-                backgroundColor: 'rgba(23, 17, 13, 0.85)',
-                border: '1px solid rgba(51, 37, 28, 0.8)',
+                backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
                 borderRadius: '12px',
                 padding: '20px',
               }}
             >
-              <div style={{ fontSize: '0.7rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                 MODEL CONFIDENCE
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#F5EFEB', margin: '4px 0' }}>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: t.textPrimary, margin: '4px 0' }}>
                 0.89
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#B3A194' }}>
+              <div style={{ fontSize: '0.78rem', color: t.textSecondary }}>
                 XGBoost Probability Calibration Index.
               </div>
             </div>
@@ -1425,7 +1489,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <h2 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '8px 0 12px 0', color: '#FFFFFF' }}>
             Life-Saving Rule Mapping
           </h2>
-          <p style={{ color: '#B3A194', maxWidth: '620px', margin: '0 auto', fontSize: '0.95rem' }}>
+          <p style={{ color: t.textSecondary, maxWidth: '620px', margin: '0 auto', fontSize: '0.95rem' }}>
             Automatic semantic matching across the industry-standard rules governing oil &amp; gas safety.
           </p>
         </div>
@@ -1463,7 +1527,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   transition: 'all 0.15s ease',
                 }}
               >
-                <Icon size={16} color={isSelected ? '#FF6A00' : '#736154'} />
+                <Icon size={16} color={isSelected ? '#FF6A00' : t.textMuted} />
                 <span>{rule.name}</span>
               </button>
             );
@@ -1473,8 +1537,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
         {/* Selected Rule Detail Card */}
         <div
           style={{
-            backgroundColor: 'rgba(23, 17, 13, 0.85)',
-            border: '1px solid rgba(51, 37, 28, 0.8)',
+            backgroundColor: t.bgCard,
+                border: '1px solid ' + t.border,
             borderRadius: '16px',
             padding: '32px',
           }}
@@ -1498,12 +1562,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 {selectedRule.name}
               </h3>
             </div>
-            <div style={{ fontSize: '0.82rem', color: '#B3A194', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '0.82rem', color: t.textSecondary, fontFamily: 'monospace' }}>
               FLAGGED PRECURSORS: <strong style={{ color: '#FF6A00' }}>{selectedRule.precursorsFlagged} INCIDENTS</strong>
             </div>
           </div>
 
-          <p style={{ fontSize: '1.02rem', color: '#F5EFEB', lineHeight: 1.6, margin: '0 0 20px 0' }}>
+          <p style={{ fontSize: '1.02rem', color: t.textPrimary, lineHeight: 1.6, margin: '0 0 20px 0' }}>
             {selectedRule.summary}
           </p>
 
@@ -1517,15 +1581,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             }}
           >
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.72rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                 MANDATED SAFETY BARRIERS
               </div>
-              <div style={{ fontSize: '0.86rem', color: '#B3A194', marginTop: '4px' }}>
+              <div style={{ fontSize: '0.86rem', color: t.textSecondary, marginTop: '4px' }}>
                 {selectedRule.criteria}
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.72rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                 HIGH-RISK REFINERY QUADRANT
               </div>
               <div style={{ fontSize: '0.86rem', color: '#FF8A1F', marginTop: '4px' }}>
@@ -1561,7 +1625,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <h2 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '8px 0 12px 0', color: '#FFFFFF' }}>
             Precursor Intelligence Network
           </h2>
-          <p style={{ color: '#B3A194', maxWidth: '640px', margin: '0 auto', fontSize: '0.95rem' }}>
+          <p style={{ color: t.textSecondary, maxWidth: '640px', margin: '0 auto', fontSize: '0.95rem' }}>
             How isolated variables correlate into severe injury precursors before an incident occurs.
           </p>
         </div>
@@ -1597,13 +1661,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   padding: '18px',
                 }}
               >
-                <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: '#736154', fontWeight: 700 }}>
+                <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: t.textMuted, fontWeight: 700 }}>
                   {node.step}
                 </div>
                 <div style={{ fontSize: '0.98rem', fontWeight: 800, color: idx === 3 ? '#FF6A00' : '#FFFFFF', margin: '4px 0' }}>
                   {node.title}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#B3A194', marginBottom: '8px' }}>
+                <div style={{ fontSize: '0.78rem', color: t.textSecondary, marginBottom: '8px' }}>
                   {node.desc}
                 </div>
                 <span
@@ -1666,13 +1730,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               padding: '32px',
             }}
           >
-            <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#736154', fontWeight: 700, marginBottom: '12px' }}>
+            <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: t.textMuted, fontWeight: 700, marginBottom: '12px' }}>
               TRADITIONAL HSSE WORKFLOW
             </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#B3A194', margin: '0 0 16px 0' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: t.textSecondary, margin: '0 0 16px 0' }}>
               Lagging &amp; Retrospective
             </h3>
-            <ul style={{ paddingLeft: '18px', color: '#B3A194', fontSize: '0.88rem', lineHeight: 1.8, margin: 0 }}>
+            <ul style={{ paddingLeft: '18px', color: t.textSecondary, fontSize: '0.88rem', lineHeight: 1.8, margin: 0 }}>
               <li>Focuses primarily on actual lost-time injury statistics.</li>
               <li>Near-miss reports with zero harm are archived without deep precursor analysis.</li>
               <li>Manual review audits take 3–6 weeks; patterns remain undiscovered.</li>
@@ -1695,7 +1759,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', margin: '0 0 16px 0' }}>
               Proactive Foresight
             </h3>
-            <ul style={{ paddingLeft: '18px', color: '#F5EFEB', fontSize: '0.88rem', lineHeight: 1.8, margin: 0 }}>
+            <ul style={{ paddingLeft: '18px', color: t.textPrimary, fontSize: '0.88rem', lineHeight: 1.8, margin: 0 }}>
               <li>Enforces: <code style={{ color: '#FF8A1F' }}>Actual Outcome != Potential Outcome</code>.</li>
               <li>Near-misses with fatal mechanisms are surfaced within seconds.</li>
               <li>Semantic NLP maps incidents automatically to IOGP Life-Saving Rules.</li>
@@ -1731,7 +1795,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <h2 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '8px 0 12px 0', color: '#FFFFFF' }}>
             Analyze a Safety Observation
           </h2>
-          <p style={{ color: '#B3A194', maxWidth: '620px', margin: '0 auto', fontSize: '0.95rem' }}>
+          <p style={{ color: t.textSecondary, maxWidth: '620px', margin: '0 auto', fontSize: '0.95rem' }}>
             Select an operational oilfield observation or enter custom narrative to test the AI model.
           </p>
         </div>
@@ -1746,7 +1810,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
         >
           {/* Quick Preset Buttons */}
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '18px' }}>
-            <span style={{ fontSize: '0.74rem', color: '#736154', alignSelf: 'center', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: '0.74rem', color: t.textMuted, alignSelf: 'center', fontFamily: 'monospace' }}>
               SAMPLES:
             </span>
             {DEMO_SAMPLES.map((sample, idx) => (
@@ -1759,9 +1823,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 style={{
                   padding: '6px 12px',
                   borderRadius: '6px',
-                  backgroundColor: demoInput === sample.text ? 'rgba(255, 106, 0, 0.15)' : 'rgba(23, 17, 13, 0.8)',
-                  border: demoInput === sample.text ? '1px solid #FF6A00' : '1px solid rgba(51, 37, 28, 0.7)',
-                  color: demoInput === sample.text ? '#FFFFFF' : '#B3A194',
+                  backgroundColor: demoInput === sample.text ? 'rgba(255, 106, 0, 0.15)' : t.bgCardSubtle,
+                  border: demoInput === sample.text ? '1px solid #FF6A00' : '1px solid ' + t.borderSubtle,
+                  color: demoInput === sample.text ? (isLight ? '#E65F00' : '#FFFFFF') : t.textSecondary,
                   fontSize: '0.78rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -1842,40 +1906,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '0.68rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+                  <div style={{ fontSize: '0.68rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                     SIF POTENTIAL SCORE
                   </div>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FF6A00', margin: '4px 0' }}>
                     {demoResult.sif} ({demoResult.score})
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#B3A194' }}>Flagged Precursor Mechanism</div>
+                  <div style={{ fontSize: '0.74rem', color: t.textSecondary }}>Flagged Precursor Mechanism</div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.68rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+                  <div style={{ fontSize: '0.68rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                     LIFE-SAVING RULE
                   </div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', margin: '4px 0' }}>
                     {demoResult.rule}
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#B3A194' }}>Semantic Match &gt; 0.85</div>
+                  <div style={{ fontSize: '0.74rem', color: t.textSecondary }}>Semantic Match &gt; 0.85</div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.68rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+                  <div style={{ fontSize: '0.68rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                     PRIMARY BARRIER BREACH
                   </div>
                   <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#FF8A1F', margin: '4px 0' }}>
                     {demoResult.barrier}
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#B3A194' }}>Mandated Control Failure</div>
+                  <div style={{ fontSize: '0.74rem', color: t.textSecondary }}>Mandated Control Failure</div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.68rem', color: '#736154', fontFamily: 'monospace', fontWeight: 700 }}>
+                  <div style={{ fontSize: '0.68rem', color: t.textMuted, fontFamily: 'monospace', fontWeight: 700 }}>
                     IDENTIFIED PRECURSOR
                   </div>
-                  <div style={{ fontSize: '0.84rem', color: '#F5EFEB', margin: '4px 0', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: '0.84rem', color: t.textPrimary, margin: '4px 0', lineHeight: 1.4 }}>
                     {demoResult.precursor}
                   </div>
                 </div>
@@ -1910,7 +1974,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           <h2 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '8px 0 12px 0', color: '#FFFFFF' }}>
             The SIF-Guard Platform
           </h2>
-          <p style={{ color: '#B3A194', maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
+          <p style={{ color: t.textSecondary, maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
             Built for enterprise safety leaders, inspectors, and operations managers.
           </p>
         </div>
@@ -1939,7 +2003,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#E85D5D' }} />
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#FFB347' }} />
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#20D997' }} />
-              <span style={{ marginLeft: '12px', fontSize: '0.76rem', fontFamily: 'monospace', color: '#736154' }}>
+              <span style={{ marginLeft: '12px', fontSize: '0.76rem', fontFamily: 'monospace', color: t.textMuted }}>
                 https://sif-guard.oilindia.in/dashboard
               </span>
             </div>
@@ -1974,7 +2038,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                     padding: '16px',
                   }}
                 >
-                  <div style={{ fontSize: '0.7rem', color: '#736154', fontWeight: 600 }}>{kpi.label}</div>
+                  <div style={{ fontSize: '0.7rem', color: t.textMuted, fontWeight: 600 }}>{kpi.label}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: '4px 0' }}>{kpi.val}</div>
                   <div style={{ fontSize: '0.68rem', color: '#FF8A1F' }}>{kpi.sub}</div>
                 </div>
@@ -2070,7 +2134,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
         <p
           style={{
             fontSize: '1.1rem',
-            color: '#B3A194',
+            color: t.textSecondary,
             maxWidth: '560px',
             margin: '0 auto 36px auto',
             lineHeight: 1.6,
@@ -2134,16 +2198,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
           }}
         >
           <div>
-            <div style={{ fontWeight: 700, color: '#F5EFEB', marginBottom: '4px' }}>
+            <div style={{ fontWeight: 700, color: t.textPrimary, marginBottom: '4px' }}>
               SIF-Guard — Serious Injury &amp; Fatality Precursor Intelligence Platform
             </div>
             <div>Developed for Oil India Limited · Smart India Hackathon 2026 (Problem Statement 165)</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <span style={{ color: '#B3A194' }}>FastAPI</span>
-            <span style={{ color: '#B3A194' }}>Three.js WebGL</span>
-            <span style={{ color: '#B3A194' }}>Supabase Auth</span>
-            <span style={{ color: '#B3A194' }}>BAAI/bge-base</span>
+            <span style={{ color: t.textSecondary }}>FastAPI</span>
+            <span style={{ color: t.textSecondary }}>Three.js WebGL</span>
+            <span style={{ color: t.textSecondary }}>Supabase Auth</span>
+            <span style={{ color: t.textSecondary }}>BAAI/bge-base</span>
             <span style={{ color: '#FF6A00' }}>© 2026 SIF-Guard Team</span>
           </div>
         </div>
