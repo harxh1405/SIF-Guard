@@ -18,7 +18,59 @@ import {
   HelpCircle,
   X,
   MapPin,
+  Zap,
+  Lock,
+  Flame,
 } from 'lucide-react';
+
+interface ProjectedSignal {
+  id: string;
+  code: string;
+  name: string;
+  rule: string;
+  worldPos: [number, number, number];
+  color: string;
+  icon: React.ElementType;
+}
+
+const PROJECTED_SIGNALS: ProjectedSignal[] = [
+  {
+    id: 'pump-station',
+    code: 'Z-02',
+    name: 'Pump Station',
+    rule: 'Energy Isolation',
+    worldPos: [0, 8.5, -25],
+    color: '#FF6A00',
+    icon: Zap,
+  },
+  {
+    id: 'pipeline-corridor',
+    code: 'Z-04',
+    name: 'Pipeline Corridor',
+    rule: 'Line of Fire',
+    worldPos: [0, 7.5, 2],
+    color: '#FF8A1F',
+    icon: AlertTriangle,
+  },
+  {
+    id: 'tank-farm',
+    code: 'Z-03',
+    name: 'Storage Bund',
+    rule: 'Confined Space',
+    worldPos: [35, 13.0, -25],
+    color: '#FF9500',
+    icon: Lock,
+  },
+  {
+    id: 'maintenance-area',
+    code: 'Z-06',
+    name: 'Maintenance Skid',
+    rule: 'Hot Work Permit',
+    worldPos: [0, 10.0, 28],
+    color: '#E05600',
+    icon: Flame,
+  },
+];
 
 interface RefineryCanvasProps {
   zones: FacilityZone[];
@@ -105,7 +157,20 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   const targetLookAt = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 2));
   const isAnimatingCam = useRef<boolean>(false);
 
-  // Smooth Camera Preset Transition
+  // Stored Initial Framing for Reset View
+  const initialCamPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 90, 100));
+  const initialTargetRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 4, 0));
+
+  // Reset View Handler (Smooth, controlled return ONLY when explicitly clicked)
+  const handleResetView = useCallback(() => {
+    if (!cameraRef.current || !controlsRef.current) return;
+    targetCamPos.current.copy(initialCamPosRef.current);
+    targetLookAt.current.copy(initialTargetRef.current);
+    isAnimatingCam.current = true;
+    setActivePreset('overview');
+  }, []);
+
+  // Smooth Camera Preset Transition (For full dashboard mode)
   const triggerCameraTransition = useCallback(
     (position: [number, number, number], target: [number, number, number], presetId: string) => {
       targetCamPos.current.set(...position);
@@ -116,7 +181,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     []
   );
 
-  // Initialize Three.js Scene
+  // Initialize Three.js Scene (Runs ONCE on mount)
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
@@ -138,20 +203,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     }
     sceneRef.current = scene;
 
-    // 2. Camera with adaptive framing for hero & digital twin
-    const defaultHeroPos: [number, number, number] = [0, 88, 96];
-    const defaultStdPos: [number, number, number] = [0, 68, 68];
-    const initialPos = customCameraPos || (minimalOverlay ? defaultHeroPos : defaultStdPos);
-    const initialTarget = customCameraTarget || [0, 0, 2];
-
-    const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.5, 600);
-    camera.position.set(...initialPos);
-    camera.lookAt(...initialTarget);
-    cameraRef.current = camera;
-    targetCamPos.current.set(...initialPos);
-    targetLookAt.current.set(...initialTarget);
-
-    // 3. WebGL Renderer with Error Guard
+    // 2. WebGL Renderer with Error Guard
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -168,7 +220,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = isLight ? 1.15 : 1.25;
+      renderer.toneMappingExposure = isLight ? 1.15 : 1.32;
       rendererRef.current = renderer;
     } catch (err) {
       console.error('WebGL initialization error:', err);
@@ -176,56 +228,54 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       return;
     }
 
-    // 4. Orbit Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.maxPolarAngle = Math.PI / 2.05; // Prevent camera going below ground
-    controls.minDistance = 15;
-    controls.maxDistance = 180;
-    controls.target.set(0, 0, 2);
-    if (minimalOverlay) {
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.7;
-    }
-    controlsRef.current = controls;
-
-    // 5. Environmental Lighting (Significantly brightened for clear industrial structural clarity)
-    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 1.4 : 1.1);
+    // 3. Environmental 5-Point Industrial Lighting Setup
+    // Subtle ambient base
+    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 1.2 : 0.75);
     scene.add(ambientLight);
     ambientLightRef.current = ambientLight;
 
+    // Sky/Ground gradient illumination
     const hemiLight = new THREE.HemisphereLight(
-      isLight ? 0xe0f2fe : 0xffbe88,
-      isLight ? 0x94a3b8 : 0x221812,
-      isLight ? 1.0 : 0.85
+      isLight ? 0xe0f2fe : 0xf5ede4,
+      isLight ? 0x94a3b8 : 0x241a14,
+      isLight ? 0.9 : 0.7
     );
     scene.add(hemiLight);
     hemiLightRef.current = hemiLight;
 
-    // Primary Sun Directional Light
-    const dirLight1 = new THREE.DirectionalLight(isLight ? 0xfffbeb : 0xfff0e0, isLight ? 2.0 : 1.85);
-    dirLight1.position.set(55, 90, 60);
-    dirLight1.castShadow = true;
-    dirLight1.shadow.mapSize.width = 2048;
-    dirLight1.shadow.mapSize.height = 2048;
-    dirLight1.shadow.camera.near = 10;
-    dirLight1.shadow.camera.far = 250;
-    dirLight1.shadow.camera.left = -70;
-    dirLight1.shadow.camera.right = 70;
-    dirLight1.shadow.camera.top = 70;
-    dirLight1.shadow.camera.bottom = -70;
-    dirLight1.shadow.bias = -0.0005;
-    scene.add(dirLight1);
-    dirLight1Ref.current = dirLight1;
+    // Key Light (Sun / Elevated Main)
+    const dirKeyLight = new THREE.DirectionalLight(isLight ? 0xfffbeb : 0xfffaf0, isLight ? 1.6 : 1.4);
+    dirKeyLight.position.set(65, 85, 55);
+    dirKeyLight.castShadow = true;
+    dirKeyLight.shadow.mapSize.width = 2048;
+    dirKeyLight.shadow.mapSize.height = 2048;
+    dirKeyLight.shadow.camera.near = 10;
+    dirKeyLight.shadow.camera.far = 300;
+    dirKeyLight.shadow.camera.left = -80;
+    dirKeyLight.shadow.camera.right = 80;
+    dirKeyLight.shadow.camera.top = 80;
+    dirKeyLight.shadow.camera.bottom = -80;
+    dirKeyLight.shadow.bias = -0.0005;
+    scene.add(dirKeyLight);
+    dirLight1Ref.current = dirKeyLight;
 
-    // Secondary Warm Fill Light (Highlights piping & distillation columns)
-    const dirLight2 = new THREE.DirectionalLight(isLight ? 0x93c5fd : 0xff8833, isLight ? 0.7 : 0.95);
-    dirLight2.position.set(-60, 45, -45);
-    scene.add(dirLight2);
-    dirLight2Ref.current = dirLight2;
+    // Cool Slate Fill Light (Front-Left)
+    const dirFillLight = new THREE.DirectionalLight(isLight ? 0x93c5fd : 0xa0c0e0, isLight ? 0.7 : 0.85);
+    dirFillLight.position.set(-55, 45, 45);
+    scene.add(dirFillLight);
+    dirLight2Ref.current = dirFillLight;
 
-    // 6. Build Refinery Base Structures
+    // Warm Industrial Sodium Rim Light (Back-Right silhouette)
+    const dirRimLight = new THREE.DirectionalLight(0xff8822, isLight ? 0.4 : 0.85);
+    dirRimLight.position.set(-45, 60, -65);
+    scene.add(dirRimLight);
+
+    // Rear Fill Light (Back-Left — keeps geometry readable from all angles)
+    const dirBackFill = new THREE.DirectionalLight(0xd0d8e2, isLight ? 0.3 : 0.55);
+    dirBackFill.position.set(50, 40, -50);
+    scene.add(dirBackFill);
+
+    // 4. Build Refinery Base Structures
     const materials = createRefineryMaterials(theme);
     const refineryGroup = new THREE.Group();
     refineryGroup.name = 'REFINERY_STRUCTURES';
@@ -241,28 +291,95 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     flameMeshRef.current = flareFlameMesh;
     pipeCollarsRef.current = pipeFlowCollars;
 
-    // 7. Animation & Render Loop
+    // 5. Dynamic Auto-Framing using THREE.Box3
+    refineryGroup.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(refineryGroup);
+    const boxCenter = new THREE.Vector3();
+    box.getCenter(boxCenter);
+    const boxSize = new THREE.Vector3();
+    box.getSize(boxSize);
+
+    // Orbital center: elevated slightly above ground plane (y ~ 4)
+    const modelCenter = new THREE.Vector3(boxCenter.x, Math.max(boxCenter.y, 4), boxCenter.z);
+
+    // Calculate bounding sphere radius covering facility bounds
+    const maxDim = Math.max(boxSize.x, boxSize.z, boxSize.y * 1.4);
+    const radius = maxDim * 0.58;
+
+    const fovRad = (45 * Math.PI) / 180;
+    const aspect = containerWidth / containerHeight;
+    const distV = radius / Math.tan(fovRad / 2);
+    const fovH = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
+    const distH = radius / Math.tan(fovH / 2);
+
+    // 20% negative space / breathing room around complex
+    const fitDistance = Math.max(distV, distH) * 1.20;
+
+    // Classic 3/4 isometric perspective: ~28 degrees elevation, ~44 degrees azimuth
+    const elevation = 28 * (Math.PI / 180);
+    const azimuth = 44 * (Math.PI / 180);
+
+    const calculatedCamPos = new THREE.Vector3(
+      modelCenter.x + fitDistance * Math.cos(elevation) * Math.sin(azimuth),
+      modelCenter.y + fitDistance * Math.sin(elevation),
+      modelCenter.z + fitDistance * Math.cos(elevation) * Math.cos(azimuth)
+    );
+
+    const initialPos = customCameraPos ? new THREE.Vector3(...customCameraPos) : calculatedCamPos;
+    const initialTarget = customCameraTarget ? new THREE.Vector3(...customCameraTarget) : modelCenter;
+
+    // 6. Camera Setup
+    const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.5, 1000);
+    camera.position.copy(initialPos);
+    camera.lookAt(initialTarget);
+    cameraRef.current = camera;
+    targetCamPos.current.copy(initialPos);
+    targetLookAt.current.copy(initialTarget);
+    initialCamPosRef.current.copy(initialPos);
+    initialTargetRef.current.copy(initialTarget);
+
+    // 7. Orbit Controls Setup
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(initialTarget);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = fitDistance * 0.28;
+    controls.maxDistance = fitDistance * 2.8;
+    controls.minPolarAngle = 0.05;
+    controls.maxPolarAngle = Math.PI / 2.05; // Prevent camera dipping below ground
+    controls.autoRotate = false; // NO auto-rotation fighting user!
+    controls.update();
+
+    // CRITICAL: Any user interaction (drag, wheel, touch) cancels programmatic camera lerping
+    controls.addEventListener('start', () => {
+      isAnimatingCam.current = false;
+    });
+
+    controlsRef.current = controls;
+
+    // 8. Animation & Render Loop
     let animationFrameId: number;
     const startRenderTime = performance.now();
+    const tempProjVec = new THREE.Vector3();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = (performance.now() - startRenderTime) * 0.001;
 
-      // Camera smooth transition lerp
+      // Programmatic Camera Lerp (Used ONLY during Reset View or preset selection)
       if (isAnimatingCam.current) {
-        camera.position.lerp(targetCamPos.current, 0.06);
-        controls.target.lerp(targetLookAt.current, 0.06);
+        camera.position.lerp(targetCamPos.current, 0.08);
+        controls.target.lerp(targetLookAt.current, 0.08);
 
         if (
-          camera.position.distanceTo(targetCamPos.current) < 0.15 &&
-          controls.target.distanceTo(targetLookAt.current) < 0.15
+          camera.position.distanceTo(targetCamPos.current) < 0.2 &&
+          controls.target.distanceTo(targetLookAt.current) < 0.2
         ) {
+          camera.position.copy(targetCamPos.current);
+          controls.target.copy(targetLookAt.current);
           isAnimatingCam.current = false;
         }
       }
-
-      controls.update();
 
       // Animate Flare Flame
       if (flameMeshRef.current) {
@@ -301,13 +418,43 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         });
       });
 
+      // Update 3D Projected Safety Signals in Real Time
+      if (minimalOverlay && cameraRef.current && containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        const h = containerRef.current.clientHeight;
+
+        for (let i = 0; i < PROJECTED_SIGNALS.length; i++) {
+          const sig = PROJECTED_SIGNALS[i];
+          const el = document.getElementById(`3d-pin-${sig.id}`);
+          if (!el) continue;
+
+          tempProjVec.set(...sig.worldPos);
+          tempProjVec.project(cameraRef.current);
+
+          // If in front of camera (tempProjVec.z < 1)
+          if (tempProjVec.z < 1) {
+            const screenX = ((tempProjVec.x + 1) / 2) * w;
+            const screenY = ((-tempProjVec.y + 1) / 2) * h;
+
+            if (screenX >= 20 && screenX <= w - 20 && screenY >= 20 && screenY <= h - 20) {
+              el.style.display = 'flex';
+              el.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -100%)`;
+              el.style.opacity = '1';
+              continue;
+            }
+          }
+          el.style.opacity = '0';
+          el.style.display = 'none';
+        }
+      }
+
       controls.update();
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 8. Handle Window Resize
+    // 9. Handle Window Resize
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = containerRef.current.clientWidth;
@@ -333,9 +480,15 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     if (!scene) return;
     const isLight = theme === 'light';
     const bgColor = isLight ? 0xe2e8f0 : 0x0b0806;
+    const isTransparent = minimalOverlay || transparentBg;
 
-    scene.background = new THREE.Color(bgColor);
-    scene.fog = new THREE.FogExp2(bgColor, isLight ? 0.004 : 0.007);
+    if (isTransparent) {
+      scene.background = null;
+      scene.fog = null;
+    } else {
+      scene.background = new THREE.Color(bgColor);
+      scene.fog = new THREE.FogExp2(bgColor, isLight ? 0.004 : 0.007);
+    }
 
     if (ambientLightRef.current) {
       ambientLightRef.current.intensity = isLight ? 1.3 : 0.6;
@@ -423,9 +576,9 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     }
   }, [zones, selectedZoneId, hoveredZoneId, activeIncidents, layers.riskZones, layers.incidents, layers.labels]);
 
-  // Sync camera when selectedZoneId changes externally
+  // Sync camera when selectedZoneId changes externally (Only in full dashboard mode)
   useEffect(() => {
-    if (selectedZoneId) {
+    if (selectedZoneId && !minimalOverlay) {
       const cfg = ZONE_3D_CONFIGS[selectedZoneId];
       if (cfg) {
         targetCamPos.current.set(...cfg.cameraFocus.position);
@@ -434,7 +587,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         setActivePreset(selectedZoneId);
       }
     }
-  }, [selectedZoneId]);
+  }, [selectedZoneId, minimalOverlay]);
 
   // Pointer Interaction (Raycasting hover & click)
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -998,6 +1151,166 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
           3D DIGITAL TWIN: <span style={{ color: '#30d158', fontWeight: 700 }}>LIVE</span>
         </span>
       </div>
+        </>
+      )}
+
+      {minimalOverlay && (
+        <>
+          {/* Top Bar: Telemetry Badge & Subtle Reset View Button */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '12px',
+              left: '12px',
+              right: '12px',
+              zIndex: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              pointerEvents: 'none',
+            }}
+          >
+            {/* Status Badge */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                backgroundColor: 'rgba(11, 8, 6, 0.78)',
+                border: '1px solid rgba(255, 106, 0, 0.28)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+                pointerEvents: 'auto',
+              }}
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#FF6A00',
+                  boxShadow: '0 0 8px #FF6A00',
+                }}
+              />
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  color: '#F5EFEB',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                OIL REFINERY DIGITAL TWIN · 3D
+              </span>
+              <span
+                style={{
+                  fontSize: '0.66rem',
+                  fontFamily: 'monospace',
+                  color: '#FF8A1F',
+                  fontWeight: 600,
+                }}
+              >
+                DRAG TO ORBIT
+              </span>
+            </div>
+
+            {/* Reset View Button */}
+            <button
+              onClick={handleResetView}
+              title="Reset camera to initial full-facility view"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(18, 13, 9, 0.85)',
+                border: '1px solid rgba(51, 37, 28, 0.85)',
+                color: '#B3A194',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                fontFamily: 'monospace',
+                cursor: 'pointer',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+                transition: 'all 0.15s ease',
+                pointerEvents: 'auto',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.borderColor = '#FF6A00';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 106, 0, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#B3A194';
+                e.currentTarget.style.borderColor = 'rgba(51, 37, 28, 0.85)';
+                e.currentTarget.style.backgroundColor = 'rgba(18, 13, 9, 0.85)';
+              }}
+            >
+              <RotateCcw size={12} />
+              <span>RESET VIEW</span>
+            </button>
+          </div>
+
+          {/* 3D Projected Safety Signals Container */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
+            {PROJECTED_SIGNALS.map((sig) => {
+              const isSelected = selectedZoneId === sig.id;
+              const Icon = sig.icon;
+              return (
+                <div
+                  key={sig.id}
+                  id={`3d-pin-${sig.id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectZone(sig.id);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    display: 'none',
+                    alignItems: 'center',
+                    gap: '7px',
+                    padding: '6px 11px',
+                    borderRadius: '8px',
+                    backgroundColor: isSelected ? 'rgba(255, 106, 0, 0.28)' : 'rgba(18, 13, 9, 0.88)',
+                    border: isSelected ? '1px solid #FF6A00' : '1px solid rgba(51, 37, 28, 0.85)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.65)',
+                    cursor: 'pointer',
+                    pointerEvents: 'auto',
+                    userSelect: 'none',
+                    whiteSpace: 'nowrap',
+                    transition: 'background-color 0.2s, border-color 0.2s',
+                  }}
+                >
+                  <Icon size={12} color={sig.color} />
+                  <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#F5EFEB' }}>
+                    {sig.code} {sig.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.64rem',
+                      color: '#FF8A1F',
+                      fontFamily: 'monospace',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      backgroundColor: 'rgba(255, 106, 0, 0.12)',
+                    }}
+                  >
+                    {sig.rule}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
     </div>

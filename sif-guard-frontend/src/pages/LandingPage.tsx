@@ -145,7 +145,7 @@ const LSR_RULES_DATA = [
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => {
   const [zones, setZones] = useState<FacilityZone[]>(FALLBACK_ZONES);
-  const [selectedZoneId, setSelectedZoneId] = useState<string | null>('pump-station');
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [hoveredZoneId, setHoveredZoneId] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -566,7 +566,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             style={{
               position: 'relative',
               width: '100%',
-              height: '560px',
+              height: '580px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -598,115 +598,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 minimalOverlay={true}
                 transparentBg={true}
               />
-            </div>
-
-            {/* High-Precision Architectural Viewport Header */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                backgroundColor: 'rgba(11, 8, 6, 0.75)',
-                border: '1px solid rgba(255, 106, 0, 0.28)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                pointerEvents: 'none',
-              }}
-            >
-              <span
-                style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: '#FF6A00',
-                  boxShadow: '0 0 8px #FF6A00',
-                }}
-              />
-              <span
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  fontFamily: 'monospace',
-                  color: '#F5EFEB',
-                  letterSpacing: '0.04em',
-                }}
-              >
-                OIL REFINERY DIGITAL TWIN
-              </span>
-              <span
-                style={{
-                  fontSize: '0.66rem',
-                  fontFamily: 'monospace',
-                  color: '#FF8A1F',
-                  fontWeight: 600,
-                  marginLeft: '4px',
-                }}
-              >
-                DRAG TO ORBIT
-              </span>
-            </div>
-
-            {/* Spatial Safety Signal Tags anchored cleanly along bottom */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '12px',
-                left: '12px',
-                right: '12px',
-                display: 'flex',
-                gap: '8px',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-                pointerEvents: 'auto',
-              }}
-            >
-              {[
-                { label: 'Z-02 Pump Station', flag: 'Energy Isolation', icon: Zap },
-                { label: 'Z-04 Pipeline Corridor', flag: 'Line of Fire', icon: AlertTriangle },
-                { label: 'Z-03 Storage Bund', flag: 'Confined Space', icon: Lock },
-                { label: 'Z-06 Maintenance Skid', flag: 'Hot Work Permit', icon: Flame },
-              ].map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      padding: '7px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(18, 13, 9, 0.8)',
-                      border: '1px solid rgba(51, 37, 28, 0.8)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.4)',
-                    }}
-                  >
-                    <Icon size={12} color="#FF6A00" />
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#F5EFEB' }}>
-                      {item.label}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.66rem',
-                        color: '#FF8A1F',
-                        fontFamily: 'monospace',
-                        padding: '1px 5px',
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(255, 106, 0, 0.12)',
-                      }}
-                    >
-                      {item.flag}
-                    </span>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>
