@@ -21,9 +21,18 @@ import type { TabId } from '../components/layout/Navigation';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import {
+  TemporalTrendChart,
+  FacilityRiskMatrix,
+  BarrierRankingChart,
+  LSRDistributionChart,
+  HazardRankingChart,
+  ActivityRankingChart,
+  formatCount,
+  formatPercentageWithContext,
+} from '../components/charts';
+import {
   Building2,
   Activity,
-  AlertTriangle,
   ShieldAlert,
   BookOpen,
   TrendingUp,
@@ -31,171 +40,28 @@ import {
   Sparkles,
   Search,
   ChevronRight,
-  Shield,
-  Layers,
-  ArrowUpRight,
+  ShieldX,
+  Flame,
+  ArrowUpDown,
+  Compass,
+  ExternalLink,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Cell,
-  Area,
-  AreaChart,
-} from 'recharts';
+import { motion } from 'motion/react';
 
 interface Props {
   onNavigate?: (tab: TabId) => void;
+  theme?: 'dark' | 'light';
 }
 
-type DimensionTab = 'sites' | 'activities' | 'hazards' | 'barriers' | 'lsr' | 'trends';
-type MetricChoice = 'density' | 'sif_count' | 'total_reports';
+export type ViewMode = 'command' | 'trends' | 'sites' | 'hazards_barriers' | 'lsr_activities';
+export type WhySubTab = 'all' | 'barriers' | 'hazards';
+export type HowSubTab = 'all' | 'lsr' | 'activities';
 
-const CustomRankedTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const density = data.sif_density !== undefined ? (data.sif_density * 100).toFixed(1) : null;
-    const precursors = data.sif_count ?? data.count ?? 0;
-    const total = data.total_reports;
-    const title = data.displayName || data.site || data.activity || data.hazard || data.barrier_failure || data.rule_name;
-
-    const isHighRisk = data.sif_density >= 0.10 || precursors >= 4;
-    const isMediumRisk = data.sif_density > 0 || precursors > 0;
-
-    return (
-      <div
-        style={{
-          background: '#211710',
-          border: '1px solid #33251C',
-          borderRadius: '12px',
-          padding: '14px 18px',
-          boxShadow: '0 15px 40px rgba(0, 0, 0, 0.45)',
-          minWidth: '220px',
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: '0.92rem',
-            color: '#F5EEE8',
-            marginBottom: '10px',
-            borderBottom: '1px solid #33251C',
-            paddingBottom: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-          }}
-        >
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
-          {isHighRisk ? (
-            <span
-              style={{
-                fontSize: '0.65rem',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                background: 'rgba(232, 93, 93, 0.15)',
-                color: '#E85D5D',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              HIGH RISK
-            </span>
-          ) : isMediumRisk ? (
-            <span
-              style={{
-                fontSize: '0.65rem',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                background: 'rgba(255, 179, 71, 0.15)',
-                color: '#FFB347',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              ELEVATED
-            </span>
-          ) : (
-            <span
-              style={{
-                fontSize: '0.65rem',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                background: 'rgba(32, 217, 151, 0.15)',
-                color: '#20D997',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              NOMINAL
-            </span>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1' }}>
-            <span>SIF Precursors:</span>
-            <span
-              style={{
-                color: precursors > 0 ? '#E85D5D' : '#F5EEE8',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {precursors}
-            </span>
-          </div>
-
-          {total !== undefined && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1' }}>
-              <span>Total Reports:</span>
-              <span style={{ color: '#F5EEE8', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                {total}
-              </span>
-            </div>
-          )}
-
-          {density !== null && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1', paddingTop: '4px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
-              <span>Precursor Density:</span>
-              <span
-                style={{
-                  color: '#FF6A00',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-mono)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {density}%
-              </span>
-            </div>
-          )}
-
-          {data.percentage !== undefined && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1' }}>
-              <span>Share:</span>
-              <span style={{ color: '#FF6A00', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                {data.percentage.toFixed(1)}%
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
-  const [activeTab, setActiveTab] = useState<DimensionTab>('sites');
+export const AnalyticsPage: React.FC<Props> = ({ onNavigate, theme = 'dark' }) => {
+  // Navigation & Sub-tab States
+  const [activeView, setActiveView] = useState<ViewMode>('command');
+  const [whySubTab, setWhySubTab] = useState<WhySubTab>('all');
+  const [howSubTab, setHowSubTab] = useState<HowSubTab>('all');
 
   // Analytics Datasets
   const [siteData, setSiteData] = useState<SiteRanking[]>([]);
@@ -206,13 +72,20 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
   const [trendData, setTrendData] = useState<TrendData[]>([]);
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(null);
 
-  // Filters & State
-  const [siteMetric, setSiteMetric] = useState<MetricChoice>('density');
-  const [activityMetric, setActivityMetric] = useState<MetricChoice>('density');
-  const [siteLimit, setSiteLimit] = useState<number>(10);
+  // Selected entities for drill-down
+  const [selectedFacility, setSelectedFacility] = useState<string | null>(null);
+  const [selectedBarrier, setSelectedBarrier] = useState<string | null>(null);
+  const [selectedHazard, setSelectedHazard] = useState<string | null>(null);
+  const [selectedLsr, setSelectedLsr] = useState<string | null>(null);
+
+  // Controls & Filters
   const [trendGrouping, setTrendGrouping] = useState<'month' | 'quarter'>('month');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [tableSortField, setTableSortField] = useState<'site' | 'total_reports' | 'sif_count' | 'sif_density'>('sif_density');
+  const [tableSortAsc, setTableSortAsc] = useState<boolean>(false);
+  const [hazardViewMode, setHazardViewMode] = useState<'list' | 'chart'>('list');
 
+  // Lifecycle
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -235,16 +108,16 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
       ]);
 
       setError(null);
-      setSiteData(sites);
-      setActivityData(activities);
-      setHazardData(hazards);
-      setBarrierData(barriers);
-      setLsrData(lsr);
-      setTrendData(trends);
+      setSiteData(sites || []);
+      setActivityData(activities || []);
+      setHazardData(hazards || []);
+      setBarrierData(barriers || []);
+      setLsrData(lsr || []);
+      setTrendData(trends || []);
       if (summary) setDashboardSummary(summary);
       setLastSyncTime(new Date());
     } catch (err: any) {
-      setError(err?.message || 'Failed to load hotspot analytics');
+      setError(err?.message || 'Failed to fetch safety telemetry intelligence');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -255,119 +128,112 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
     fetchAllAnalytics();
   }, [fetchAllAnalytics]);
 
-  // Derived KPI metrics calculated strictly from real data
+  // Derived KPI metrics strictly from real backend responses
   const kpis = useMemo(() => {
     const totalReports = dashboardSummary?.total_reports ?? siteData.reduce((acc, s) => acc + s.total_reports, 0);
     const sifPrecursors = dashboardSummary?.sif_precursor_count ?? siteData.reduce((acc, s) => acc + s.sif_count, 0);
     const avgDensity = totalReports > 0 ? (sifPrecursors / totalReports) * 100 : 0;
-    const highRiskSites = siteData.filter((s) => s.sif_density >= 0.05 || s.sif_count >= 2).length;
+    const activeSites = siteData.filter((s) => s.sif_count > 0).length;
+    const topBarrier = [...barrierData].sort((a, b) => b.sif_count - a.sif_count)[0];
+    const topHazard = [...hazardData].sort((a, b) => b.sif_count - a.sif_count)[0];
+    const topLsr = [...lsrData].sort((a, b) => b.count - a.count)[0];
 
     return {
       totalReports,
       sifPrecursors,
       avgDensity: avgDensity.toFixed(1),
-      highRiskSites,
+      avgDensityNum: avgDensity,
+      activeSites,
+      totalSites: siteData.length,
+      topBarrier,
+      topHazard,
+      topLsr,
     };
-  }, [siteData, dashboardSummary]);
+  }, [siteData, dashboardSummary, barrierData, hazardData, lsrData]);
 
-  // Ranked & Sorted Sites for Primary Chart
-  const sortedSites = useMemo(() => {
-    const sorted = [...siteData].sort((a, b) => {
-      if (siteMetric === 'density') {
-        return b.sif_density - a.sif_density || b.sif_count - a.sif_count;
-      }
-      if (siteMetric === 'sif_count') {
-        return b.sif_count - a.sif_count || b.sif_density - a.sif_density;
-      }
-      return b.total_reports - a.total_reports;
+  // Search & Sort for Facility Table
+  const filteredAndSortedSites = useMemo(() => {
+    const filtered = siteData.filter((s) => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return (s.site || '').toLowerCase().includes(q);
     });
 
-    return siteLimit > 0 ? sorted.slice(0, siteLimit) : sorted;
-  }, [siteData, siteMetric, siteLimit]);
-
-  const siteChartData = useMemo(() => {
-    return sortedSites.map((s, idx) => ({
-      ...s,
-      displayName: s.site || 'Unknown Location',
-      rank: idx + 1,
-      displayValue:
-        siteMetric === 'density'
-          ? parseFloat((s.sif_density * 100).toFixed(1))
-          : siteMetric === 'sif_count'
-          ? s.sif_count
-          : s.total_reports,
-    }));
-  }, [sortedSites, siteMetric]);
-
-  // Top site for Key Insight
-  const topSite = useMemo(() => {
-    if (siteData.length === 0) return null;
-    return [...siteData].sort((a, b) => b.sif_density - a.sif_density || b.sif_count - a.sif_count)[0];
-  }, [siteData]);
-
-  // Filtered sites for table
-  const filteredSites = useMemo(() => {
-    if (!searchQuery.trim()) return siteData;
-    const q = searchQuery.toLowerCase();
-    return siteData.filter((s) => s.site.toLowerCase().includes(q));
-  }, [siteData, searchQuery]);
-
-  // Ranked Activities for Activity Chart
-  const sortedActivities = useMemo(() => {
-    const sorted = [...activityData].sort((a, b) => {
-      if (activityMetric === 'density') {
-        return b.sif_density - a.sif_density || b.sif_count - a.sif_count;
+    return filtered.sort((a, b) => {
+      let comparison = 0;
+      if (tableSortField === 'site') {
+        comparison = (a.site || '').localeCompare(b.site || '');
+      } else if (tableSortField === 'total_reports') {
+        comparison = a.total_reports - b.total_reports;
+      } else if (tableSortField === 'sif_count') {
+        comparison = a.sif_count - b.sif_count;
+      } else if (tableSortField === 'sif_density') {
+        comparison = a.sif_density - b.sif_density;
       }
-      if (activityMetric === 'sif_count') {
-        return b.sif_count - a.sif_count || b.sif_density - a.sif_density;
-      }
-      return b.total_reports - a.total_reports;
+      return tableSortAsc ? comparison : -comparison;
     });
-    return sorted.slice(0, 10);
-  }, [activityData, activityMetric]);
+  }, [siteData, searchQuery, tableSortField, tableSortAsc]);
 
-  const activityChartData = useMemo(() => {
-    return sortedActivities.map((a, idx) => ({
-      ...a,
-      displayName: a.activity || 'Unspecified Activity',
-      rank: idx + 1,
-      displayValue:
-        activityMetric === 'density'
-          ? parseFloat((a.sif_density * 100).toFixed(1))
-          : activityMetric === 'sif_count'
-          ? a.sif_count
-          : a.total_reports,
-    }));
-  }, [sortedActivities, activityMetric]);
+  const handleSort = (field: 'site' | 'total_reports' | 'sif_count' | 'sif_density') => {
+    if (tableSortField === field) {
+      setTableSortAsc(!tableSortAsc);
+    } else {
+      setTableSortField(field);
+      setTableSortAsc(false);
+    }
+  };
+
+  const handleFacilityClick = (siteName: string) => {
+    setSelectedFacility((prev) => (prev === siteName ? null : siteName));
+  };
+
+  if (loading && !refreshing) {
+    return (
+      <div style={{ padding: '24px 0', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <LoadingSkeleton rows={2} />
+        <LoadingSkeleton rows={4} />
+        <LoadingSkeleton rows={6} />
+      </div>
+    );
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
     >
-      {/* 1. PAGE HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+      {/* ====================================================================
+          1. COMMAND CENTER HEADER & TELEMETRY CONTROLS
+         ==================================================================== */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}
+      >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-            <h1 className="page-title" style={{ margin: 0, fontSize: '1.65rem' }}>
-              Analytics & Trends
+            <h1 className="page-title" style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '-0.02em' }}>
+              SIF Intelligence
             </h1>
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '3px 10px',
-                borderRadius: '12px',
+                padding: '3px 9px',
+                borderRadius: '6px',
                 background: 'rgba(32, 217, 151, 0.10)',
                 border: '1px solid rgba(32, 217, 151, 0.25)',
                 color: 'var(--success)',
-                fontSize: '0.72rem',
-                fontWeight: 700,
+                fontSize: '0.70rem',
+                fontWeight: 600,
                 fontFamily: 'var(--font-mono)',
-                letterSpacing: '0.04em',
               }}
             >
               <span
@@ -376,1069 +242,1246 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                   height: '6px',
                   borderRadius: '50%',
                   background: 'var(--success)',
-                  boxShadow: '0 0 8px rgba(32, 217, 151, 0.8)',
                   display: 'inline-block',
                 }}
               />
-              SYSTEM OPERATIONAL
+              Live Telemetry
             </div>
           </div>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
-            Monitor precursor patterns, facility density, and emerging risk signals across operational assets
+          <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', margin: 0 }}>
+            Operational precursor signals and barrier integrity across monitored facilities
           </p>
         </div>
 
-        {/* Sync Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+        {/* Sync Controls & Quick Navigation */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
             Synced {lastSyncTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
+
           <button
             onClick={() => fetchAllAnalytics(true)}
             disabled={refreshing || loading}
             className="btn btn-secondary"
-            style={{ padding: '7px 14px', fontSize: '0.8rem', gap: '6px' }}
+            style={{ padding: '6px 12px', fontSize: '0.78rem', gap: '6px' }}
             title="Refresh analytics telemetry"
           >
-            <RotateCw size={14} className={refreshing ? 'spin' : ''} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
+            <RotateCw
+              size={13}
+              style={{
+                animation: refreshing ? 'spin 1s linear infinite' : 'none',
+              }}
+            />
             <span>{refreshing ? 'Syncing...' : 'Refresh'}</span>
           </button>
+
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('review')}
+              className="btn btn-secondary"
+              style={{ padding: '6px 12px', fontSize: '0.78rem', gap: '6px' }}
+              title="Open Triage Review Queue"
+            >
+              <ShieldAlert size={13} color="var(--primary)" />
+              <span>Triage Queue</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 2. KPI ROW (Calculated purely from real data) */}
+      {error && <ErrorBanner message={error} onRetry={() => fetchAllAnalytics(true)} />}
+
+      {/* ====================================================================
+          2. EXECUTIVE KPI SUMMARY AREA (Exact numbers, no fabricated deltas)
+         ==================================================================== */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '16px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '12px',
         }}
       >
-        {/* KPI 1: Total Reports */}
+        {/* KPI 1: Reports Analyzed */}
         <div
-          className="card"
-          style={{
-            padding: '20px 22px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+          className="card card-interactive"
+          onClick={() => setActiveView('command')}
+          style={{ padding: '14px 16px' }}
         >
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            Reports Analyzed
+          </div>
           <div
             style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--primary), transparent)',
-              opacity: 0.7,
+              fontSize: '1.65rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-mono)',
+              lineHeight: 1.1,
+              marginBottom: '4px',
             }}
-          />
-          <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
-            TOTAL REPORTS
-          </div>
-          <div
-            className="numeric-display"
-            style={{ fontSize: '1.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}
           >
-            {kpis.totalReports}
+            {formatCount(kpis.totalReports)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Layers size={13} color="var(--primary)" />
-            <span>Operational records monitored</span>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            Safety records evaluated
           </div>
         </div>
 
         {/* KPI 2: SIF Precursors */}
         <div
-          className="card"
-          style={{
-            padding: '20px 22px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+          className="card card-interactive"
+          onClick={() => setActiveView('trends')}
+          style={{ padding: '14px 16px' }}
         >
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            SIF Precursors
+          </div>
           <div
             style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--danger), transparent)',
-              opacity: 0.7,
+              fontSize: '1.65rem',
+              fontWeight: 700,
+              color: 'var(--danger)',
+              fontFamily: 'var(--font-mono)',
+              lineHeight: 1.1,
+              marginBottom: '4px',
             }}
-          />
-          <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
-            SIF PRECURSORS
-          </div>
-          <div
-            className="numeric-display"
-            style={{ fontSize: '1.9rem', fontWeight: 600, color: 'var(--danger)', marginBottom: '4px' }}
           >
-            {kpis.sifPrecursors}
+            {formatCount(kpis.sifPrecursors)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <ShieldAlert size={13} color="var(--danger)" />
-            <span>High energy & barrier failures</span>
+          <div style={{ fontSize: '0.72rem', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <ShieldAlert size={12} />
+            <span>High-potential energy events</span>
           </div>
         </div>
 
-        {/* KPI 3: Avg Density */}
+        {/* KPI 3: Average Density */}
         <div
-          className="card"
-          style={{
-            padding: '20px 22px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+          className="card card-interactive"
+          onClick={() => setActiveView('sites')}
+          style={{ padding: '14px 16px' }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--warning), transparent)',
-              opacity: 0.7,
-            }}
-          />
-          <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
-            AVG. DENSITY
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            Average Precursor Density
           </div>
           <div
-            className="numeric-display"
-            style={{ fontSize: '1.9rem', fontWeight: 600, color: 'var(--warning)', marginBottom: '4px' }}
+            style={{
+              fontSize: '1.65rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-mono)',
+              lineHeight: 1.1,
+              marginBottom: '4px',
+            }}
           >
             {kpis.avgDensity}%
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <TrendingUp size={13} color="var(--warning)" />
-            <span>Precursor-to-volume ratio</span>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            {kpis.sifPrecursors} SIFs / {kpis.totalReports} reports
           </div>
         </div>
 
-        {/* KPI 4: High-Risk Sites */}
+        {/* KPI 4: Active Locations */}
+        <div
+          className="card card-interactive"
+          onClick={() => setActiveView('sites')}
+          style={{ padding: '14px 16px' }}
+        >
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            Active Precursor Locations
+          </div>
+          <div
+            style={{
+              fontSize: '1.65rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-mono)',
+              lineHeight: 1.1,
+              marginBottom: '4px',
+            }}
+          >
+            {kpis.activeSites}
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px' }}>
+              / {kpis.totalSites}
+            </span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            Locations with recorded SIFs
+          </div>
+        </div>
+
+        {/* KPI 5: Top Barrier Defect */}
+        <div
+          className="card card-interactive"
+          onClick={() => setActiveView('hazards_barriers')}
+          style={{ padding: '14px 16px' }}
+        >
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            Primary Barrier Defect
+          </div>
+          <div
+            style={{
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              color: 'var(--danger)',
+              lineHeight: 1.2,
+              marginBottom: '4px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={kpis.topBarrier?.barrier_failure || 'None'}
+          >
+            {kpis.topBarrier ? kpis.topBarrier.barrier_failure : 'None'}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            {kpis.topBarrier ? `${kpis.topBarrier.sif_count} precursor failures` : 'No failures recorded'}
+          </div>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          3. NAVIGATION SWITCHER (Refined segmented styling)
+         ==================================================================== */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          background: 'var(--surface)',
+          padding: '4px',
+          borderRadius: '8px',
+          border: '1px solid var(--border)',
+          overflowX: 'auto',
+        }}
+      >
+        <button
+          onClick={() => setActiveView('command')}
+          style={{
+            padding: '7px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            background: activeView === 'command' ? 'var(--surface-hover)' : 'transparent',
+            color: activeView === 'command' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontWeight: activeView === 'command' ? 600 : 500,
+            fontSize: '0.80rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.15s ease',
+            borderBottom: activeView === 'command' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <Compass size={14} color={activeView === 'command' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>Command Center</span>
+        </button>
+
+        <button
+          onClick={() => setActiveView('trends')}
+          style={{
+            padding: '7px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            background: activeView === 'trends' ? 'var(--surface-hover)' : 'transparent',
+            color: activeView === 'trends' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontWeight: activeView === 'trends' ? 600 : 500,
+            fontSize: '0.80rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.15s ease',
+            borderBottom: activeView === 'trends' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <TrendingUp size={14} color={activeView === 'trends' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>1. WHAT Changed?</span>
+        </button>
+
+        <button
+          onClick={() => setActiveView('sites')}
+          style={{
+            padding: '7px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            background: activeView === 'sites' ? 'var(--surface-hover)' : 'transparent',
+            color: activeView === 'sites' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontWeight: activeView === 'sites' ? 600 : 500,
+            fontSize: '0.80rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.15s ease',
+            borderBottom: activeView === 'sites' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <Building2 size={14} color={activeView === 'sites' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>2. WHERE is Risk?</span>
+        </button>
+
+        <button
+          onClick={() => setActiveView('hazards_barriers')}
+          style={{
+            padding: '7px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            background: activeView === 'hazards_barriers' ? 'var(--surface-hover)' : 'transparent',
+            color: activeView === 'hazards_barriers' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontWeight: activeView === 'hazards_barriers' ? 600 : 500,
+            fontSize: '0.80rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.15s ease',
+            borderBottom: activeView === 'hazards_barriers' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <ShieldX size={14} color={activeView === 'hazards_barriers' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>3. WHY are Signals Occurring?</span>
+        </button>
+
+        <button
+          onClick={() => setActiveView('lsr_activities')}
+          style={{
+            padding: '7px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            background: activeView === 'lsr_activities' ? 'var(--surface-hover)' : 'transparent',
+            color: activeView === 'lsr_activities' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontWeight: activeView === 'lsr_activities' ? 600 : 500,
+            fontSize: '0.80rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.15s ease',
+            borderBottom: activeView === 'lsr_activities' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <BookOpen size={14} color={activeView === 'lsr_activities' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>4. HOW are Controls Involved?</span>
+        </button>
+      </div>
+
+      {/* ====================================================================
+          4. EXECUTIVE OPERATIONAL INSIGHT (Structured & Deterministic)
+         ==================================================================== */}
+      {(activeView === 'command' || activeView === 'hazards_barriers') && kpis.topBarrier && (
         <div
           className="card"
           style={{
-            padding: '20px 22px',
-            position: 'relative',
-            overflow: 'hidden',
+            padding: '16px 20px',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--primary), transparent)',
-              opacity: 0.7,
-            }}
-          />
-          <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
-            HIGH-RISK SITES
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={15} color="var(--primary)" />
+              <span
+                style={{
+                  fontSize: '0.74rem',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  color: 'var(--primary-bright)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Operational Insight • Barrier Failure Signal
+              </span>
+            </div>
+
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('explorer')}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--primary)',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: 0,
+                }}
+              >
+                <span>View Related Reports in Explorer</span>
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
-          <div
-            className="numeric-display"
-            style={{ fontSize: '1.9rem', fontWeight: 600, color: kpis.highRiskSites > 0 ? 'var(--danger)' : 'var(--success)', marginBottom: '4px' }}
-          >
-            {kpis.highRiskSites}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: kpis.highRiskSites > 0 ? 'var(--danger)' : 'var(--success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Shield size={13} color={kpis.highRiskSites > 0 ? 'var(--danger)' : 'var(--success)'} />
-            <span>{kpis.highRiskSites > 0 ? 'Requires priority review' : 'Nominal barrier status'}</span>
+
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+            <strong>{kpis.topBarrier.barrier_failure}</strong> is the primary barrier defect identified across{' '}
+            <strong>{kpis.topBarrier.sif_count}</strong> SIF precursor events out of{' '}
+            <strong>{kpis.topBarrier.total_reports}</strong> total records (
+            {Number(kpis.topBarrier.sif_density).toFixed(1)}% density).
+            {kpis.topHazard && (
+              <span>
+                {' '}Most frequent accompanying hazard is <strong>{kpis.topHazard.hazard}</strong> (
+                {kpis.topHazard.sif_count} precursors).
+              </span>
+            )}
+            {kpis.topLsr && (
+              <span>
+                {' '}Primary Life-Saving Rule control involved:{' '}
+                <strong>{kpis.topLsr.rule_name}</strong>.
+              </span>
+            )}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* 3. ANALYTICS DIMENSION SUB-TABS */}
-      <div
-        className="card"
-        style={{
-          padding: '6px',
-          display: 'flex',
-          gap: '6px',
-          flexWrap: 'wrap',
-          background: 'var(--surface)',
-        }}
-      >
-        {[
-          { id: 'sites', label: 'Sites & Locations', icon: Building2 },
-          { id: 'activities', label: 'Activities & Tasks', icon: Activity },
-          { id: 'hazards', label: 'Recurring Hazards', icon: AlertTriangle },
-          { id: 'barriers', label: 'Barrier Failures', icon: ShieldAlert },
-          { id: 'lsr', label: 'Life-Saving Rules', icon: BookOpen },
-          { id: 'trends', label: 'Temporal Trends', icon: TrendingUp },
-        ].map((t) => {
-          const Icon = t.icon;
-          const isActive = activeTab === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id as DimensionTab)}
-              className={`btn ${isActive ? 'btn-primary' : 'btn-secondary'}`}
-              style={{
-                fontSize: '0.82rem',
-                padding: '7px 14px',
-                borderRadius: '8px',
-                fontWeight: isActive ? 600 : 500,
-              }}
-            >
-              <Icon size={15} />
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {error && <ErrorBanner message={error} onRetry={() => fetchAllAnalytics(false)} />}
-
-      {loading ? (
-        <LoadingSkeleton rows={6} />
-      ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
-            {/* ============================================================
-                TAB 1: SITES & LOCATIONS (PRIMARY VIEW)
-               ============================================================ */}
-            {activeTab === 'sites' && (
-              <>
-                {/* PRIMARY CHART CARD: Horizontal Ranked Bar Chart */}
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  {/* Chart Header & Controls */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '16px',
-                      marginBottom: '20px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                        {siteMetric === 'density'
-                          ? 'SIF Precursor Density by Facility'
-                          : siteMetric === 'sif_count'
-                          ? 'SIF Precursor Count by Facility'
-                          : 'Total Incident Reports by Facility'}
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        Facilities ranked by {siteMetric === 'density' ? 'precursor concentration ratio' : siteMetric === 'sif_count' ? 'precursor count' : 'total report volume'}
-                      </p>
-                    </div>
-
-                    {/* Chart Contextual Controls */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                      {/* Metric Selector */}
-                      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-elevated)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
-                        <button
-                          onClick={() => setSiteMetric('density')}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: siteMetric === 'density' ? 'var(--primary)' : 'transparent',
-                            color: siteMetric === 'density' ? '#FFFFFF' : 'var(--text-secondary)',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                        >
-                          SIF Density (%)
-                        </button>
-                        <button
-                          onClick={() => setSiteMetric('sif_count')}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: siteMetric === 'sif_count' ? 'var(--primary)' : 'transparent',
-                            color: siteMetric === 'sif_count' ? '#FFFFFF' : 'var(--text-secondary)',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                        >
-                          SIF Precursors
-                        </button>
-                        <button
-                          onClick={() => setSiteMetric('total_reports')}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            background: siteMetric === 'total_reports' ? 'var(--primary)' : 'transparent',
-                            color: siteMetric === 'total_reports' ? '#FFFFFF' : 'var(--text-secondary)',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                        >
-                          Total Reports
-                        </button>
-                      </div>
-
-                      {/* Limit Selector */}
-                      <select
-                        value={siteLimit}
-                        onChange={(e) => setSiteLimit(Number(e.target.value))}
-                        style={{
-                          background: 'var(--surface-elevated)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                          borderRadius: '8px',
-                          padding: '6px 10px',
-                          fontSize: '0.78rem',
-                          fontFamily: 'var(--font-main)',
-                          cursor: 'pointer',
-                          outline: 'none',
-                        }}
-                      >
-                        <option value={5}>Top 5</option>
-                        <option value={10}>Top 10</option>
-                        <option value={20}>Top 20</option>
-                        <option value={0}>All Facilities</option>
-                      </select>
-
-                      {onNavigate && (
-                        <button
-                          onClick={() => onNavigate('explorer')}
-                          className="btn btn-ghost"
-                          style={{ fontSize: '0.78rem', padding: '6px 10px', color: 'var(--primary-bright)' }}
-                          title="Open in Incident Explorer"
-                        >
-                          <span>Explorer</span>
-                          <ArrowUpRight size={14} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Horizontal Bar Chart Container */}
-                  <div
-                    style={{
-                      height: `${Math.min(420, Math.max(280, siteChartData.length * 36 + 40))}px`,
-                      width: '100%',
-                    }}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={siteChartData}
-                        layout="vertical"
-                        margin={{ top: 8, right: 30, left: 160, bottom: 8 }}
-                      >
-                        <CartesianGrid
-                          horizontal={false}
-                          vertical={true}
-                          stroke="var(--border-subtle)"
-                          strokeDasharray="3 3"
-                        />
-                        <XAxis
-                          type="number"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }}
-                          tickFormatter={(val) => `${val}${siteMetric === 'density' ? '%' : ''}`}
-                          domain={[0, 'auto']}
-                        />
-                        <YAxis
-                          type="category"
-                          dataKey="displayName"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 12, fontFamily: 'var(--font-main)', fill: 'var(--text-primary)', fontWeight: 500 }}
-                          width={160}
-                          tickLine={false}
-                        />
-                        <Tooltip content={<CustomRankedTooltip metricType={siteMetric} />} cursor={{ fill: 'rgba(255, 106, 0, 0.04)' }} />
-                        <Bar dataKey="displayValue" radius={[0, 6, 6, 0]} barSize={20}>
-                          {siteChartData.map((entry, index) => {
-                            let fill = '#C6530A';
-                            if (index === 0 && entry.displayValue > 0) {
-                              fill = '#FF6A00'; // Visual dominant top facility
-                            } else if (entry.displayValue === 0) {
-                              fill = '#71300C'; // Inactive/zero muted
-                            } else if (index < 3 && entry.displayValue > 0) {
-                              fill = '#D95B0B';
-                            }
-                            return <Cell key={`cell-${index}`} fill={fill} />;
-                          })}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* KEY INSIGHT CARD (Data-driven) */}
-                <div
-                  className="card"
+      {/* ====================================================================
+          5. QUESTION 1: WHAT CHANGED? (Temporal Precursor Trend)
+         ==================================================================== */}
+      {(activeView === 'command' || activeView === 'trends') && (
+        <div
+          className="card"
+          style={{
+            padding: '20px',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
                   style={{
-                    padding: '18px 24px',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '16px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--primary)',
+                    background: 'rgba(255, 115, 0, 0.12)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', maxWidth: '850px' }}>
-                    <div
-                      style={{
-                        width: '34px',
-                        height: '34px',
-                        borderRadius: '8px',
-                        background: 'rgba(255, 106, 0, 0.12)',
-                        border: '1px solid rgba(255, 106, 0, 0.25)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--primary)',
-                        flexShrink: 0,
-                        marginTop: '2px',
-                      }}
+                  WHAT CHANGED?
+                </span>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                  SIF Precursor Trend
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                Temporal report volume, SIF precursor frequency, and precursor density over time
+              </p>
+            </div>
+          </div>
+
+          <TemporalTrendChart
+            data={trendData}
+            theme={theme}
+            height={activeView === 'trends' ? '420px' : '320px'}
+            grouping={trendGrouping}
+            onGroupingChange={(g) => setTrendGrouping(g)}
+          />
+        </div>
+      )}
+
+      {/* ====================================================================
+          6. QUESTION 2: WHERE IS RISK CONCENTRATED? (Facility Risk Landscape)
+         ==================================================================== */}
+      {(activeView === 'command' || activeView === 'sites') && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Scatter / Bubble Matrix Card */}
+          <div
+            className="card"
+            style={{
+              padding: '20px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-mono)',
+                      color: 'var(--primary)',
+                      background: 'rgba(255, 115, 0, 0.12)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    WHERE IS THE RISK SIGNAL?
+                  </span>
+                  <h2 style={{ fontSize: '1.05rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                    Facility Risk Landscape
+                  </h2>
+                </div>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                  X: Total Reports (Volume) • Y: Precursor Density (%) • Bubble Size: SIF Precursor Count
+                </p>
+              </div>
+
+              {selectedFacility && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    background: 'rgba(255, 115, 0, 0.12)',
+                    border: '1px solid rgba(255, 115, 0, 0.3)',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  <span style={{ color: 'var(--text-secondary)' }}>Selected:</span>
+                  <strong style={{ color: 'var(--primary-bright)' }}>{selectedFacility}</strong>
+                  <button
+                    onClick={() => setSelectedFacility(null)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      padding: '0 2px',
+                      fontSize: '0.85rem',
+                    }}
+                    title="Clear selection"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <FacilityRiskMatrix
+              data={siteData}
+              theme={theme}
+              height={activeView === 'sites' ? '420px' : '340px'}
+              selectedFacility={selectedFacility}
+              onFacilitySelect={handleFacilityClick}
+            />
+
+            {selectedFacility && onNavigate && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  background: 'var(--surface-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  fontSize: '0.80rem',
+                }}
+              >
+                <span>
+                  Facility active in filter: <strong>{selectedFacility}</strong>
+                </span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => onNavigate('facility')}
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 10px', fontSize: '0.74rem', gap: '4px' }}
+                  >
+                    <span>View Digital Twin</span>
+                    <ExternalLink size={12} />
+                  </button>
+                  <button
+                    onClick={() => onNavigate('explorer')}
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 10px', fontSize: '0.74rem', gap: '4px' }}
+                  >
+                    <span>Filter Reports</span>
+                    <ChevronRight size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Facility Telemetry Table */}
+          <div
+            className="card"
+            style={{
+              padding: '20px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                  Facility Telemetry & Precursor Distribution
+                </h3>
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                  Exact incident records with sample-size reliability context
+                </p>
+              </div>
+
+              <div style={{ position: 'relative', width: '220px' }}>
+                <Search
+                  size={14}
+                  style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+                />
+                <input
+                  type="text"
+                  placeholder="Filter facilities..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '6px 10px 6px 30px',
+                    borderRadius: '6px',
+                    background: 'var(--surface-elevated)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.78rem',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.80rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left', color: 'var(--text-secondary)' }}>
+                    <th
+                      onClick={() => handleSort('site')}
+                      style={{ padding: '8px 10px', cursor: 'pointer', fontWeight: 600 }}
                     >
-                      <Sparkles size={17} />
-                    </div>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                        <span
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>Facility Location</span>
+                        <ArrowUpDown size={12} />
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('total_reports')}
+                      style={{ padding: '8px 10px', cursor: 'pointer', fontWeight: 600, textAlign: 'right' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                        <span>Total Reports</span>
+                        <ArrowUpDown size={12} />
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('sif_count')}
+                      style={{ padding: '8px 10px', cursor: 'pointer', fontWeight: 600, textAlign: 'right' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                        <span>SIF Precursors</span>
+                        <ArrowUpDown size={12} />
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('sif_density')}
+                      style={{ padding: '8px 10px', cursor: 'pointer', fontWeight: 600, textAlign: 'right' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                        <span>Precursor Density</span>
+                        <ArrowUpDown size={12} />
+                      </div>
+                    </th>
+                    <th style={{ padding: '8px 10px', fontWeight: 600, textAlign: 'left' }}>
+                      Sample Context
+                    </th>
+                    {onNavigate && <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 600 }}>Actions</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAndSortedSites.map((item, idx) => {
+                    const isSelected = selectedFacility === item.site;
+                    const isSmallSample = item.total_reports < 5;
+                    const pctInfo = formatPercentageWithContext(item.sif_count, item.total_reports);
+
+                    return (
+                      <tr
+                        key={idx}
+                        onClick={() => handleFacilityClick(item.site)}
+                        style={{
+                          borderBottom: '1px solid var(--border-subtle)',
+                          background: isSelected ? 'var(--surface-hover)' : 'transparent',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease',
+                        }}
+                      >
+                        <td style={{ padding: '9px 10px', fontWeight: 600, color: isSelected ? 'var(--primary-bright)' : 'var(--text-primary)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Building2 size={14} color={item.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)'} />
+                            <span>{item.site}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '9px 10px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                          {formatCount(item.total_reports)}
+                        </td>
+                        <td
                           style={{
-                            fontSize: '0.7rem',
+                            padding: '9px 10px',
+                            textAlign: 'right',
                             fontFamily: 'var(--font-mono)',
                             fontWeight: 700,
-                            color: 'var(--primary)',
-                            letterSpacing: '0.08em',
-                            textTransform: 'uppercase',
+                            color: item.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)',
                           }}
                         >
-                          ● Key Operational Insight
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.5, margin: 0 }}>
-                        {topSite && topSite.sif_count > 0 ? (
-                          <>
-                            <strong style={{ color: 'var(--primary-bright)' }}>{topSite.site}</strong> currently shows the highest SIF precursor density at{' '}
-                            <strong style={{ color: 'var(--danger)', fontFamily: 'var(--font-mono)' }}>{(topSite.sif_density * 100).toFixed(1)}%</strong>{' '}
-                            ({topSite.sif_count} precursors out of {topSite.total_reports} reports).{' '}
-                            {kpis.highRiskSites > 1
-                              ? `${kpis.highRiskSites} facilities require active barrier triage.`
-                              : 'Recommended focus: safety barrier verification and isolation protocol auditing.'}
-                          </>
-                        ) : (
-                          'No elevated SIF precursor hotspots detected across monitored facilities. Precursor distribution remains balanced.'
+                          {formatCount(item.sif_count)}
+                        </td>
+                        <td style={{ padding: '9px 10px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+                          <span style={{ color: item.sif_count > 0 ? 'var(--warning)' : 'var(--success)' }}>
+                            {pctInfo.percentStr}
+                          </span>
+                        </td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                              {pctInfo.contextStr}
+                            </span>
+                            {isSmallSample && (
+                              <span
+                                style={{
+                                  fontSize: '0.65rem',
+                                  padding: '1px 5px',
+                                  borderRadius: '4px',
+                                  background: 'rgba(255, 179, 71, 0.12)',
+                                  color: 'var(--warning)',
+                                  border: '1px solid rgba(255, 179, 71, 0.25)',
+                                  fontFamily: 'var(--font-mono)',
+                                }}
+                              >
+                                Limited sample
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        {onNavigate && (
+                          <td style={{ padding: '9px 10px', textAlign: 'right' }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate('explorer');
+                              }}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--primary)',
+                                cursor: 'pointer',
+                                fontSize: '0.74rem',
+                                fontWeight: 600,
+                                padding: '2px 6px',
+                              }}
+                            >
+                              Explore →
+                            </button>
+                          </td>
                         )}
-                      </p>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====================================================================
+          7. QUESTION 3: WHY ARE SIGNALS OCCURRING? (Barriers & Hazards)
+         ==================================================================== */}
+      {(activeView === 'command' || activeView === 'hazards_barriers') && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '10px',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--primary)',
+                    background: 'rgba(255, 115, 0, 0.12)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  WHY ARE SIGNALS OCCURRING?
+                </span>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                  Barrier Integrity & Recurring Energy Hazards
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                Root-cause barrier defect modes and high-frequency energy exposure classes
+              </p>
+            </div>
+
+            {activeView === 'hazards_barriers' && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '4px',
+                  background: 'var(--surface-elevated)',
+                  padding: '3px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <button
+                  onClick={() => setWhySubTab('all')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: whySubTab === 'all' ? 600 : 500,
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: whySubTab === 'all' ? 'var(--primary)' : 'transparent',
+                    color: whySubTab === 'all' ? '#FFFFFF' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setWhySubTab('barriers')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: whySubTab === 'barriers' ? 600 : 500,
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: whySubTab === 'barriers' ? 'var(--primary)' : 'transparent',
+                    color: whySubTab === 'barriers' ? '#FFFFFF' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Barriers
+                </button>
+                <button
+                  onClick={() => setWhySubTab('hazards')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: whySubTab === 'hazards' ? 600 : 500,
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: whySubTab === 'hazards' ? 'var(--primary)' : 'transparent',
+                    color: whySubTab === 'hazards' ? '#FFFFFF' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Hazards
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: whySubTab === 'all' ? 'repeat(auto-fit, minmax(420px, 1fr))' : '1fr',
+              gap: '16px',
+            }}
+          >
+            {/* Barrier Ranking Card */}
+            {(whySubTab === 'all' || whySubTab === 'barriers') && (
+              <div
+                className="card"
+                style={{
+                  padding: '20px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldX size={15} color="var(--danger)" />
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                      Barrier Failure Defect Modes
+                    </h3>
+                  </div>
+                  <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                    Ranked by SIF-linked barrier failure count
+                  </p>
+                </div>
+
+                <BarrierRankingChart
+                  data={barrierData}
+                  theme={theme}
+                  selectedBarrier={selectedBarrier}
+                  onBarrierSelect={(b) => setSelectedBarrier((prev) => (prev === b ? null : b))}
+                />
+              </div>
+            )}
+
+            {/* Recurring Hazards Card (Ranked List as per Section 20) */}
+            {(whySubTab === 'all' || whySubTab === 'hazards') && (
+              <div
+                className="card"
+                style={{
+                  padding: '20px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Flame size={15} color="var(--warning)" />
+                      <h3 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                        Recurring Hazard Signals
+                      </h3>
                     </div>
+                    <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                      Ranked energy hazard exposures with sample context
+                    </p>
                   </div>
 
-                  {onNavigate && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '2px',
+                      background: 'var(--surface-elevated)',
+                      padding: '2px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--border-subtle)',
+                    }}
+                  >
                     <button
-                      onClick={() => onNavigate('review')}
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.82rem', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      onClick={() => setHazardViewMode('list')}
+                      style={{
+                        padding: '2px 6px',
+                        fontSize: '0.68rem',
+                        fontWeight: hazardViewMode === 'list' ? 600 : 500,
+                        border: 'none',
+                        borderRadius: '3px',
+                        background: hazardViewMode === 'list' ? 'var(--primary)' : 'transparent',
+                        color: hazardViewMode === 'list' ? '#FFFFFF' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                      }}
                     >
-                      <span>Triage Queue</span>
-                      <ChevronRight size={14} />
+                      List
                     </button>
-                  )}
+                    <button
+                      onClick={() => setHazardViewMode('chart')}
+                      style={{
+                        padding: '2px 6px',
+                        fontSize: '0.68rem',
+                        fontWeight: hazardViewMode === 'chart' ? 600 : 500,
+                        border: 'none',
+                        borderRadius: '3px',
+                        background: hazardViewMode === 'chart' ? 'var(--primary)' : 'transparent',
+                        color: hazardViewMode === 'chart' ? '#FFFFFF' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Chart
+                    </button>
+                  </div>
                 </div>
 
-                {/* FACILITY INTELLIGENCE TABLE (Dedicated Separate Card) */}
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '14px',
-                      marginBottom: '18px',
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                          Facility Intelligence
-                        </h3>
-                        <span
+                {hazardViewMode === 'chart' ? (
+                  <HazardRankingChart
+                    data={hazardData}
+                    theme={theme}
+                    selectedHazard={selectedHazard}
+                    onHazardSelect={(h) => setSelectedHazard((prev) => (prev === h ? null : h))}
+                  />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {hazardData.slice(0, 8).map((item, idx) => {
+                      const isSelected = selectedHazard === item.hazard;
+                      const maxSif = Math.max(...hazardData.map((h) => h.sif_count), 1);
+                      const barPercent = Math.round((item.sif_count / maxSif) * 100);
+                      const pctInfo = formatPercentageWithContext(item.sif_count, item.total_reports);
+
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedHazard((prev) => (prev === item.hazard ? null : item.hazard))}
                           style={{
-                            fontSize: '0.72rem',
-                            fontFamily: 'var(--font-mono)',
-                            color: 'var(--text-muted)',
-                            background: 'var(--surface-elevated)',
-                            padding: '2px 8px',
+                            padding: '8px 12px',
                             borderRadius: '6px',
-                            border: '1px solid var(--border-subtle)',
+                            background: isSelected ? 'var(--surface-hover)' : 'var(--surface-elevated)',
+                            border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-subtle)'}`,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '5px',
+                            transition: 'all 0.15s ease',
                           }}
                         >
-                          {filteredSites.length} monitored
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                        Telemetry metrics and SIF risk classification per operational asset
-                      </p>
-                    </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span
+                                style={{
+                                  fontSize: '0.70rem',
+                                  fontFamily: 'var(--font-mono)',
+                                  fontWeight: 700,
+                                  color: 'var(--text-muted)',
+                                }}
+                              >
+                                {String(idx + 1).padStart(2, '0')}
+                              </span>
+                              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {item.hazard}
+                              </span>
+                            </div>
 
-                    {/* Table Search Input */}
-                    <div style={{ position: 'relative', width: '240px' }}>
-                      <Search
-                        size={14}
-                        color="var(--text-muted)"
-                        style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Filter facilities..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '7px 12px 7px 30px',
-                          borderRadius: '8px',
-                          background: 'var(--background-secondary)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.8rem',
-                          outline: 'none',
-                        }}
-                      />
-                    </div>
-                  </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                                {pctInfo.contextStr}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.76rem',
+                                  fontFamily: 'var(--font-mono)',
+                                  fontWeight: 700,
+                                  color: item.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)',
+                                }}
+                              >
+                                {pctInfo.percentStr}
+                              </span>
+                            </div>
+                          </div>
 
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Facility</th>
-                          <th style={{ textAlign: 'right' }}>Total Reports</th>
-                          <th style={{ textAlign: 'right' }}>SIF Precursors</th>
-                          <th style={{ width: '200px' }}>Precursor Density</th>
-                          <th style={{ textAlign: 'center' }}>Risk Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredSites.length > 0 ? (
-                          filteredSites.map((s, idx) => {
-                            const isHigh = s.sif_density >= 0.10 || s.sif_count >= 4;
-                            const isMed = s.sif_density > 0 || s.sif_count > 0;
-                            const pct = (s.sif_density * 100).toFixed(1);
-
-                            return (
-                              <tr key={idx}>
-                                <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                                  {s.site || 'Unknown Location'}
-                                </td>
-                                <td
-                                  style={{
-                                    textAlign: 'right',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontVariantNumeric: 'tabular-nums',
-                                    color: 'var(--text-secondary)',
-                                  }}
-                                >
-                                  {s.total_reports}
-                                </td>
-                                <td
-                                  style={{
-                                    textAlign: 'right',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontVariantNumeric: 'tabular-nums',
-                                    color: s.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)',
-                                    fontWeight: s.sif_count > 0 ? 700 : 400,
-                                  }}
-                                >
-                                  {s.sif_count}
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div
-                                      style={{
-                                        flex: 1,
-                                        height: '6px',
-                                        background: 'var(--surface-elevated)',
-                                        borderRadius: '3px',
-                                        overflow: 'hidden',
-                                      }}
-                                    >
-                                      <div
-                                        style={{
-                                          width: `${Math.min(100, Math.max(0, s.sif_density * 100))}%`,
-                                          height: '100%',
-                                          background: isHigh
-                                            ? 'var(--danger)'
-                                            : isMed
-                                            ? 'var(--primary)'
-                                            : 'var(--text-muted)',
-                                          borderRadius: '3px',
-                                        }}
-                                      />
-                                    </div>
-                                    <span
-                                      style={{
-                                        fontFamily: 'var(--font-mono)',
-                                        fontVariantNumeric: 'tabular-nums',
-                                        fontSize: '0.82rem',
-                                        fontWeight: 600,
-                                        color: isHigh ? 'var(--danger)' : isMed ? 'var(--text-primary)' : 'var(--text-muted)',
-                                        minWidth: '45px',
-                                        textAlign: 'right',
-                                      }}
-                                    >
-                                      {pct}%
-                                    </span>
-                                  </div>
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                  {isHigh ? (
-                                    <span
-                                      className="badge badge-sif"
-                                      style={{ fontSize: '0.7rem', padding: '3px 8px' }}
-                                    >
-                                      HIGH
-                                    </span>
-                                  ) : isMed ? (
-                                    <span
-                                      className="badge badge-uncertain"
-                                      style={{ fontSize: '0.7rem', padding: '3px 8px' }}
-                                    >
-                                      MEDIUM
-                                    </span>
-                                  ) : (
-                                    <span
-                                      className="badge badge-nonsif"
-                                      style={{ fontSize: '0.7rem', padding: '3px 8px' }}
-                                    >
-                                      LOW
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        ) : (
-                          <tr>
-                            <td colSpan={5} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                              No facilities matching &quot;{searchQuery}&quot;
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* ============================================================
-                TAB 2: ACTIVITIES & TASKS
-               ============================================================ */}
-            {activeTab === 'activities' && (
-              <>
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '16px',
-                      marginBottom: '20px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                        Operational Task Precursor Distribution
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        High-risk activities ranked by {activityMetric === 'density' ? 'precursor density' : 'precursor count'}
-                      </p>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-elevated)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
-                      <button
-                        onClick={() => setActivityMetric('density')}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          background: activityMetric === 'density' ? 'var(--primary)' : 'transparent',
-                          color: activityMetric === 'density' ? '#FFFFFF' : 'var(--text-secondary)',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Density (%)
-                      </button>
-                      <button
-                        onClick={() => setActivityMetric('sif_count')}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          background: activityMetric === 'sif_count' ? 'var(--primary)' : 'transparent',
-                          color: activityMetric === 'sif_count' ? '#FFFFFF' : 'var(--text-secondary)',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        SIF Count
-                      </button>
-                    </div>
-                  </div>
-
-                  <div style={{ height: `${Math.min(420, Math.max(280, activityChartData.length * 36 + 40))}px`, width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={activityChartData}
-                        layout="vertical"
-                        margin={{ top: 8, right: 30, left: 160, bottom: 8 }}
-                      >
-                        <CartesianGrid horizontal={false} vertical={true} stroke="var(--border-subtle)" strokeDasharray="3 3" />
-                        <XAxis
-                          type="number"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }}
-                          tickFormatter={(val) => `${val}${activityMetric === 'density' ? '%' : ''}`}
-                        />
-                        <YAxis
-                          type="category"
-                          dataKey="displayName"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 12, fontFamily: 'var(--font-main)', fill: 'var(--text-primary)', fontWeight: 500 }}
-                          width={160}
-                          tickLine={false}
-                        />
-                        <Tooltip content={<CustomRankedTooltip metricType={activityMetric} />} cursor={{ fill: 'rgba(255, 106, 0, 0.04)' }} />
-                        <Bar dataKey="displayValue" radius={[0, 6, 6, 0]} barSize={20}>
-                          {activityChartData.map((entry, index) => (
-                            <Cell
-                              key={`act-${index}`}
-                              fill={index === 0 && entry.displayValue > 0 ? '#FF6A00' : entry.displayValue === 0 ? '#71300C' : '#C6530A'}
+                          {/* Visual proportion bar */}
+                          <div
+                            style={{
+                              width: '100%',
+                              height: '4px',
+                              borderRadius: '2px',
+                              background: 'var(--border-subtle)',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: `${barPercent}%`,
+                                height: '100%',
+                                background: item.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)',
+                                borderRadius: '2px',
+                              }}
                             />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-
-                {/* Activity Intelligence Table */}
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                    Activity Breakdown
-                  </h3>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Activity / Work Scope</th>
-                          <th style={{ textAlign: 'right' }}>Total Reports</th>
-                          <th style={{ textAlign: 'right' }}>SIF Precursors</th>
-                          <th style={{ width: '200px' }}>Density</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activityData.map((a, idx) => (
-                          <tr key={idx}>
-                            <td style={{ fontWeight: 600 }}>{a.activity}</td>
-                            <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                              {a.total_reports}
-                            </td>
-                            <td style={{ textAlign: 'right', color: a.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                              {a.sif_count}
-                            </td>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                  <div
-                                    style={{
-                                      width: `${Math.min(100, Math.max(0, a.sif_density * 100))}%`,
-                                      height: '100%',
-                                      background: a.sif_density > 0.1 ? 'var(--danger)' : 'var(--primary)',
-                                    }}
-                                  />
-                                </div>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600 }}>
-                                  {(a.sif_density * 100).toFixed(1)}%
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
+                )}
+              </div>
             )}
+          </div>
+        </div>
+      )}
 
-            {/* ============================================================
-                TAB 3: RECURRING HAZARDS
-               ============================================================ */}
-            {activeTab === 'hazards' && (
-              <div className="card" style={{ padding: '24px 28px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                  Recurring Precursor Hazards
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                  Dominant hazard classifications associated with high potential incident energy
-                </p>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Hazard Identification</th>
-                        <th style={{ textAlign: 'right' }}>Total Reports</th>
-                        <th style={{ textAlign: 'right' }}>SIF Precursors</th>
-                        <th style={{ width: '200px' }}>Density</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {hazardData.map((h, idx) => (
-                        <tr key={idx}>
-                          <td style={{ fontWeight: 600, color: 'var(--primary-bright)' }}>{h.hazard}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.total_reports}</td>
-                          <td style={{ textAlign: 'right', color: h.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.sif_count}</td>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${Math.min(100, Math.max(0, h.sif_density * 100))}%`, height: '100%', background: 'var(--primary)' }} />
-                              </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600 }}>
-                                {(h.sif_density * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+      {/* ====================================================================
+          8. QUESTION 4: HOW ARE CONTROLS INVOLVED? (LSR & Work Scopes)
+         ==================================================================== */}
+      {(activeView === 'command' || activeView === 'lsr_activities') && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '10px',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--primary)',
+                    background: 'rgba(255, 115, 0, 0.12)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  HOW ARE CONTROLS INVOLVED?
+                </span>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                  IOGP Life-Saving Rules & Operational Work Scopes
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                Standardized life-saving rule control alignment and activity scope vulnerability
+              </p>
+            </div>
+
+            {activeView === 'lsr_activities' && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '4px',
+                  background: 'var(--surface-elevated)',
+                  padding: '3px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <button
+                  onClick={() => setHowSubTab('all')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: howSubTab === 'all' ? 600 : 500,
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: howSubTab === 'all' ? 'var(--primary)' : 'transparent',
+                    color: howSubTab === 'all' ? '#FFFFFF' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setHowSubTab('lsr')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: howSubTab === 'lsr' ? 600 : 500,
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: howSubTab === 'lsr' ? 'var(--primary)' : 'transparent',
+                    color: howSubTab === 'lsr' ? '#FFFFFF' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Life-Saving Rules
+                </button>
+                <button
+                  onClick={() => setHowSubTab('activities')}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.74rem',
+                    fontWeight: howSubTab === 'activities' ? 600 : 500,
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: howSubTab === 'activities' ? 'var(--primary)' : 'transparent',
+                    color: howSubTab === 'activities' ? '#FFFFFF' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Work Scopes
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: howSubTab === 'all' ? 'repeat(auto-fit, minmax(420px, 1fr))' : '1fr',
+              gap: '16px',
+            }}
+          >
+            {/* Life-Saving Rules Chart */}
+            {(howSubTab === 'all' || howSubTab === 'lsr') && (
+              <div
+                className="card"
+                style={{
+                  padding: '20px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <BookOpen size={15} color="var(--primary)" />
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                      IOGP Life-Saving Rule Distribution
+                    </h3>
+                  </div>
+                  <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                    Match counts and percentage share across parsed records
+                  </p>
                 </div>
+
+                <LSRDistributionChart
+                  data={lsrData}
+                  theme={theme}
+                  selectedLsr={selectedLsr}
+                  onLsrSelect={(r) => setSelectedLsr((prev) => (prev === r ? null : r))}
+                />
               </div>
             )}
 
-            {/* ============================================================
-                TAB 4: BARRIER FAILURES
-               ============================================================ */}
-            {activeTab === 'barriers' && (
-              <div className="card" style={{ padding: '24px 28px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                  Failed, Missing, or Bypassed Safety Barriers
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                  Safety barriers whose absence or degradation allowed precursor escalation
-                </p>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Barrier Failure Defect</th>
-                        <th style={{ textAlign: 'right' }}>Total Reports</th>
-                        <th style={{ textAlign: 'right' }}>SIF Precursors</th>
-                        <th style={{ width: '200px' }}>Density</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {barrierData.map((b, idx) => (
-                        <tr key={idx}>
-                          <td style={{ fontWeight: 600, color: 'var(--danger)' }}>{b.barrier_failure}</td>
-                          <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.total_reports}</td>
-                          <td style={{ textAlign: 'right', color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.sif_count}</td>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${Math.min(100, Math.max(0, b.sif_density * 100))}%`, height: '100%', background: 'var(--danger)' }} />
-                              </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600, color: 'var(--danger)' }}>
-                                {(b.sif_density * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {/* Operational Activities Chart */}
+            {(howSubTab === 'all' || howSubTab === 'activities') && (
+              <div
+                className="card"
+                style={{
+                  padding: '20px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Activity size={15} color="var(--primary)" />
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                      Operational Task & Activity Work Scopes
+                    </h3>
+                  </div>
+                  <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                    Ranked by SIF precursor count with total report context
+                  </p>
                 </div>
+
+                <ActivityRankingChart
+                  data={activityData}
+                  theme={theme}
+                />
               </div>
             )}
-
-            {/* ============================================================
-                TAB 5: LIFE-SAVING RULES
-               ============================================================ */}
-            {activeTab === 'lsr' && (
-              <div className="card" style={{ padding: '24px 28px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                  IOGP Life-Saving Rules Implication Distribution
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                  Distribution of precursor occurrences matched against standard IOGP 9 Life-Saving Rules
-                </p>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Life-Saving Rule Name</th>
-                        <th style={{ textAlign: 'right' }}>Incident Matches</th>
-                        <th style={{ width: '220px' }}>Share of Precursors (%)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lsrData.map((lsr, idx) => (
-                        <tr key={idx}>
-                          <td style={{ fontWeight: 600, color: 'var(--primary-bright)' }}>{lsr.rule_name}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{lsr.count}</td>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${Math.min(100, Math.max(0, lsr.percentage))}%`, height: '100%', background: 'var(--primary)' }} />
-                              </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600 }}>
-                                {lsr.percentage.toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* ============================================================
-                TAB 6: TEMPORAL TRENDS
-               ============================================================ */}
-            {activeTab === 'trends' && (
-              <>
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '14px',
-                      marginBottom: '20px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                        Temporal Precursor Trajectory
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        Chronological trend of SIF precursors vs total reported volume
-                      </p>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <button
-                        onClick={() => setTrendGrouping('month')}
-                        className={`btn ${trendGrouping === 'month' ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ fontSize: '0.75rem', padding: '5px 12px' }}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        onClick={() => setTrendGrouping('quarter')}
-                        className={`btn ${trendGrouping === 'quarter' ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ fontSize: '0.75rem', padding: '5px 12px' }}
-                      >
-                        Quarterly
-                      </button>
-                    </div>
-                  </div>
-
-                  <div style={{ height: '340px', width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
-                        <defs>
-                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
-                            <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
-                          </linearGradient>
-                          <linearGradient id="colorSif" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--danger)" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="var(--danger)" stopOpacity={0.0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" />
-                        <XAxis dataKey="period" stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
-                        <YAxis stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
-                        <Tooltip content={<CustomRankedTooltip metricType="trends" />} />
-                        <Area type="monotone" dataKey="total_reports" name="Total Reports" stroke="var(--primary)" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
-                        <Area type="monotone" dataKey="sif_precursors" name="SIF Precursors" stroke="var(--danger)" strokeWidth={3} fillOpacity={1} fill="url(#colorSif)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Trend Table */}
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                    Temporal Metrics Breakdown
-                  </h3>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Period</th>
-                          <th style={{ textAlign: 'right' }}>Total Reports</th>
-                          <th style={{ textAlign: 'right' }}>SIF Precursors</th>
-                          <th style={{ textAlign: 'right' }}>Density</th>
-                          <th style={{ textAlign: 'right' }}>Change</th>
-                          <th style={{ textAlign: 'center' }}>Trend</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {trendData.map((t, idx) => (
-                          <tr key={idx}>
-                            <td style={{ fontWeight: 600 }}>{t.period}</td>
-                            <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.total_reports}</td>
-                            <td style={{ textAlign: 'right', color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.sif_precursors}</td>
-                            <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{(t.sif_density * 100).toFixed(1)}%</td>
-                            <td style={{ textAlign: 'right', color: t.percentage_change > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                              {t.percentage_change > 0 ? `+${t.percentage_change}%` : `${t.percentage_change}%`}
-                            </td>
-                            <td style={{ textAlign: 'center' }}>
-                              <span className={t.trend === 'INCREASE' ? 'badge badge-sif' : 'badge badge-nonsif'}>
-                                {t.trend}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </div>
       )}
     </motion.div>
   );
 };
+
+export default AnalyticsPage;

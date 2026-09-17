@@ -162,33 +162,67 @@ export const Navigation: React.FC<Props> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: isCollapsed ? 'center' : 'flex-start',
-                  gap: isCollapsed ? '0' : '12px',
-                  padding: isCollapsed ? '10px 0' : '9px 12px',
-                  borderRadius: '10px',
+                  gap: isCollapsed ? '0' : '10px',
+                  padding: isCollapsed ? '9px 0' : '8px 10px',
+                  borderRadius: '8px',
                   border: 'none',
-                  borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
-                  background: isActive ? 'rgba(255, 106, 0, 0.14)' : 'transparent',
-                  color: isActive ? '#FFFFFF' : 'var(--text-secondary)',
+                  background: isActive ? 'var(--surface-hover)' : 'transparent',
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                   fontWeight: isActive ? 600 : 500,
-                  fontSize: '0.85rem',
+                  fontSize: '0.83rem',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transition: 'background-color 0.15s ease-out, color 0.15s ease-out, border-color 0.15s ease-out',
+                  transition: 'background-color 0.15s ease-out, color 0.15s ease-out',
                   width: '100%',
                 }}
               >
+                {/* Active Indicator Accent */}
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebarActiveIndicator"
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: '6px',
+                      bottom: '6px',
+                      width: '3px',
+                      borderRadius: '0 2px 2px 0',
+                      background: 'var(--primary)',
+                    }}
+                  />
+                )}
+
                 <Icon
-                  size={17}
+                  size={16}
                   color={isActive ? 'var(--primary)' : 'var(--text-muted)'}
                   style={{
                     transition: 'color 0.15s ease-out',
                     flexShrink: 0,
+                    marginLeft: isActive && !isCollapsed ? '2px' : 0,
                   }}
                 />
                 {!isCollapsed && (
-                  <span style={{ fontFamily: 'var(--font-main)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-main)',
+                      letterSpacing: '-0.01em',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                    }}
+                  >
                     {tab.label}
                   </span>
+                )}
+                {isActive && !isCollapsed && (
+                  <span
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      borderRadius: '50%',
+                      background: 'var(--primary)',
+                      opacity: 0.8,
+                    }}
+                  />
                 )}
               </motion.button>
             );

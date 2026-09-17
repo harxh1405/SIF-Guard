@@ -172,7 +172,7 @@ function AppContent() {
           {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
           {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
           {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}
-          {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
+          {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} theme={theme} />}
           {activeTab === 'knowledge' && <KnowledgeLSRPage />}
           {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
         </main>

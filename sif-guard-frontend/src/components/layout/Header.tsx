@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldAlert, Server, CheckCircle2, XCircle, Keyboard, User, LogOut } from 'lucide-react';
+import { ShieldAlert, Keyboard, User, LogOut } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
 import { motion } from 'motion/react';
@@ -100,45 +100,39 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        {/* Backend Status Badge */}
+        {/* System Status Indicator */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '12px',
+            padding: '6px 12px',
+            borderRadius: '8px',
             background: 'var(--surface-elevated)',
-            border: '1px solid var(--border)',
-            fontSize: '0.78rem',
+            border: '1px solid var(--border-subtle)',
+            fontSize: '0.76rem',
             fontFamily: 'var(--font-mono)',
           }}
+          title={health ? `AI Service Live (${health.service}) • Model: ${health.embedding_model}` : 'Checking backend...'}
         >
-          <Server size={14} color="var(--primary)" />
-          <span style={{ color: 'var(--text-secondary)' }}>Backend:</span>
+          <span
+            style={{
+              width: '7px',
+              height: '7px',
+              borderRadius: '50%',
+              backgroundColor: !error && health ? 'var(--success)' : 'var(--danger)',
+              boxShadow: !error && health ? '0 0 8px rgba(32, 217, 151, 0.6)' : 'none',
+              display: 'inline-block',
+            }}
+          />
+          <span style={{ color: 'var(--text-secondary)' }}>System:</span>
           {!error && health ? (
-            <span
-              style={{
-                color: 'var(--success)',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}
-            >
-              <CheckCircle2 size={12} /> Live ({health.embedding_model.split('/')[1] || health.embedding_model})
+            <span style={{ color: 'var(--success)', fontWeight: 600 }}>
+              Online
             </span>
           ) : (
-            <span
-              style={{
-                color: 'var(--danger)',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}
-            >
-              <XCircle size={12} /> Disconnected
+            <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+              Disconnected
             </span>
           )}
         </div>
