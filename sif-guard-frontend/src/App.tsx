@@ -13,6 +13,7 @@ import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthPage } from './components/auth/AuthPage';
+import { LandingPage } from './pages/LandingPage';
 import { ShieldAlert, Loader2 } from 'lucide-react';
 
 const TAB_ORDER: TabId[] = [
@@ -28,6 +29,7 @@ const TAB_ORDER: TabId[] = [
 
 function AppContent() {
   const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('sif_guard_theme') as 'dark' | 'light') || 'dark';
@@ -128,9 +130,12 @@ function AppContent() {
     );
   }
 
-  // Unauthenticated: Show Auth Page (Login / Signup)
+  // Unauthenticated: Show Landing Page by default, or Auth Page when requested
   if (!user) {
-    return <AuthPage />;
+    if (showAuth) {
+      return <AuthPage onBack={() => setShowAuth(false)} />;
+    }
+    return <LandingPage onEnterPlatform={() => setShowAuth(true)} />;
   }
 
   // Authenticated: Show full existing SIF-Guard Application

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldAlert, LogIn, UserPlus, AlertCircle, CheckCircle2, Loader2, Lock, Mail, User } from 'lucide-react';
+import { ShieldAlert, LogIn, UserPlus, AlertCircle, CheckCircle2, Loader2, Lock, Mail, User, ArrowLeft } from 'lucide-react';
 
-export const AuthPage: React.FC = () => {
+interface AuthPageProps {
+  onBack?: () => void;
+}
+
+export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [fullName, setFullName] = useState('');
@@ -129,6 +133,27 @@ export const AuthPage: React.FC = () => {
           boxSizing: 'border-box',
         }}
       >
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary, #B3A194)',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              padding: '0 0 16px 0',
+              transition: 'color 0.15s ease',
+            }}
+          >
+            <ArrowLeft size={14} /> Back to Overview
+          </button>
+        )}
+
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div

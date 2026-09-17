@@ -30,6 +30,7 @@ interface RefineryCanvasProps {
   onSelectIncident?: (incident: ZoneIncident) => void;
   theme?: 'light' | 'dark';
   onFallback2D?: () => void;
+  minimalOverlay?: boolean;
 }
 
 export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
@@ -42,6 +43,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   onSelectIncident,
   theme = 'dark',
   onFallback2D,
+  minimalOverlay = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -659,7 +661,10 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         </div>
       )}
 
-      {/* Top Left: Enterprise Camera Presets Dropdown & Selector */}
+      {/* Overlays and HUD controls */}
+      {!minimalOverlay && (
+        <>
+          {/* Top Left: Enterprise Camera Presets Dropdown & Selector */}
       <div
         style={{
           position: 'absolute',
@@ -957,6 +962,8 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
           3D DIGITAL TWIN: <span style={{ color: '#30d158', fontWeight: 700 }}>LIVE</span>
         </span>
       </div>
+        </>
+      )}
     </div>
   );
 };
