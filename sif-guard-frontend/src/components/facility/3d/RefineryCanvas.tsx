@@ -68,7 +68,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     incidents: false, // SIF incident pins off by default
     pipelines: true,
     equipment: true,
-    labels: true,
+    labels: !minimalOverlay,
   });
 
   const [activePreset, setActivePreset] = useState<string>('overview');
@@ -100,6 +100,14 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   const flameMeshRef = useRef<THREE.Mesh | null>(null);
   const pipeCollarsRef = useRef<THREE.Mesh[]>([]);
   const interactiveMeshesRef = useRef<THREE.Mesh[]>([]);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
+  const selectedZoneIdRef = useRef<string | null>(selectedZoneId);
+  const hoveredZoneIdRef = useRef<string | null>(hoveredZoneId);
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const pointerPosRef = useRef<{ clientX: number; clientY: number } | null>(null);
+  const rafHoverIdRef = useRef<number | null>(null);
 
   // Camera animation interpolation state
   const targetCamPos = useRef<THREE.Vector3>(new THREE.Vector3(0, 68, 68));
@@ -240,45 +248,40 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     flameMeshRef.current = flareFlameMesh;
     pipeCollarsRef.current = pipeFlowCollars;
 
-    // 5. Dynamic Auto-Framing using THREE.Box3
-    refineryGroup.updateMatrixWorld(true);
-    const box = new THREE.Box3().setFromObject(refineryGroup);
-    const boxCenter = new THREE.Vector3();
-    box.getCenter(boxCenter);
-    const boxSize = new THREE.Vector3();
-    box.getSize(boxSize);
+    // 5. Dynamic Auto-Framing using Facility Equipment Footprint (Radius 44, Center [2, 4.0, 0])
+    const facilityCenter = new THREE.Vector3(2, 4.0, 0);
+    const facilityRadius = 44; // True industrial equipment footprint
 
-    // Orbital center: elevated slightly above ground plane (y ~ 4)
-    const modelCenter = new THREE.Vector3(boxCenter.x, Math.max(boxCenter.y, 4), boxCenter.z);
-
-    // Calculate bounding sphere radius covering facility bounds
-    const maxDim = Math.max(boxSize.x, boxSize.z, boxSize.y * 1.4);
-    const radius = maxDim * 0.58;
-
-    const fovRad = (45 * Math.PI) / 180;
     const aspect = containerWidth / containerHeight;
-    const distV = radius / Math.tan(fovRad / 2);
+    const fov = 42;
+    const fovRad = (fov * Math.PI) / 180;
+    const distV = facilityRadius / Math.tan(fovRad / 2);
     const fovH = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
-    const distH = radius / Math.tan(fovH / 2);
+    const distH = facilityRadius / Math.tan(fovH / 2);
 
-    // 20% negative space / breathing room around complex
-    const fitDistance = Math.max(distV, distH) * 1.20;
+    // Responsive camera distance:
+    // On widescreen (aspect >= 1.3), vertical coverage frames tightly at ~98-104 units.
+    // On narrower screens (tablet/mobile), blend with distH so facility stays large without horizontal clipping.
+    const fitDistance =
+      aspect >= 1.3
+        ? distV * 0.90
+        : Math.max(distV * 0.90, distH * 0.92);
 
-    // Classic 3/4 isometric perspective: ~28 degrees elevation, ~44 degrees azimuth
-    const elevation = 28 * (Math.PI / 180);
-    const azimuth = 44 * (Math.PI / 180);
+    // Classic 3/4 isometric perspective: 26° elevation, 40° azimuth
+    const elevation = 26 * (Math.PI / 180);
+    const azimuth = 40 * (Math.PI / 180);
 
     const calculatedCamPos = new THREE.Vector3(
-      modelCenter.x + fitDistance * Math.cos(elevation) * Math.sin(azimuth),
-      modelCenter.y + fitDistance * Math.sin(elevation),
-      modelCenter.z + fitDistance * Math.cos(elevation) * Math.cos(azimuth)
+      facilityCenter.x + fitDistance * Math.cos(elevation) * Math.sin(azimuth),
+      facilityCenter.y + fitDistance * Math.sin(elevation),
+      facilityCenter.z + fitDistance * Math.cos(elevation) * Math.cos(azimuth)
     );
 
     const initialPos = customCameraPos ? new THREE.Vector3(...customCameraPos) : calculatedCamPos;
-    const initialTarget = customCameraTarget ? new THREE.Vector3(...customCameraTarget) : modelCenter;
+    const initialTarget = customCameraTarget ? new THREE.Vector3(...customCameraTarget) : facilityCenter;
 
     // 6. Camera Setup
-    const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.5, 1000);
+    const camera = new THREE.PerspectiveCamera(fov, aspect, 0.5, 1000);
     camera.position.copy(initialPos);
     camera.lookAt(initialTarget);
     cameraRef.current = camera;
@@ -292,16 +295,28 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     controls.target.copy(initialTarget);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.minDistance = fitDistance * 0.28;
-    controls.maxDistance = fitDistance * 2.8;
+    controls.rotateSpeed = 0.9;
+    controls.minDistance = 35;
+    controls.maxDistance = 220;
     controls.minPolarAngle = 0.05;
     controls.maxPolarAngle = Math.PI / 2.05; // Prevent camera dipping below ground
     controls.autoRotate = false; // NO auto-rotation fighting user!
+    controls.enableZoom = false; // Mouse wheel belongs to website page scroll!
+    controls.enablePan = false;
+    renderer.domElement.style.touchAction = 'none';
     controls.update();
 
-    // CRITICAL: Any user interaction (drag, wheel, touch) cancels programmatic camera lerping
+    // Any user interaction (drag, touch) cancels programmatic camera lerping
     controls.addEventListener('start', () => {
       isAnimatingCam.current = false;
+      isDraggingRef.current = true;
+      setHoveredData(null);
+    });
+
+    controls.addEventListener('end', () => {
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 50);
     });
 
     controlsRef.current = controls;
@@ -388,6 +403,9 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
+      if (rafHoverIdRef.current !== null) {
+        cancelAnimationFrame(rafHoverIdRef.current);
+      }
       controls.dispose();
       renderer.dispose();
     };
@@ -449,7 +467,24 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     pipeCollarsRef.current = pipeFlowCollars;
   }, [theme, layers]);
 
-  // Update Dynamic Zones & Incidents when data/selection/hover/layer changes
+  // Fast in-place zone highlighting without destroying/recreating 3D meshes
+  const updateZoneHighlight = useCallback((targetHoveredId: string | null, targetSelectedId: string | null) => {
+    zoneEntriesRef.current.forEach((entry) => {
+      const isSelected = targetSelectedId === entry.zoneId;
+      const isHovered = targetHoveredId === entry.zoneId;
+      const mat = entry.padMesh.material as THREE.MeshStandardMaterial;
+      if (mat) {
+        mat.opacity = isSelected ? 0.38 : isHovered ? 0.30 : 0.16;
+        mat.emissiveIntensity = isSelected ? 0.5 : isHovered ? 0.38 : entry.isCritical ? 0.3 : 0.08;
+      }
+      const lineMat = entry.outlineLine.material as THREE.LineBasicMaterial;
+      if (lineMat) {
+        lineMat.color.setHex(isSelected || isHovered ? 0xffffff : entry.baseColorHex);
+      }
+    });
+  }, []);
+
+  // Update Dynamic Zones & Incidents ONLY when data, layers or structure changes (NOT on hover)
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
@@ -468,9 +503,9 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     if (layers.riskZones) {
       const { zoneGroup, entries, interactiveMeshes } = createZoneMeshes(
         zones,
-        selectedZoneId,
-        hoveredZoneId,
-        layers.labels
+        selectedZoneIdRef.current,
+        hoveredZoneIdRef.current,
+        layers.labels && !minimalOverlay
       );
       zoneGroup.name = 'ZONE_GROUP';
       scene.add(zoneGroup);
@@ -484,7 +519,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     if (layers.incidents) {
       const { incidentGroup, entries, interactiveMeshes } = createIncidentMarkers(
         activeIncidents,
-        selectedZoneId
+        selectedZoneIdRef.current
       );
       incidentGroup.name = 'INCIDENT_GROUP';
       scene.add(incidentGroup);
@@ -493,7 +528,14 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     } else {
       incidentEntriesRef.current = [];
     }
-  }, [zones, selectedZoneId, hoveredZoneId, activeIncidents, layers.riskZones, layers.incidents, layers.labels]);
+  }, [zones, activeIncidents, layers.riskZones, layers.incidents, layers.labels, minimalOverlay]);
+
+  // Synchronize selection / hover highlighting without rebuilding meshes
+  useEffect(() => {
+    selectedZoneIdRef.current = selectedZoneId;
+    hoveredZoneIdRef.current = hoveredZoneId;
+    updateZoneHighlight(hoveredZoneId, selectedZoneId);
+  }, [hoveredZoneId, selectedZoneId, updateZoneHighlight]);
 
   // Sync camera when selectedZoneId changes externally (Only in full dashboard mode)
   useEffect(() => {
@@ -508,63 +550,107 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     }
   }, [selectedZoneId, minimalOverlay]);
 
-  // Pointer Interaction (Raycasting hover & click)
-  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  // Process raycasting hover via requestAnimationFrame
+  const processHover = useCallback(() => {
+    rafHoverIdRef.current = null;
+    if (isDraggingRef.current) return;
+    if (!pointerPosRef.current) return;
+
     const canvas = canvasRef.current;
     const camera = cameraRef.current;
     if (!canvas || !camera) return;
 
     const rect = canvas.getBoundingClientRect();
-    const mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    const { clientX, clientY } = pointerPosRef.current;
+    const mouseX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const mouseY = -((clientY - rect.top) / rect.height) * 2 + 1;
 
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(new THREE.Vector2(mouseX, mouseY), camera);
-
-    const intersects = raycaster.intersectObjects(interactiveMeshesRef.current, false);
+    raycasterRef.current.setFromCamera(new THREE.Vector2(mouseX, mouseY), camera);
+    const intersects = raycasterRef.current.intersectObjects(interactiveMeshesRef.current, false);
 
     if (intersects.length > 0) {
       const topHit = intersects[0].object;
       const userData = topHit.userData;
+      const hitZoneId = (userData.zoneId as string) || null;
 
-      if (userData.type === 'zone') {
-        onHoverZone(userData.zoneId);
-        setHoveredData({
-          type: 'zone',
-          data: userData.zone,
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        });
-      } else if (userData.type === 'incident') {
-        onHoverZone(userData.zoneId);
-        setHoveredData({
-          type: 'incident',
-          data: userData.incident,
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        });
+      const posX = clientX - rect.left;
+      const posY = clientY - rect.top;
+
+      // Update tooltip position immediately on DOM element without React re-render
+      if (tooltipRef.current) {
+        const maxX = Math.max(100, rect.width - 295);
+        const maxY = Math.max(100, rect.height - 180);
+        tooltipRef.current.style.transform = `translate(${Math.min(Math.max(10, posX + 16), maxX)}px, ${Math.min(Math.max(10, posY + 16), maxY)}px)`;
+      }
+
+      // Only update state & notify parent when the hovered zone actually changes
+      if (hitZoneId !== hoveredZoneIdRef.current) {
+        hoveredZoneIdRef.current = hitZoneId;
+        onHoverZone(hitZoneId);
+        updateZoneHighlight(hitZoneId, selectedZoneIdRef.current);
+
+        if (userData.type === 'zone') {
+          setHoveredData({
+            type: 'zone',
+            data: userData.zone,
+            x: posX,
+            y: posY,
+          });
+        } else if (userData.type === 'incident') {
+          setHoveredData({
+            type: 'incident',
+            data: userData.incident,
+            x: posX,
+            y: posY,
+          });
+        }
       }
     } else {
-      if (hoveredData) {
+      if (hoveredZoneIdRef.current !== null) {
+        hoveredZoneIdRef.current = null;
         onHoverZone(null);
         setHoveredData(null);
+        updateZoneHighlight(null, selectedZoneIdRef.current);
       }
+    }
+  }, [onHoverZone, updateZoneHighlight]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    isDraggingRef.current = false;
+    isAnimatingCam.current = false;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    // If mouse button is held and moved > 4px, user is in active OrbitControls drag
+    if (e.buttons > 0) {
+      const dist = Math.hypot(e.clientX - dragStartPos.current.x, e.clientY - dragStartPos.current.y);
+      if (dist > 4) {
+        isDraggingRef.current = true;
+        if (hoveredData) {
+          setHoveredData(null);
+        }
+        return;
+      }
+    }
+
+    pointerPosRef.current = { clientX: e.clientX, clientY: e.clientY };
+    if (rafHoverIdRef.current === null) {
+      rafHoverIdRef.current = requestAnimationFrame(processHover);
     }
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasClick = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     const camera = cameraRef.current;
     if (!canvas || !camera) return;
 
     const rect = canvas.getBoundingClientRect();
-    const mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    const mouseX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const mouseY = -((clientY - rect.top) / rect.height) * 2 + 1;
 
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(new THREE.Vector2(mouseX, mouseY), camera);
-
-    const intersects = raycaster.intersectObjects(interactiveMeshesRef.current, false);
+    raycasterRef.current.setFromCamera(new THREE.Vector2(mouseX, mouseY), camera);
+    const intersects = raycasterRef.current.intersectObjects(interactiveMeshesRef.current, false);
 
     if (intersects.length > 0) {
       const topHit = intersects[0].object;
@@ -578,6 +664,34 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
           onSelectIncident(userData.incident);
         }
       }
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const dist = Math.hypot(e.clientX - dragStartPos.current.x, e.clientY - dragStartPos.current.y);
+    if (dist <= 4 && !isDraggingRef.current) {
+      handleCanvasClick(e.clientX, e.clientY);
+    }
+    setTimeout(() => {
+      isDraggingRef.current = false;
+      pointerPosRef.current = { clientX: e.clientX, clientY: e.clientY };
+      if (rafHoverIdRef.current === null) {
+        rafHoverIdRef.current = requestAnimationFrame(processHover);
+      }
+    }, 50);
+  };
+
+  const handlePointerLeave = () => {
+    if (rafHoverIdRef.current !== null) {
+      cancelAnimationFrame(rafHoverIdRef.current);
+      rafHoverIdRef.current = null;
+    }
+    pointerPosRef.current = null;
+    if (hoveredZoneIdRef.current !== null) {
+      hoveredZoneIdRef.current = null;
+      onHoverZone(null);
+      setHoveredData(null);
+      updateZoneHighlight(null, selectedZoneIdRef.current);
     }
   };
 
@@ -659,20 +773,24 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       {/* 3D WebGL Canvas */}
       <canvas
         ref={canvasRef}
+        onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onClick={handleClick}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
         style={{
           width: '100%',
           height: '100%',
           display: 'block',
           cursor: 'grab',
           outline: 'none',
+          touchAction: 'none',
         }}
       />
 
       {/* Floating Hover Tooltip */}
       {hoveredData && (
         <div
+          ref={tooltipRef}
           style={{
             position: 'absolute',
             top: 0,
@@ -687,7 +805,8 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             backdropFilter: 'blur(8px)',
             maxWidth: '280px',
             fontSize: '12px',
-            transform: `translate(${Math.min(hoveredData.x + 15, 420)}px, ${Math.min(hoveredData.y + 15, 480)}px)`,
+            transform: `translate(${Math.min(hoveredData.x + 16, 800)}px, ${Math.min(hoveredData.y + 16, 600)}px)`,
+            transition: 'transform 0.04s ease-out',
           }}
         >
           {hoveredData.type === 'zone' ? (
@@ -1089,19 +1208,18 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
               pointerEvents: 'none',
             }}
           >
-            {/* Status Badge */}
+            {/* Left Title Badge */}
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.88)' : 'rgba(11, 8, 6, 0.78)',
-                border: isLight ? '1px solid rgba(226, 217, 207, 0.9)' : '1px solid rgba(255, 106, 0, 0.28)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                boxShadow: isLight ? '0 4px 16px rgba(0, 0, 0, 0.06)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
+                gap: '7px',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.70)' : 'rgba(14, 11, 9, 0.45)',
+                border: isLight ? '1px solid rgba(195, 182, 168, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
                 pointerEvents: 'auto',
               }}
             >
@@ -1110,34 +1228,48 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                   width: '6px',
                   height: '6px',
                   borderRadius: '50%',
-                  backgroundColor: '#FF6A00',
-                  boxShadow: '0 0 8px #FF6A00',
+                  backgroundColor: '#FF7300',
+                  boxShadow: '0 0 8px #FF7300',
                 }}
               />
               <span
                 style={{
-                  fontSize: '0.72rem',
+                  fontSize: '0.70rem',
                   fontWeight: 700,
                   fontFamily: 'monospace',
-                  color: isLight ? '#1A1613' : '#F5EFEB',
+                  color: isLight ? '#1C1815' : '#E8E1D9',
                   letterSpacing: '0.04em',
                 }}
               >
                 OIL REFINERY DIGITAL TWIN · 3D
               </span>
+            </div>
+
+            {/* Center Helper Label */}
+            <div
+              style={{
+                padding: '4px 10px',
+                borderRadius: '4px',
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.55)' : 'rgba(14, 11, 9, 0.40)',
+                border: isLight ? '1px solid rgba(195, 182, 168, 0.3)' : '1px solid rgba(255, 255, 255, 0.04)',
+                pointerEvents: 'none',
+              }}
+            >
               <span
                 style={{
-                  fontSize: '0.66rem',
+                  fontSize: '0.65rem',
                   fontFamily: 'monospace',
-                  color: isLight ? '#E65F00' : '#FF8A1F',
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  color: isLight ? '#554B41' : 'rgba(255, 255, 255, 0.50)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
                 }}
               >
                 DRAG TO ORBIT
               </span>
             </div>
 
-            {/* Reset View Button */}
+            {/* Right Reset View Button */}
             <button
               onClick={handleResetView}
               title="Reset camera to initial full-facility view"
@@ -1145,30 +1277,30 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 13, 9, 0.85)',
-                border: isLight ? '1px solid rgba(226, 217, 207, 0.9)' : '1px solid rgba(51, 37, 28, 0.85)',
-                color: isLight ? '#5C5248' : '#B3A194',
-                fontSize: '0.72rem',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.75)' : 'rgba(14, 11, 9, 0.45)',
+                border: isLight ? '1px solid rgba(195, 182, 168, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+                color: isLight ? '#554B41' : '#A8A099',
+                fontSize: '0.70rem',
                 fontWeight: 600,
                 fontFamily: 'monospace',
                 cursor: 'pointer',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                boxShadow: isLight ? '0 4px 16px rgba(0, 0, 0, 0.06)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
                 pointerEvents: 'auto',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = isLight ? '#1A1613' : '#FFFFFF';
-                e.currentTarget.style.borderColor = '#FF6A00';
-                e.currentTarget.style.backgroundColor = isLight ? '#FFFFFF' : 'rgba(255, 106, 0, 0.15)';
+                e.currentTarget.style.color = isLight ? '#1C1815' : '#F5F1EA';
+                e.currentTarget.style.borderColor = '#FF7300';
+                e.currentTarget.style.backgroundColor = isLight ? '#FFFFFF' : 'rgba(255, 115, 0, 0.15)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = isLight ? '#5C5248' : '#B3A194';
-                e.currentTarget.style.borderColor = isLight ? 'rgba(226, 217, 207, 0.9)' : 'rgba(51, 37, 28, 0.85)';
-                e.currentTarget.style.backgroundColor = isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(18, 13, 9, 0.85)';
+                e.currentTarget.style.color = isLight ? '#554B41' : '#A8A099';
+                e.currentTarget.style.borderColor = isLight ? 'rgba(195, 182, 168, 0.4)' : 'rgba(255, 255, 255, 0.05)';
+                e.currentTarget.style.backgroundColor = isLight ? 'rgba(255, 255, 255, 0.75)' : 'rgba(14, 11, 9, 0.45)';
               }}
             >
               <RotateCcw size={12} />

@@ -31,6 +31,21 @@ export interface RefineryMaterials {
   truckCab: THREE.MeshStandardMaterial;
 }
 
+function createGroundAlphaTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d')!;
+  const grad = ctx.createRadialGradient(128, 128, 40, 128, 128, 128);
+  grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  grad.addColorStop(0.65, 'rgba(255, 255, 255, 0.6)');
+  grad.addColorStop(0.95, 'rgba(255, 255, 255, 0)');
+  grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(canvas);
+}
+
 export function createRefineryMaterials(theme: 'light' | 'dark' = 'dark'): RefineryMaterials {
   const isLight = theme === 'light';
 
@@ -39,6 +54,9 @@ export function createRefineryMaterials(theme: 'light' | 'dark' = 'dark'): Refin
       color: isLight ? 0xc2cad4 : 0x120d09,
       roughness: isLight ? 0.9 : 0.85,
       metalness: isLight ? 0.05 : 0.15,
+      alphaMap: createGroundAlphaTexture(),
+      transparent: true,
+      depthWrite: false,
     }),
     road: new THREE.MeshStandardMaterial({
       color: isLight ? 0x334155 : 0x1a130e,
@@ -140,54 +158,56 @@ export function buildRefineryModel(
   const isLight = theme === 'light';
 
   // =========================================================================
-  // 1. GROUND, PERIMETER & INDUSTRIAL GRID
+  // 1. GROUND, PERIMETER & INDUSTRIAL GRID (Tightly cradles facility footprint)
   // =========================================================================
-  const groundGeo = new THREE.PlaneGeometry(130, 110);
+  const groundGeo = new THREE.PlaneGeometry(108, 90);
   const groundMesh = new THREE.Mesh(groundGeo, mats.ground);
   groundMesh.rotation.x = -Math.PI / 2;
   groundMesh.position.y = -0.05;
   groundMesh.receiveShadow = true;
   scene.add(groundMesh);
 
-  // High-Tech Industrial Spatial Grid
+  // High-Tech Industrial Spatial Grid (Tightly framed 96x96, 24 divisions)
   const gridHelper = new THREE.GridHelper(
-    120,
-    30,
+    96,
+    24,
     isLight ? 0x0284c7 : 0xff6a00,
     isLight ? 0x94a3b8 : 0x2a1e16
   );
   gridHelper.position.y = 0.01;
   const gridMat = gridHelper.material as THREE.Material;
   gridMat.transparent = true;
-  gridMat.opacity = isLight ? 0.35 : 0.45;
+  gridMat.opacity = isLight ? 0.25 : 0.32;
   scene.add(gridHelper);
 
-  // Perimeter Boundary Line
-  const fenceGeo = new THREE.BoxGeometry(116, 0.5, 96);
-  const fenceEdges = new THREE.EdgesGeometry(fenceGeo);
-  const fenceLine = new THREE.LineSegments(
-    fenceEdges,
-    new THREE.LineBasicMaterial({ color: isLight ? 0x64748b : 0x5a4436 })
-  );
-  fenceLine.position.y = 0.25;
-  scene.add(fenceLine);
+  // Perimeter Boundary Line (Only rendered in full overlay mode, omitted in seamless hero)
+  if (layers.labels) {
+    const fenceGeo = new THREE.BoxGeometry(94, 0.5, 76);
+    const fenceEdges = new THREE.EdgesGeometry(fenceGeo);
+    const fenceLine = new THREE.LineSegments(
+      fenceEdges,
+      new THREE.LineBasicMaterial({ color: isLight ? 0x64748b : 0x5a4436, transparent: true, opacity: 0.35 })
+    );
+    fenceLine.position.y = 0.25;
+    scene.add(fenceLine);
+  }
 
   // Roads Network
   // Central Main Arterial Road
-  const roadHoriz = new THREE.Mesh(new THREE.PlaneGeometry(114, 7), mats.road);
+  const roadHoriz = new THREE.Mesh(new THREE.PlaneGeometry(92, 7), mats.road);
   roadHoriz.rotation.x = -Math.PI / 2;
   roadHoriz.position.set(0, 0.02, 14);
   scene.add(roadHoriz);
 
   // Central Road Yellow Centerline
-  const cLine = new THREE.Mesh(new THREE.PlaneGeometry(112, 0.3), mats.roadLine);
+  const cLine = new THREE.Mesh(new THREE.PlaneGeometry(90, 0.3), mats.roadLine);
   cLine.rotation.x = -Math.PI / 2;
   cLine.position.set(0, 0.03, 14);
   scene.add(cLine);
 
   // Vertical Connecting Roads
   [-18, 18].forEach((rx) => {
-    const roadVert = new THREE.Mesh(new THREE.PlaneGeometry(6, 94), mats.road);
+    const roadVert = new THREE.Mesh(new THREE.PlaneGeometry(6, 74), mats.road);
     roadVert.rotation.x = -Math.PI / 2;
     roadVert.position.set(rx, 0.02, 0);
     scene.add(roadVert);

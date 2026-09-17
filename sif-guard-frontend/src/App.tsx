@@ -99,8 +99,8 @@ function AppContent() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'var(--bg-primary, #0B0806)',
-          color: 'var(--text-primary, #F5EFEB)',
+          backgroundColor: 'var(--bg-primary, #080706)',
+          color: 'var(--text-primary, #F5F1EA)',
           fontFamily: 'Inter, sans-serif',
         }}
       >
@@ -109,22 +109,22 @@ function AppContent() {
             width: '56px',
             height: '56px',
             borderRadius: '14px',
-            backgroundColor: 'rgba(255, 106, 0, 0.12)',
-            border: '1px solid rgba(255, 106, 0, 0.3)',
+            backgroundColor: 'rgba(255, 115, 0, 0.12)',
+            border: '1px solid rgba(255, 115, 0, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: '20px',
           }}
         >
-          <ShieldAlert size={30} color="var(--primary, #FF6A00)" />
+          <ShieldAlert size={30} color="var(--primary, #FF7300)" />
         </div>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            color: 'var(--text-secondary, #B3A194)',
+            color: 'var(--text-secondary, #A8A099)',
             fontSize: '0.9rem',
           }}
         >
