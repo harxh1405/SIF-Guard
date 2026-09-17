@@ -119,7 +119,7 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
           variant={!error && health ? 'success' : 'danger'}
           tooltip={
             health
-              ? `Embedding Model: ${health.embedding_model}`
+              ? `AI Service Live (${health.service}) • Model: ${health.embedding_model}`
               : 'Backend Service Disconnected'
           }
         >
