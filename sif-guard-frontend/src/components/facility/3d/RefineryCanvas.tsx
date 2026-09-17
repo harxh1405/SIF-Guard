@@ -31,6 +31,11 @@ interface RefineryCanvasProps {
   theme?: 'light' | 'dark';
   onFallback2D?: () => void;
   minimalOverlay?: boolean;
+  customCameraPos?: [number, number, number];
+  customCameraTarget?: [number, number, number];
+  height?: string | number;
+  containerStyle?: React.CSSProperties;
+  transparentBg?: boolean;
 }
 
 export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
@@ -44,6 +49,11 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   theme = 'dark',
   onFallback2D,
   minimalOverlay = false,
+  customCameraPos,
+  customCameraTarget,
+  height,
+  containerStyle,
+  transparentBg = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -112,22 +122,34 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     const container = containerRef.current;
     const canvas = canvasRef.current;
-    const width = container.clientWidth || 800;
-    const height = container.clientHeight || 620;
+    const containerWidth = container.clientWidth || 800;
+    const containerHeight = container.clientHeight || 620;
     const isLight = theme === 'light';
+    const isTransparent = minimalOverlay || transparentBg;
 
     // 1. Scene
     const scene = new THREE.Scene();
     const bgColor = isLight ? 0xe2e8f0 : 0x0b0806;
-    scene.background = new THREE.Color(bgColor);
-    scene.fog = new THREE.FogExp2(bgColor, isLight ? 0.003 : 0.0025);
+    if (isTransparent) {
+      scene.background = null;
+    } else {
+      scene.background = new THREE.Color(bgColor);
+      scene.fog = new THREE.FogExp2(bgColor, isLight ? 0.003 : 0.0025);
+    }
     sceneRef.current = scene;
 
-    // 2. Camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 500);
-    camera.position.set(0, 68, 68);
-    camera.lookAt(0, 0, 2);
+    // 2. Camera with adaptive framing for hero & digital twin
+    const defaultHeroPos: [number, number, number] = [0, 88, 96];
+    const defaultStdPos: [number, number, number] = [0, 68, 68];
+    const initialPos = customCameraPos || (minimalOverlay ? defaultHeroPos : defaultStdPos);
+    const initialTarget = customCameraTarget || [0, 0, 2];
+
+    const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.5, 600);
+    camera.position.set(...initialPos);
+    camera.lookAt(...initialTarget);
     cameraRef.current = camera;
+    targetCamPos.current.set(...initialPos);
+    targetLookAt.current.set(...initialTarget);
 
     // 3. WebGL Renderer with Error Guard
     let renderer: THREE.WebGLRenderer;
@@ -135,9 +157,13 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       renderer = new THREE.WebGLRenderer({
         canvas,
         antialias: true,
+        alpha: true,
         powerPreference: 'high-performance',
       });
-      renderer.setSize(width, height);
+      if (isTransparent) {
+        renderer.setClearColor(0x000000, 0);
+      }
+      renderer.setSize(containerWidth, containerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -542,15 +568,20 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       ref={containerRef}
       style={{
         width: '100%',
-        height: '620px',
-        minHeight: '620px',
+        height: height || (minimalOverlay ? '100%' : '620px'),
+        minHeight: minimalOverlay ? 'unset' : '620px',
         position: 'relative',
-        backgroundColor: isLight ? '#e2e8f0' : '#0c0a08',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        border: '1px solid var(--border)',
-        boxShadow: isLight ? '0 4px 20px rgba(0,0,0,0.08)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
+        backgroundColor: (minimalOverlay || transparentBg)
+          ? 'transparent'
+          : (isLight ? '#e2e8f0' : '#0c0a08'),
+        borderRadius: minimalOverlay ? '0' : '12px',
+        overflow: minimalOverlay ? 'visible' : 'hidden',
+        border: minimalOverlay ? 'none' : '1px solid var(--border)',
+        boxShadow: minimalOverlay
+          ? 'none'
+          : (isLight ? '0 4px 20px rgba(0,0,0,0.08)' : '0 8px 32px rgba(0, 0, 0, 0.5)'),
         userSelect: 'none',
+        ...containerStyle,
       }}
     >
       {/* 3D WebGL Canvas */}

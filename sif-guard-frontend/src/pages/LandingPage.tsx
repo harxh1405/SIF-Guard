@@ -9,6 +9,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { RefineryCanvas } from '../components/facility/3d/RefineryCanvas';
+import { AmbientTelemetryCanvas } from '../components/common/AmbientTelemetryCanvas';
 import { ZONE_3D_CONFIGS } from '../components/facility/3d/zoneConfig';
 import { getFacilityOverview } from '../api/facility';
 import type { FacilityZone } from '../types/facility';
@@ -217,8 +218,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
         width: '100%',
         overflowX: 'hidden',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+        position: 'relative',
       }}
     >
+      {/* Background Ambient Telemetry Canvas */}
+      <AmbientTelemetryCanvas />
       {/* =============================================================
           1. MINIMAL INDUSTRIAL NAVBAR
           ============================================================= */}
@@ -361,19 +365,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
       <section
         style={{
           position: 'relative',
-          padding: '130px 48px 80px 48px',
+          padding: '130px 48px 60px 48px',
           maxWidth: '1440px',
           margin: '0 auto',
-          minHeight: '92vh',
+          minHeight: '94vh',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: 'column',
+          justifyContent: 'center',
           boxSizing: 'border-box',
+          zIndex: 2,
         }}
       >
         <div
+          className="hero-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
+            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.25fr)',
             gap: '56px',
             alignItems: 'center',
             width: '100%',
@@ -401,6 +408,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                   borderRadius: '50%',
                   backgroundColor: '#FF6A00',
                   boxShadow: '0 0 8px #FF6A00',
+                  animation: 'beacon-pulse 2s infinite',
                 }}
               />
               <span
@@ -553,19 +561,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             </div>
           </div>
 
-          {/* Right Column: Visible, Well-Lit 3D Refinery Twin in Architectural Frame */}
+          {/* Right Column: Seamless, Natural 3D Refinery Twin */}
           <div
             style={{
               position: 'relative',
               width: '100%',
-              height: '540px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(18, 13, 9, 0.85)',
-              border: '1px solid rgba(51, 37, 28, 0.8)',
-              overflow: 'hidden',
-              boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.7)',
+              height: '560px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
+            {/* Subtle soft ambient back-glow behind the 3D facility */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '85%',
+                height: '85%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255, 106, 0, 0.08) 0%, rgba(255, 106, 0, 0.02) 50%, transparent 75%)',
+                filter: 'blur(50px)',
+                pointerEvents: 'none',
+              }}
+            />
+
             {/* Real 3D Refinery Canvas with high lighting and minimal overlay */}
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
               <RefineryCanvas
@@ -577,6 +596,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
                 activeIncidents={[]}
                 theme="dark"
                 minimalOverlay={true}
+                transparentBg={true}
               />
             </div>
 
@@ -584,101 +604,152 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterPlatform }) => 
             <div
               style={{
                 position: 'absolute',
-                top: '16px',
-                left: '16px',
-                right: '16px',
-                display: 'flex',
+                top: '12px',
+                right: '12px',
+                display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 14px',
-                borderRadius: '10px',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '9999px',
                 backgroundColor: 'rgba(11, 8, 6, 0.75)',
-                border: '1px solid rgba(51, 37, 28, 0.7)',
-                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 106, 0, 0.28)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
                 pointerEvents: 'none',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    backgroundColor: '#FF6A00',
-                    boxShadow: '0 0 6px #FF6A00',
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    fontFamily: 'monospace',
-                    color: '#F5EFEB',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  OIL REFINERY DIGITAL TWIN · 3D TELEMETRY
-                </span>
-              </div>
               <span
                 style={{
-                  fontSize: '0.68rem',
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#FF6A00',
+                  boxShadow: '0 0 8px #FF6A00',
+                }}
+              />
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  color: '#F5EFEB',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                OIL REFINERY DIGITAL TWIN
+              </span>
+              <span
+                style={{
+                  fontSize: '0.66rem',
                   fontFamily: 'monospace',
                   color: '#FF8A1F',
                   fontWeight: 600,
+                  marginLeft: '4px',
                 }}
               >
-                DRAG TO ROTATE
+                DRAG TO ORBIT
               </span>
             </div>
 
-            {/* Spatial Safety Signal Tags anchored to bottom */}
+            {/* Spatial Safety Signal Tags anchored cleanly along bottom */}
             <div
               style={{
                 position: 'absolute',
-                bottom: '16px',
-                left: '16px',
-                right: '16px',
+                bottom: '12px',
+                left: '12px',
+                right: '12px',
                 display: 'flex',
                 gap: '8px',
-                overflowX: 'auto',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
                 pointerEvents: 'auto',
               }}
             >
               {[
-                { label: 'Z-02 Pump Station', flag: 'LOTO Monitored', icon: Zap },
+                { label: 'Z-02 Pump Station', flag: 'Energy Isolation', icon: Zap },
                 { label: 'Z-04 Pipeline Corridor', flag: 'Line of Fire', icon: AlertTriangle },
-                { label: 'Z-03 Tank Farm', flag: 'Confined Space', icon: Lock },
-                { label: 'Z-06 Maintenance', flag: 'Hot Work Permit', icon: Flame },
+                { label: 'Z-03 Storage Bund', flag: 'Confined Space', icon: Lock },
+                { label: 'Z-06 Maintenance Skid', flag: 'Hot Work Permit', icon: Flame },
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
                   <div
                     key={idx}
                     style={{
-                      flex: 1,
-                      minWidth: '130px',
-                      padding: '8px 10px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '7px 12px',
                       borderRadius: '8px',
-                      backgroundColor: 'rgba(11, 8, 6, 0.8)',
-                      border: '1px solid rgba(51, 37, 28, 0.7)',
-                      backdropFilter: 'blur(8px)',
+                      backgroundColor: 'rgba(18, 13, 9, 0.8)',
+                      border: '1px solid rgba(51, 37, 28, 0.8)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.4)',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '2px' }}>
-                      <Icon size={12} color="#FF6A00" />
-                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#F5EFEB', whiteSpace: 'nowrap' }}>
-                        {item.label}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.64rem', color: '#FF8A1F', fontFamily: 'monospace' }}>
+                    <Icon size={12} color="#FF6A00" />
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#F5EFEB' }}>
+                      {item.label}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '0.66rem',
+                        color: '#FF8A1F',
+                        fontFamily: 'monospace',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        backgroundColor: 'rgba(255, 106, 0, 0.12)',
+                      }}
+                    >
                       {item.flag}
-                    </div>
+                    </span>
                   </div>
                 );
               })}
             </div>
           </div>
+        </div>
+
+        {/* Subtle Continuous Scroll Prompt */}
+        <div
+          style={{
+            marginTop: '44px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            opacity: 0.8,
+            transition: 'opacity 0.2s ease',
+            userSelect: 'none',
+          }}
+          onClick={() => scrollToSection('signals')}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.8')}
+        >
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              color: '#736154',
+              fontFamily: 'monospace',
+              textTransform: 'uppercase',
+            }}
+          >
+            Scroll to Explore Precursor Intelligence
+          </span>
+          <span
+            style={{
+              color: '#FF6A00',
+              fontSize: '1.1rem',
+              lineHeight: 1,
+              animation: 'bounce 2s infinite',
+            }}
+          >
+            ↓
+          </span>
         </div>
       </section>
 
