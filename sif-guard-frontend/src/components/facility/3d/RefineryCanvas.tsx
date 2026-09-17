@@ -120,7 +120,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     const scene = new THREE.Scene();
     const bgColor = isLight ? 0xe2e8f0 : 0x0b0806;
     scene.background = new THREE.Color(bgColor);
-    scene.fog = new THREE.FogExp2(bgColor, isLight ? 0.004 : 0.007);
+    scene.fog = new THREE.FogExp2(bgColor, isLight ? 0.003 : 0.0025);
     sceneRef.current = scene;
 
     // 2. Camera
@@ -142,7 +142,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = isLight ? 1.15 : 1.0;
+      renderer.toneMappingExposure = isLight ? 1.15 : 1.25;
       rendererRef.current = renderer;
     } catch (err) {
       console.error('WebGL initialization error:', err);
@@ -158,24 +158,28 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     controls.minDistance = 15;
     controls.maxDistance = 180;
     controls.target.set(0, 0, 2);
+    if (minimalOverlay) {
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.7;
+    }
     controlsRef.current = controls;
 
-    // 5. Environmental Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 1.3 : 0.6);
+    // 5. Environmental Lighting (Significantly brightened for clear industrial structural clarity)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 1.4 : 1.1);
     scene.add(ambientLight);
     ambientLightRef.current = ambientLight;
 
     const hemiLight = new THREE.HemisphereLight(
-      isLight ? 0xe0f2fe : 0xffaa55,
-      isLight ? 0x94a3b8 : 0x110c08,
-      isLight ? 0.9 : 0.4
+      isLight ? 0xe0f2fe : 0xffbe88,
+      isLight ? 0x94a3b8 : 0x221812,
+      isLight ? 1.0 : 0.85
     );
     scene.add(hemiLight);
     hemiLightRef.current = hemiLight;
 
     // Primary Sun Directional Light
-    const dirLight1 = new THREE.DirectionalLight(isLight ? 0xfffbeb : 0xffeedd, isLight ? 1.8 : 1.4);
-    dirLight1.position.set(45, 80, 50);
+    const dirLight1 = new THREE.DirectionalLight(isLight ? 0xfffbeb : 0xfff0e0, isLight ? 2.0 : 1.85);
+    dirLight1.position.set(55, 90, 60);
     dirLight1.castShadow = true;
     dirLight1.shadow.mapSize.width = 2048;
     dirLight1.shadow.mapSize.height = 2048;
@@ -189,9 +193,9 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     scene.add(dirLight1);
     dirLight1Ref.current = dirLight1;
 
-    // Secondary Fill Light
-    const dirLight2 = new THREE.DirectionalLight(isLight ? 0x93c5fd : 0x446688, isLight ? 0.6 : 0.5);
-    dirLight2.position.set(-50, 40, -40);
+    // Secondary Warm Fill Light (Highlights piping & distillation columns)
+    const dirLight2 = new THREE.DirectionalLight(isLight ? 0x93c5fd : 0xff8833, isLight ? 0.7 : 0.95);
+    dirLight2.position.set(-60, 45, -45);
     scene.add(dirLight2);
     dirLight2Ref.current = dirLight2;
 
@@ -271,6 +275,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         });
       });
 
+      controls.update();
       renderer.render(scene, camera);
     };
 
