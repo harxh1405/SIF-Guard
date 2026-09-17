@@ -4,6 +4,9 @@ import type { DashboardSummary } from '../types/api';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyTelemetryState } from '../components/common/EmptyTelemetryState';
+import { RefineryHeroSection } from '../components/facility/RefineryHeroSection';
+import { DataFlowPipeline } from '../components/common/DataFlowPipeline';
+import { CountUpNumber } from '../components/common/CountUpNumber';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Info,
@@ -20,14 +23,16 @@ import {
   Flame,
   Sparkles,
   Zap,
+  ShieldAlert,
 } from 'lucide-react';
 import type { TabId } from '../components/layout/Navigation';
 
 interface Props {
   onNavigate: (tab: TabId) => void;
+  theme?: 'dark' | 'light';
 }
 
-export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
+export const DashboardPage: React.FC<Props> = ({ onNavigate, theme = 'dark' }) => {
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,17 +58,17 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
 
   if (loading) {
     return (
-      <div>
-        <h2 className="section-title" style={{ marginBottom: '20px' }}>Executive Safety Intelligence</h2>
-        <LoadingSkeleton rows={5} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <h2 className="section-title" style={{ marginBottom: '10px' }}>Executive Safety Intelligence</h2>
+        <LoadingSkeleton rows={6} />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div>
-        <h2 className="section-title" style={{ marginBottom: '20px' }}>Executive Safety Intelligence</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <h2 className="section-title" style={{ marginBottom: '10px' }}>Executive Safety Intelligence</h2>
         <ErrorBanner message={error || 'No data available'} onRetry={fetchDashboard} />
       </div>
     );
@@ -78,13 +83,22 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
     >
-      {/* Crisp Top Header Section */}
+      {/* 1. Large Visual Moment: Refinery Digital-Twin Hero Experience */}
+      <RefineryHeroSection
+        onNavigate={onNavigate}
+        theme={theme}
+        totalReports={data.total_reports}
+        sifCount={data.sif_precursor_count}
+        monitoredSites={data.sites}
+      />
+
+      {/* 2. Top Header Controls & Ratio Indicator */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h2 className="section-title" style={{ margin: 0, fontSize: '1.4rem' }}>
-            Executive Safety Intelligence
+          <h2 className="section-title" style={{ margin: 0, fontSize: '1.25rem' }}>
+            Operational Baseline & Metrics
           </h2>
           {/* Info Icon for Heinrich's Principle Educational Copy */}
           <button
@@ -111,7 +125,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
               e.currentTarget.style.background = 'transparent';
             }}
           >
-            <Info size={18} />
+            <Info size={16} />
           </button>
         </div>
 
@@ -156,11 +170,11 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Unified 5-Column Metric Bar */}
+      {/* 3. Unified 5-Column Metric Bar with CountUpNumber Animation */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
           background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: '16px',
@@ -185,7 +199,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             </span>
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
-            {data.total_reports.toLocaleString()}
+            <CountUpNumber value={data.total_reports} />
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Processed narratives</span>
         </div>
@@ -207,7 +221,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             </span>
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
-            {data.sif_precursor_count.toLocaleString()}
+            <CountUpNumber value={data.sif_precursor_count} />
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--danger)', fontWeight: 600 }}>
             High potential events
@@ -231,7 +245,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             </span>
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
-            {densityPercent}%
+            <CountUpNumber value={parseFloat(densityPercent)} decimals={1} suffix="%" />
           </div>
           <span style={{ fontSize: '0.72rem', color: data.sif_precursor_density > 0.3 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>
             {data.sif_precursor_density > 0.3 ? 'High Risk Exposure' : 'Normal Baseline'}
@@ -255,7 +269,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             </span>
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
-            {data.sites}
+            <CountUpNumber value={data.sites} />
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Sites / Rigs</span>
         </div>
@@ -276,13 +290,23 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             </span>
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-mono)' }}>
-            {data.activities}
+            <CountUpNumber value={data.activities} />
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Operational Tasks</span>
         </div>
       </div>
 
-      {/* Main Workspace: Single Global Empty State OR Populated Grids */}
+      {/* 4. Safety Intelligence Transformation Pipeline */}
+      <DataFlowPipeline
+        onNavigate={onNavigate}
+        theme={theme}
+        totalReports={data.total_reports}
+        sifCount={data.sif_precursor_count}
+        activeBarriers={data.top_barrier_failures?.length || 7}
+        lsrMatches={data.top_lsr?.length || 5}
+      />
+
+      {/* 5. Main Workspace: Emerging Precursor Patterns & Top Life-Saving Rules */}
       {data.total_reports === 0 ? (
         <EmptyTelemetryState
           title="No Telemetry Data Ingested"
@@ -598,20 +622,31 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                     fontSize: '0.95rem',
                     fontWeight: 700,
                     color: 'var(--primary-bright)',
-                    fontFamily: 'var(--font-mono)',
+                    lineHeight: 1.4,
                   }}
                 >
-                  Actual Outcome ≠ Potential Outcome
+                  "Minor incident frequency does not predict SIF frequency. Only SIF precursor potential predicts SIF frequency."
                 </div>
 
-                <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                  Heinrich's traditional safety pyramid assumes low-severity incidents predict fatalities linearly. However, in high-energy exploration, drilling, and production environments, SIF-Guard isolates precursors—hazardous exposures where a barrier defect created fatality potential—regardless of whether workers suffered zero injury, first aid, or severe harm.
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  Traditional safety metrics treat all near-misses equally under Heinrich's Triangle. SIF-GUARD isolates high-energy precursor events with broken life-critical barriers—the true statistical signals of fatal and catastrophic risk.
                 </p>
 
-                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', marginTop: '6px' }}>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic' }}>
-                    Engineered for Oil India Limited (OIL) HSSE Precursor Intelligence.
-                  </p>
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-subtle)',
+                    fontSize: '0.8rem',
+                    color: 'var(--text-muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                  }}
+                >
+                  <ShieldAlert size={16} color="var(--primary)" />
+                  <span>Aligned with IOGP 9 Life-Saving Rules and Campbell Institute SIF Prevention methodology.</span>
                 </div>
               </div>
             </motion.div>

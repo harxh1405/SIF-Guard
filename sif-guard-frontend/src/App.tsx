@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import type { TabId } from './components/layout/Navigation';
@@ -10,6 +11,7 @@ import { PrecursorClustersPage } from './pages/PrecursorClustersPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { KnowledgeLSRPage } from './pages/KnowledgeLSRPage';
 import { ReviewQueuePage } from './pages/ReviewQueuePage';
+import { PageTransition } from './components/motion/PageTransition';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthPage } from './components/auth/AuthPage';
@@ -167,14 +169,18 @@ function AppContent() {
         />
 
         <main ref={mainContentRef} style={{ flex: 1, minWidth: 0, padding: '28px 36px', overflowY: 'auto', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
-          {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
-          {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
-          {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
-          {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
-          {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}
-          {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} theme={theme} />}
-          {activeTab === 'knowledge' && <KnowledgeLSRPage />}
-          {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
+          <AnimatePresence mode="wait">
+            <PageTransition key={activeTab} tabKey={activeTab}>
+              {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} theme={theme} />}
+              {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
+              {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
+              {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
+              {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}
+              {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} theme={theme} />}
+              {activeTab === 'knowledge' && <KnowledgeLSRPage />}
+              {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
+            </PageTransition>
+          </AnimatePresence>
         </main>
       </div>
 
