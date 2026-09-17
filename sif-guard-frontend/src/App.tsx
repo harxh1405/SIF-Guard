@@ -11,6 +11,9 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { KnowledgeLSRPage } from './pages/KnowledgeLSRPage';
 import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthPage } from './components/auth/AuthPage';
+import { ShieldAlert, Loader2 } from 'lucide-react';
 
 const TAB_ORDER: TabId[] = [
   'dashboard',
@@ -23,7 +26,8 @@ const TAB_ORDER: TabId[] = [
   'review',
 ];
 
-export function App() {
+function AppContent() {
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('sif_guard_theme') as 'dark' | 'light') || 'dark';
@@ -50,8 +54,10 @@ export function App() {
     setIsCollapsed((prev) => !prev);
   };
 
-  // Global Keyboard Shortcuts (Tabs 1-7, '?' for shortcuts modal, 'Esc' to close modal)
+  // Global Keyboard Shortcuts (Tabs 1-8, '?' for shortcuts modal, 'Esc' to close modal)
   useEffect(() => {
+    if (!user) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const tag = target?.tagName?.toLowerCase();
@@ -73,8 +79,61 @@ export function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [shortcutsOpen]);
+  }, [shortcutsOpen, user]);
 
+  // Loading state: Do not display dashboard content while authentication is resolving
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: '100vh',
+          width: '100vw',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--bg-primary, #0B0806)',
+          color: 'var(--text-primary, #F5EFEB)',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '14px',
+            backgroundColor: 'rgba(255, 106, 0, 0.12)',
+            border: '1px solid rgba(255, 106, 0, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '20px',
+          }}
+        >
+          <ShieldAlert size={30} color="var(--primary, #FF6A00)" />
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            color: 'var(--text-secondary, #B3A194)',
+            fontSize: '0.9rem',
+          }}
+        >
+          <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+          <span>Verifying SIF-Guard session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Unauthenticated: Show Auth Page (Login / Signup)
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  // Authenticated: Show full existing SIF-Guard Application
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)', overflow: 'hidden' }}>
       <Header
@@ -108,6 +167,14 @@ export function App() {
         onClose={() => setShortcutsOpen(false)}
       />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

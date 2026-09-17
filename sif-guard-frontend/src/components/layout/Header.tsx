@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldAlert, Server, CheckCircle2, XCircle, Keyboard } from 'lucide-react';
+import { ShieldAlert, Server, CheckCircle2, XCircle, Keyboard, User, LogOut } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
 import { motion } from 'motion/react';
 import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   theme: 'dark' | 'light';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts }) => {
+  const { user, profile, signOut } = useAuth();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [error, setError] = useState<boolean>(false);
 
@@ -183,6 +185,63 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
 
         {/* Theme Toggle Switch */}
         <ThemeToggleSwitch theme={theme} onToggle={onToggleTheme} />
+
+        {/* User Info & Logout */}
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '7px',
+                padding: '6px 12px',
+                borderRadius: '12px',
+                background: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
+                fontSize: '0.78rem',
+                color: 'var(--text-primary)',
+              }}
+            >
+              <User size={14} color="var(--primary)" />
+              <span
+                style={{
+                  fontWeight: 600,
+                  maxWidth: '140px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {profile?.full_name || user.email}
+              </span>
+            </div>
+
+            <motion.button
+              onClick={signOut}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '7px 12px',
+                borderRadius: '12px',
+                background: 'rgba(232, 93, 93, 0.10)',
+                border: '1px solid rgba(232, 93, 93, 0.25)',
+                color: 'var(--danger, #E85D5D)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                boxShadow: 'var(--shadow-card)',
+                transition: 'all 0.15s ease-out',
+              }}
+              title="Sign Out"
+            >
+              <LogOut size={14} />
+              <span>Sign Out</span>
+            </motion.button>
+          </div>
+        )}
       </div>
     </header>
   );
