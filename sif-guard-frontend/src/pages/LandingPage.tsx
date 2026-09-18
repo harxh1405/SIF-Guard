@@ -415,20 +415,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSearchFilter, setActiveSearchFilter] = useState<{ query: string; category: string } | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [fontSize, setFontSize] = useState<'small' | 'normal' | 'large'>(() => {
-    try {
-      const saved = localStorage.getItem('sif_portal_font_size');
-      if (saved === 'small' || saved === 'normal' || saved === 'large') return saved;
-    } catch {
-      // ignore
-    }
-    return 'normal';
-  });
+
+  // Monitor window scroll to keep navbar locked and elevated at top
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Preload refinery.webp on landing page mount only
@@ -446,43 +448,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     };
   }, []);
 
-  // Dynamic Root Font Size & Accessibility Scaling Controller (A- / A / A+)
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('font-size-small', 'font-size-normal', 'font-size-large');
-    root.classList.add(`font-size-${fontSize}`);
-
-    if (fontSize === 'small') {
-      root.style.fontSize = '14px'; // 87.5% - clear, readable reduction
-    } else if (fontSize === 'large') {
-      root.style.fontSize = '18.5px'; // 115.6% - clear, high-accessibility enlargement
-    } else {
-      root.style.fontSize = '16px'; // 100% - standard baseline
-    }
-
-    return () => {
-      // Restore standard baseline when navigating away or unmounting
-      root.style.fontSize = '';
-      root.classList.remove('font-size-small', 'font-size-normal', 'font-size-large');
-    };
-  }, [fontSize]);
-
-  const handleFontSizeChange = (size: 'small' | 'normal' | 'large') => {
-    setFontSize(size);
-    try {
-      localStorage.setItem('sif_portal_font_size', size);
-    } catch {
-      // ignore
-    }
-    const label =
-      size === 'small'
-        ? 'Decreased (A- / 87.5%)'
-        : size === 'large'
-        ? 'Increased (A+ / 115%)'
-        : 'Standard (A / 100%)';
-    setToastMessage(`Text Size: ${label}`);
-    setTimeout(() => setToastMessage(null), 2500);
-  };
 
   const searchMatches = React.useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -586,7 +551,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   });
 
   return (
-    <div className={`india-gov-page font-size-${fontSize}`}>
+    <div className="india-gov-page">
       {/* =========================================================================
           FIXED ANIMATED BACKGROUND LAYER (REFINERY.WEBP + SLOW KEN BURNS + SCRIM)
           Stationary behind content, position: fixed, inset: 0, outside any transform/filter
@@ -597,7 +562,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </div>
 
       {/* Landing Page Content Wrapper with Transparent Base */}
-      <div className={`landing-content-wrapper font-size-${fontSize}`}>
+      <div className="landing-content-wrapper">
       {/* Background Audio Player */}
       <audio
         ref={audioRef}
@@ -609,101 +574,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </audio>
 
       {/* =========================================================================
-          1. NATIONAL TRICOLOR TOP STRIPE (india.gov.in standard)
-          ========================================================================= */}
-      <div className="india-top-stripe" />
-
-      {/* =========================================================================
-          2. ACCESSIBILITY & STATUTORY ATTRIBUTION BAR (ENGLISH ONLY)
-          ========================================================================= */}
-      <section className="india-accessibility-bar" aria-label="Accessibility Bar">
-        <div className="india-gov-wrap india-access-inner">
-          <div className="india-access-left">
-            <span className="india-access-item">
-              <strong>NATIONAL SAFETY INITIATIVE</strong>
-            </span>
-            <span className="india-access-pipe">|</span>
-            <span className="india-access-item">
-              Ministry of Petroleum &amp; Natural Gas
-            </span>
-            <span className="india-access-pipe">|</span>
-            <span className="india-access-item">
-              Oil India Limited
-            </span>
-          </div>
-
-          <div className="india-access-right">
-            {/* Audio Toggle Equalizer */}
-            <div className="india-audio-ctrl">
-              <button
-                type="button"
-                className={`india-audio-btn ${isPlaying ? 'playing' : ''}`}
-                onClick={toggleAudioPlayback}
-                title={isPlaying ? 'Pause Background Audio' : 'Play Background Audio'}
-              >
-                {isPlaying ? <Volume2 size={13} /> : <VolumeX size={13} />}
-                <span>{isPlaying ? 'Audio: On' : 'Audio: Off'}</span>
-                {isPlaying && (
-                  <span className="india-equalizer-bars">
-                    <span className="bar bar1" />
-                    <span className="bar bar2" />
-                    <span className="bar bar3" />
-                  </span>
-                )}
-              </button>
-            </div>
-
-            <span className="india-access-pipe">|</span>
-
-            {/* Skip to Main Content */}
-            <a href="#main-content" className="india-skip-link">
-              Skip to Main Content
-            </a>
-
-            <span className="india-access-pipe">|</span>
-
-            {/* Font Size Scaling */}
-            <div className="india-font-ctrls" role="group" aria-label="Text Size Controls">
-              <button
-                type="button"
-                className={`india-font-btn ${fontSize === 'small' ? 'active' : ''}`}
-                onClick={() => handleFontSizeChange('small')}
-                title="Decrease text size (90%)"
-                aria-label="Decrease text size (A-)"
-              >
-                A-
-              </button>
-              <button
-                type="button"
-                className={`india-font-btn ${fontSize === 'normal' ? 'active' : ''}`}
-                onClick={() => handleFontSizeChange('normal')}
-                title="Standard text size (100%)"
-                aria-label="Standard text size (A)"
-              >
-                A
-              </button>
-              <button
-                type="button"
-                className={`india-font-btn ${fontSize === 'large' ? 'active' : ''}`}
-                onClick={() => handleFontSizeChange('large')}
-                title="Increase text size (112%)"
-                aria-label="Increase text size (A+)"
-              >
-                A+
-              </button>
-            </div>
-
-            <span className="india-access-pipe">|</span>
-
-            <span className="india-access-lang">
-              <strong>English</strong>
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================================
-          3. MAIN LOGO & SEARCH HEADER (ENGLISH ONLY)
+          MAIN LOGO & SEARCH HEADER (ENGLISH ONLY)
           ========================================================================= */}
       <header className="india-main-header">
         <div className="india-gov-wrap india-header-inner">
@@ -849,9 +720,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </header>
 
       {/* =========================================================================
-          4. OFFICIAL PRIMARY NAVIGATION BAR (ENGLISH ONLY)
+          OFFICIAL PRIMARY NAVIGATION BAR (FIXED ON TOP WHEN SCROLLING)
           ========================================================================= */}
-      <nav className="india-nav-bar" aria-label="Primary Navigation">
+      <nav className={`india-nav-bar ${isScrolled ? 'is-scrolled' : ''}`} aria-label="Primary Navigation">
         <div className="india-gov-wrap india-nav-inner">
           <div className="india-nav-mobile-bar">
             <span className="india-nav-mobile-title">PORTAL NAVIGATION</span>
@@ -865,6 +736,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {isMobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
               <span>{isMobileMenuOpen ? 'Close' : 'Menu'}</span>
             </button>
+          </div>
+
+          {/* Compact Brand Badge (Reveals on Scroll) */}
+          <div
+            className={`india-nav-brand ${isScrolled ? 'visible' : ''}`}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            title="Return to top of portal"
+          >
+            <span className="india-nav-brand-icon">🏛️</span>
+            <span className="india-nav-brand-title">SIF-GUARD</span>
           </div>
 
           <ul className={`india-nav-list ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
@@ -890,6 +771,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </ul>
 
           <div className="india-nav-right desktop-only">
+            <button
+              type="button"
+              className={`india-nav-audio-btn ${isPlaying ? 'playing' : ''}`}
+              onClick={toggleAudioPlayback}
+              title={isPlaying ? 'Pause Background Audio' : 'Play Background Audio'}
+              aria-label={isPlaying ? 'Audio: On' : 'Audio: Off'}
+            >
+              {isPlaying ? <Volume2 size={13} /> : <VolumeX size={13} />}
+              <span>{isPlaying ? 'Audio: On' : 'Audio: Off'}</span>
+            </button>
+
             <button
               type="button"
               className="india-officer-btn"
@@ -1452,14 +1344,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </footer>
       </div>
-
-      {/* Accessibility Toast Feedback */}
-      {toastMessage && (
-        <div className="india-a11y-toast" role="status" aria-live="polite">
-          <Activity size={16} color="#FFFFFF" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
     </div>
   );
 };
