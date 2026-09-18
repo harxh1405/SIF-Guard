@@ -29,25 +29,28 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
   return (
     <div
       style={{
-        backgroundColor: 'var(--bg-card, #0D171A)',
-        border: '1px solid var(--border, #203238)',
-        borderRadius: 'var(--radius-md, 8px)',
-        padding: '20px 24px',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderTop: '3.5px solid #003366',
+        borderRadius: 'var(--radius-md)',
+        padding: '20px 22px',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Activity size={18} color="#F2A933" />
+          <Activity size={17} color="#ff9933" />
           <h3
             style={{
-              fontFamily: 'var(--font-serif, Fraunces, serif)',
-              fontSize: '1.05rem',
-              fontWeight: 600,
-              color: 'var(--text-primary, #F4F3EE)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '1rem',
+              fontWeight: 800,
+              color: 'var(--primary)',
               margin: 0,
+              letterSpacing: '0.02em',
             }}
           >
             SAFETY INTELLIGENCE FEED
@@ -56,18 +59,20 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
         <span
           style={{
             fontFamily: 'var(--font-mono, monospace)',
-            fontSize: '0.68rem',
-            color: 'var(--text-muted, #647477)',
-            backgroundColor: 'rgba(32, 50, 56, 0.4)',
+            fontSize: '0.67rem',
+            fontWeight: 800,
+            color: '#b45309',
+            backgroundColor: '#fef3c7',
+            border: '1px solid #fde68a',
             padding: '2px 8px',
             borderRadius: '4px',
           }}
         >
-          LIVE PIPELINE
+          LIVE AUDIT STREAM
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', maxHeight: '340px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', maxHeight: '340px' }}>
         {items.map((item) => (
           <div
             key={item.id}
@@ -76,42 +81,44 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
               display: 'flex',
               alignItems: 'flex-start',
               gap: '12px',
-              padding: '10px 12px',
+              padding: '10px 14px',
               borderRadius: '6px',
-              backgroundColor: 'rgba(17, 36, 41, 0.4)',
-              border: '1px solid rgba(32, 50, 56, 0.5)',
+              backgroundColor: 'var(--surface-hover)',
+              border: '1px solid var(--border-subtle)',
               cursor: item.reportId && onSelectReport ? 'pointer' : 'default',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
               if (item.reportId && onSelectReport) {
-                e.currentTarget.style.backgroundColor = 'rgba(17, 36, 41, 0.8)';
-                e.currentTarget.style.borderColor = 'var(--amber, #F2A933)';
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#003366';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 51, 102, 0.08)';
               }
             }}
             onMouseLeave={(e) => {
               if (item.reportId && onSelectReport) {
-                e.currentTarget.style.backgroundColor = 'rgba(17, 36, 41, 0.4)';
-                e.currentTarget.style.borderColor = 'rgba(32, 50, 56, 0.5)';
+                e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
+                e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                e.currentTarget.style.boxShadow = 'none';
               }
             }}
           >
             <div style={{ marginTop: '2px' }}>{getIcon(item.type)}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary, #F4F3EE)' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {item.title}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.7rem', color: 'var(--text-muted, #647477)' }}>
+                <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
                   {item.timestamp}
                 </span>
               </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary, #9CA8AA)', margin: '4px 0 0 0', lineHeight: 1.35 }}>
+              <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '3px 0 0 0', lineHeight: 1.35 }}>
                 {item.description}
               </p>
             </div>
             {item.reportId && onSelectReport && (
-              <ChevronRight size={14} color="#647477" style={{ alignSelf: 'center' }} />
+              <ChevronRight size={13} color="#94a3b8" style={{ alignSelf: 'center' }} />
             )}
           </div>
         ))}

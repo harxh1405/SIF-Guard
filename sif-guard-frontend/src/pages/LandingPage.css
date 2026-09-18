@@ -1,0 +1,1543 @@
+/* ==========================================================================
+   NATIONAL PORTAL OF INDIA (india.gov.in) OFFICIAL DESIGN SYSTEM
+   SIF-GUARD // Oil India Limited (Ministry of Petroleum & Natural Gas)
+   Clean English Edition (No PM Narendra Modi photo, English typography)
+   ========================================================================== */
+
+:root {
+  --gov-navy-dark: #002244;
+  --gov-navy-primary: #003366;
+  --gov-navy-light: #0b457e;
+  --gov-saffron: #ff9933;
+  --gov-saffron-dark: #b45309;
+  --gov-green: #128807;
+  --gov-red: #dc2626;
+  --gov-text-dark: #1e293b;
+  --gov-text-muted: #64748b;
+  --gov-bg-gray: #f1f5f9;
+  --gov-border: #cbd5e1;
+  --gov-card-bg: #ffffff;
+}
+
+/* Page Base */
+.india-gov-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8fafc;
+  color: var(--gov-text-dark);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.india-gov-page *,
+.india-gov-page *::before,
+.india-gov-page *::after {
+  box-sizing: border-box;
+}
+
+.india-gov-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+  .india-gov-wrap {
+    padding: 0 32px;
+  }
+}
+
+/* Font Scaling classes */
+.font-size-large {
+  font-size: 108%;
+}
+
+.font-size-larger {
+  font-size: 116%;
+}
+
+/* ==========================================================================
+   1. NATIONAL TRICOLOR TOP STRIPE
+   ========================================================================== */
+.india-top-stripe {
+  height: 4.5px;
+  width: 100%;
+  background: linear-gradient(90deg, #ff9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #128807 66.66%);
+}
+
+/* ==========================================================================
+   2. ACCESSIBILITY & STATUTORY ATTRIBUTION BAR
+   ========================================================================== */
+.india-accessibility-bar {
+  background-color: #1a273b;
+  color: #cbd5e1;
+  font-size: 11.5px;
+  border-bottom: 1px solid #2d3f59;
+}
+
+.india-access-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.india-access-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.india-access-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.india-access-item strong {
+  color: #ffffff;
+}
+
+.india-access-pipe {
+  color: #475569;
+  user-select: none;
+}
+
+.india-access-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11.5px;
+}
+
+/* Audio Player Equalizer Controller */
+.india-audio-ctrl {
+  display: flex;
+  align-items: center;
+}
+
+.india-audio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 153, 51, 0.15);
+  border: 1px solid rgba(255, 153, 51, 0.4);
+  color: #ff9933;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.india-audio-btn:hover {
+  background: rgba(255, 153, 51, 0.25);
+  color: #ffffff;
+}
+
+.india-audio-btn.playing {
+  background: #ff9933;
+  color: #1a273b;
+  border-color: #ff9933;
+}
+
+.india-equalizer-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+}
+
+.india-equalizer-bars .bar {
+  width: 2px;
+  background-color: #1a273b;
+  border-radius: 1px;
+  animation: equalizerBounce 0.8s ease infinite alternate;
+}
+
+.india-equalizer-bars .bar1 { height: 4px; animation-delay: 0.1s; }
+.india-equalizer-bars .bar2 { height: 8px; animation-delay: 0.3s; }
+.india-equalizer-bars .bar3 { height: 6px; animation-delay: 0.2s; }
+
+@keyframes equalizerBounce {
+  0% { height: 2px; }
+  100% { height: 10px; }
+}
+
+.india-skip-link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.india-skip-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.india-font-ctrls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.india-font-btn {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.india-font-btn:hover,
+.india-font-btn.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.india-access-lang {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   3. OFFICIAL MAIN HEADER & SEARCH
+   ========================================================================= */
+.india-main-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 0;
+}
+
+.india-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.india-emblem-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.india-emblem-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.india-emblem-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.india-lion-icon {
+  font-size: 20px;
+}
+
+.india-satyameva {
+  font-size: 6.5px;
+  font-weight: 700;
+  color: #003366;
+  margin-top: 1px;
+  letter-spacing: 0.02em;
+}
+
+.india-portal-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.india-portal-hindi {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b45309;
+  letter-spacing: 0.04em;
+}
+
+.india-portal-english {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #003366;
+  margin: 0;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.india-portal-sub {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.india-portal-psu {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Official Search Bar with Category Filter */
+.india-header-search {
+  flex: 1;
+  max-width: 520px;
+}
+
+.india-search-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #003366;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 51, 102, 0.08);
+}
+
+.india-search-icon {
+  color: #64748b;
+  margin-left: 10px;
+}
+
+.india-search-input {
+  flex: 1;
+  border: none;
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  outline: none;
+  background: transparent;
+}
+
+.india-search-input::placeholder {
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.india-search-category {
+  border: none;
+  border-left: 1px solid #cbd5e1;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  color: #334155;
+  background: #f8fafc;
+  outline: none;
+  cursor: pointer;
+}
+
+.india-search-btn {
+  background-color: #003366;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.india-search-btn:hover {
+  background-color: #ff9933;
+  color: #002244;
+}
+
+/* ==========================================================================
+   4. PRIMARY NAVIGATION BAR (Deep Navy Blue)
+   ========================================================================= */
+.india-nav-bar {
+  background-color: #002244;
+  border-bottom: 2px solid #ff9933;
+}
+
+.india-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.india-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.india-nav-link {
+  display: inline-block;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.india-nav-link:hover,
+.india-nav-link.active {
+  background-color: #003366;
+  color: #ff9933;
+  border-bottom-color: #ff9933;
+}
+
+.india-officer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ff9933;
+  color: #002244;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.india-officer-btn:hover {
+  background-color: #ffffff;
+  color: #003366;
+}
+
+/* ==========================================================================
+   5. STATUTORY NOTICE TICKER
+   ========================================================================= */
+.india-notice-ticker {
+  background-color: #fff7ed;
+  border-bottom: 1px solid #ffedd5;
+  padding: 8px 0;
+  font-size: 0.82rem;
+}
+
+.india-ticker-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.india-ticker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #dc2626;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.india-ticker-content {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.india-ticker-content p {
+  margin: 0;
+  color: #9a3412;
+  font-weight: 500;
+}
+
+.india-ticker-date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   6. HERO / SPOTLIGHT BANNER
+   ========================================================================= */
+.india-spotlight-section {
+  padding: 36px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.india-spotlight-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-top: 4px solid #003366;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.06);
+  padding: 36px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .india-spotlight-card {
+    grid-template-columns: 1.3fr 1.1fr;
+    gap: 40px;
+  }
+}
+
+.india-mandate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(0, 51, 102, 0.08);
+  border: 1px solid rgba(0, 51, 102, 0.2);
+  color: #003366;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+}
+
+.india-spotlight-title {
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  font-weight: 800;
+  color: #002244;
+  line-height: 1.22;
+  margin: 0 0 16px 0;
+}
+
+.india-spotlight-text {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0 0 24px 0;
+}
+
+.india-spotlight-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.india-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #003366;
+  color: #ffffff;
+  border: 1px solid #002244;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.india-btn-primary:hover {
+  background-color: #ff9933;
+  color: #002244;
+  border-color: #ff9933;
+}
+
+.india-btn-primary.small {
+  padding: 7px 14px;
+  font-size: 0.82rem;
+}
+
+.india-btn-primary.full-width {
+  width: 100%;
+  justify-content: center;
+  padding: 11px 18px;
+}
+
+.india-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8fafc;
+  color: #003366;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.india-btn-secondary:hover {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+/* Stats Strip */
+.india-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+@media (min-width: 600px) {
+  .india-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.india-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.india-stat-num {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #003366;
+}
+
+.india-stat-label {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Right Column: Real-time Telemetry Dossier Panel */
+.india-telemetry-panel {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-top: 4px solid #003366;
+  border-radius: 8px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.05);
+}
+
+.india-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+.india-panel-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #003366;
+}
+
+.india-panel-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #128807;
+  box-shadow: 0 0 6px #128807;
+}
+
+.india-panel-latency {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.india-panel-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.india-panel-alert-icon {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.india-panel-alert-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0;
+}
+
+.india-panel-alert-desc {
+  font-size: 0.75rem;
+  color: #7f1d1d;
+  margin: 2px 0 0 0;
+}
+
+.india-panel-sev {
+  margin-left: auto;
+  font-family: monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #ffffff;
+  background-color: #dc2626;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.india-panel-barriers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.india-barriers-label {
+  font-family: monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+}
+
+.india-barrier-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.india-barrier-bar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: #334155;
+}
+
+.text-danger { color: #dc2626; }
+.text-success { color: #128807; }
+.text-warning { color: #b45309; }
+
+.india-barrier-bar-track {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.india-barrier-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.bg-danger { background-color: #dc2626; }
+.bg-success { background-color: #128807; }
+.bg-warning { background-color: #f59e0b; }
+
+.india-panel-action {
+  background: #002244;
+  border-radius: 5px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.india-action-tag {
+  font-family: monospace;
+  font-size: 0.65rem;
+  color: #ff9933;
+  font-weight: 700;
+}
+
+.india-panel-action code {
+  font-family: monospace;
+  font-size: 0.74rem;
+  color: #ffffff;
+  word-break: break-all;
+}
+
+.india-panel-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid #003366;
+  color: #003366;
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.india-panel-btn:hover {
+  background: #003366;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   7. SECTIONS & COMMON COMPONENT STYLING
+   ========================================================================= */
+.india-section {
+  padding: 48px 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.india-section.bg-alt {
+  background-color: #f8fafc;
+}
+
+.india-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.india-section-category {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #b45309;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.india-section-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #002244;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.india-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #003366;
+  text-decoration: none;
+}
+
+.india-view-all-link:hover {
+  color: #ff9933;
+}
+
+/* Safety Topics Grid (Cards) */
+.india-topics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .india-topics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .india-topics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.india-topic-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-top: 3.5px solid #003366;
+  border-radius: 6px;
+  padding: 22px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.india-topic-card:hover {
+  border-top-color: #ff9933;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 51, 102, 0.08);
+}
+
+.india-topic-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.india-topic-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #003366;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.india-topic-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.india-topic-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #002244;
+  margin: 0 0 4px 0;
+}
+
+.india-topic-code {
+  font-size: 0.72rem;
+  font-family: monospace;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.india-topic-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #475569;
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.india-topic-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+
+.india-topic-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #003366;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.india-topic-action-btn:hover {
+  color: #ff9933;
+}
+
+/* ==========================================================================
+   8. PRECURSOR AUDIT STREAM & REGULATORY DOSSIER
+   ========================================================================= */
+.india-tabs-group {
+  display: flex;
+  gap: 6px;
+}
+
+.india-tab-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.india-tab-btn.active {
+  background: #003366;
+  color: #ffffff;
+  border-color: #003366;
+}
+
+.india-audit-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 960px) {
+  .india-audit-layout {
+    grid-template-columns: 1fr 1.15fr;
+    gap: 32px;
+    align-items: start;
+  }
+}
+
+.india-audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.india-audit-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.india-audit-card:hover {
+  border-color: #003366;
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.05);
+}
+
+.india-audit-card.selected {
+  border-left: 4px solid #003366;
+  border-color: #003366;
+  background-color: #f8fafc;
+}
+
+.india-audit-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.india-audit-id {
+  font-family: monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.india-sif-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.india-audit-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #002244;
+  margin: 0 0 4px 0;
+}
+
+.india-audit-card-asset {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.india-audit-card-meta {
+  font-size: 0.74rem;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Dossier Card on the right */
+.india-dossier-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-top: 4px solid #dc2626;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.india-dossier-header {
+  padding: 20px 24px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.india-dossier-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.india-dossier-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #dc2626;
+  letter-spacing: 0.04em;
+}
+
+.india-dossier-id {
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.india-dossier-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #002244;
+  margin: 0 0 8px 0;
+}
+
+.india-dossier-asset-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.india-dossier-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.india-dossier-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.india-dossier-text {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 0;
+  font-style: italic;
+}
+
+.india-dossier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.india-dossier-cell {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+
+.india-cell-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.india-cell-val {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #002244;
+}
+
+.india-barrier-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.india-action-box {
+  background: #0f172a;
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: #38bdf8;
+  font-size: 0.78rem;
+}
+
+.india-dossier-footer {
+  padding: 16px 24px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ==========================================================================
+   9. MONITORED FACILITIES
+   ========================================================================= */
+.india-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 100px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.india-dot.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.india-facilities-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .india-facilities-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .india-facilities-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.india-facility-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-top: 3.5px solid #003366;
+  border-radius: 6px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.india-facility-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.india-facility-id {
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.india-facility-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #002244;
+  margin: 2px 0 0 0;
+  line-height: 1.25;
+}
+
+.india-asset-status {
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.india-asset-status.normal {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.india-asset-status.watch {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.india-facility-loc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.india-facility-type {
+  font-size: 0.8rem;
+  color: #475569;
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.india-facility-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.india-spec-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  color: #334155;
+}
+
+.india-facility-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #003366;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.india-facility-btn:hover {
+  background: #003366;
+  color: #ffffff;
+  border-color: #003366;
+}
+
+/* ==========================================================================
+   10. STATUTORY STANDARDS & COMPLIANCE
+   ========================================================================= */
+.india-standards-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  align-items: center;
+}
+
+@media (min-width: 860px) {
+  .india-standards-box {
+    grid-template-columns: 1fr 1.3fr;
+    gap: 48px;
+  }
+}
+
+.india-standards-p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 12px 0 0 0;
+}
+
+.india-standards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.india-std-item {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-left: 3.5px solid #003366;
+  border-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.india-std-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.india-std-item strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #002244;
+}
+
+.india-std-item span {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   11. NATIONAL PORTAL FOOTER (india.gov.in standard)
+   ========================================================================= */
+.india-gov-footer {
+  background-color: #002244;
+  color: #cbd5e1;
+  border-top: 1px solid #1e3a5f;
+}
+
+.india-footer-content {
+  padding: 48px 0 24px 0;
+}
+
+.india-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  margin-bottom: 40px;
+}
+
+@media (min-width: 640px) {
+  .india-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .india-footer-grid {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+.india-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.india-footer-emblem {
+  font-size: 28px;
+}
+
+.india-footer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.india-footer-sub {
+  font-size: 0.75rem;
+  color: #ff9933;
+  margin: 0;
+}
+
+.india-footer-desc {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0 0 16px 0;
+}
+
+.india-footer-heading {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 14px 0;
+  border-bottom: 2px solid #ff9933;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.india-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.india-footer-links a {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.india-footer-links a:hover {
+  color: #ff9933;
+}
+
+.india-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid #1e3a5f;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.india-footer-copy p {
+  margin: 2px 0;
+}
+
+.india-footer-credits {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.india-credit-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: #ffffff;
+}

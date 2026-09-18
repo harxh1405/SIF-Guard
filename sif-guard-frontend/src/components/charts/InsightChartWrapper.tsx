@@ -18,13 +18,14 @@ export interface InsightChartWrapperProps {
 export const SIF_GUARD_ECHARTS_THEME = {
   backgroundColor: 'transparent',
   textStyle: {
-    fontFamily: 'Inter, Geist, sans-serif',
-    color: '#9CA8AA',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    color: '#64748b',
   },
   title: {
     textStyle: {
-      color: '#F4F3EE',
-      fontFamily: 'Fraunces, Instrument Serif, serif',
+      color: '#003366',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontWeight: 700,
     },
   },
   line: {
@@ -35,24 +36,24 @@ export const SIF_GUARD_ECHARTS_THEME = {
     smooth: true,
   },
   categoryAxis: {
-    axisLine: { show: true, lineStyle: { color: '#203238' } },
+    axisLine: { show: true, lineStyle: { color: '#cbd5e1' } },
     axisTick: { show: false },
-    axisLabel: { color: '#9CA8AA', fontSize: 11 },
+    axisLabel: { color: '#64748b', fontSize: 11 },
     splitLine: { show: false },
   },
   valueAxis: {
     axisLine: { show: false },
     axisTick: { show: false },
-    axisLabel: { color: '#9CA8AA', fontSize: 11 },
-    splitLine: { show: true, lineStyle: { color: '#203238', type: 'dashed' } },
+    axisLabel: { color: '#64748b', fontSize: 11 },
+    splitLine: { show: true, lineStyle: { color: '#e2e8f0', type: 'dashed' } },
   },
   tooltip: {
-    backgroundColor: '#0D171A',
-    borderColor: '#203238',
+    backgroundColor: '#ffffff',
+    borderColor: '#cbd5e1',
     borderWidth: 1,
     padding: [10, 14],
-    textStyle: { color: '#F4F3EE', fontSize: 12 },
-    extraCssText: 'box-shadow: 0 8px 24px rgba(0,0,0,0.6); border-radius: 6px;',
+    textStyle: { color: '#0f172a', fontSize: 12 },
+    extraCssText: 'box-shadow: 0 8px 24px rgba(0, 51, 102, 0.12); border-radius: 6px;',
   },
 };
 
@@ -81,14 +82,15 @@ export const InsightChartWrapper: React.FC<InsightChartWrapperProps> = ({
   return (
     <div
       style={{
-        backgroundColor: 'var(--bg-card, #0D171A)',
-        border: '1px solid var(--border, #203238)',
-        borderRadius: 'var(--radius-md, 8px)',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderTop: '3.5px solid #003366',
+        borderRadius: 'var(--radius-md)',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
       {(title || subtitle || headerAction) && (
@@ -105,10 +107,10 @@ export const InsightChartWrapper: React.FC<InsightChartWrapperProps> = ({
             {title && (
               <h3
                 style={{
-                  fontFamily: 'var(--font-serif, Fraunces, serif)',
-                  fontSize: '1.05rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary, #F4F3EE)',
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '1rem',
+                  fontWeight: 800,
+                  color: 'var(--primary)',
                   margin: 0,
                   letterSpacing: '0.02em',
                 }}
@@ -119,10 +121,10 @@ export const InsightChartWrapper: React.FC<InsightChartWrapperProps> = ({
             {subtitle && (
               <p
                 style={{
-                  fontSize: '0.8rem',
-                  color: 'var(--text-secondary, #9CA8AA)',
-                  margin: '4px 0 0 0',
-                  lineHeight: '1.4',
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.78rem',
+                  margin: '3px 0 0 0',
+                  lineHeight: 1.35,
                 }}
               >
                 {subtitle}

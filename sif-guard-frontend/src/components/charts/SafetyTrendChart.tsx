@@ -28,15 +28,21 @@ export const SafetyTrendChart: React.FC<SafetyTrendChartProps> = ({
     },
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'cross', crossStyle: { color: '#9CA8AA' } },
+      axisPointer: { type: 'cross', crossStyle: { color: '#94a3b8' } },
+      backgroundColor: '#ffffff',
+      borderColor: '#cbd5e1',
+      borderWidth: 1,
+      padding: [10, 14],
+      textStyle: { color: '#0f172a', fontSize: 12 },
+      extraCssText: 'box-shadow: 0 6px 20px rgba(0,51,102,0.12); border-radius: 6px;',
       formatter: (params: any[]) => {
-        let res = `<div style="font-weight:600;margin-bottom:4px;color:#F4F3EE">${params[0]?.name || ''}</div>`;
+        let res = `<div style="font-weight:700;margin-bottom:4px;color:#003366">${params[0]?.name || ''}</div>`;
         params.forEach((item) => {
           const val = item.seriesName.includes('Density') ? `${item.value}%` : item.value;
           res += `<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:3px">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${item.color}"></span>
-            <span style="color:#9CA8AA">${item.seriesName}:</span>
-            <span style="font-weight:600;color:#F4F3EE;margin-left:auto">${val}</span>
+            <span style="color:#475569">${item.seriesName}:</span>
+            <span style="font-weight:700;color:#0f172a;margin-left:auto">${val}</span>
           </div>`;
         });
         return res;
@@ -44,7 +50,7 @@ export const SafetyTrendChart: React.FC<SafetyTrendChartProps> = ({
     },
     legend: {
       data: ['Total Reports', 'SIF Potential', 'SIF Precursor Density (%)'],
-      textStyle: { color: '#9CA8AA', fontSize: 11 },
+      textStyle: { color: '#475569', fontSize: 11, fontWeight: 600 },
       top: 0,
       right: 0,
     },
@@ -52,21 +58,23 @@ export const SafetyTrendChart: React.FC<SafetyTrendChartProps> = ({
       type: 'category',
       data: periods.length ? periods : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
       axisPointer: { type: 'shadow' },
+      axisLine: { lineStyle: { color: '#cbd5e1' } },
+      axisLabel: { color: '#64748b' },
     },
     yAxis: [
       {
         type: 'value',
         name: 'Reports',
         min: 0,
-        axisLabel: { color: '#9CA8AA' },
-        splitLine: { lineStyle: { color: '#203238', type: 'dashed' } },
+        axisLabel: { color: '#64748b' },
+        splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } },
       },
       {
         type: 'value',
         name: 'Density (%)',
         min: 0,
         max: 100,
-        axisLabel: { color: '#9CA8AA', formatter: '{value}%' },
+        axisLabel: { color: '#64748b', formatter: '{value}%' },
         splitLine: { show: false },
       },
     ],
@@ -76,9 +84,7 @@ export const SafetyTrendChart: React.FC<SafetyTrendChartProps> = ({
         type: 'bar',
         barWidth: '24%',
         itemStyle: {
-          color: '#112429',
-          borderColor: '#203238',
-          borderWidth: 1,
+          color: '#003366',
           borderRadius: [4, 4, 0, 0],
         },
         data: totalReports.length ? totalReports : [42, 58, 65, 80, 95, 110],
@@ -88,7 +94,7 @@ export const SafetyTrendChart: React.FC<SafetyTrendChartProps> = ({
         type: 'bar',
         barWidth: '24%',
         itemStyle: {
-          color: '#E54F4F',
+          color: '#dc2626',
           borderRadius: [4, 4, 0, 0],
         },
         data: sifPrecursors.length ? sifPrecursors : [12, 18, 14, 25, 31, 38],
@@ -99,8 +105,8 @@ export const SafetyTrendChart: React.FC<SafetyTrendChartProps> = ({
         yAxisIndex: 1,
         symbol: 'circle',
         symbolSize: 7,
-        itemStyle: { color: '#F2A933' },
-        lineStyle: { width: 2, color: '#F2A933' },
+        itemStyle: { color: '#ff9933' },
+        lineStyle: { width: 2.5, color: '#ff9933' },
         data: sifDensity.length ? sifDensity : [28, 31, 21, 31, 32, 34],
       },
     ],
