@@ -25,15 +25,20 @@
   width: 100%;
   background-color: #f8fafc;
   color: var(--gov-text-dark);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   box-sizing: border-box;
 }
 
 .india-gov-page *,
 .india-gov-page *::before,
-.india-gov-page *::after {
+.india-gov-page *::after,
+.india-gov-page button,
+.india-gov-page input,
+.india-gov-page select,
+.india-gov-page textarea {
   box-sizing: border-box;
+  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .india-gov-wrap {
