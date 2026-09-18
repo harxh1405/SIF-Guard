@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import {
   LayoutDashboard,
   UploadCloud,
@@ -58,19 +57,22 @@ export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
   const allItems = sections.flatMap((section) => section.items);
 
   return (
-    <motion.nav
-      animate={{ width: '100%' }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+    <nav
       style={{
         background: '#205493',
         borderBottom: '1px solid #1B365D',
-        height: '44px',
+        height: '50px',
+        minHeight: '50px',
+        maxHeight: '50px',
+        flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
-        position: 'relative',
-        zIndex: 20,
+        position: 'sticky',
+        top: 0,
+        zIndex: 90,
         width: '100%',
         borderRadius: '0px',
+        boxShadow: '0 2px 10px rgba(13, 35, 58, 0.18)',
       }}
     >
       <div
@@ -95,7 +97,7 @@ export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
             overflowX: 'auto',
             msOverflowStyle: 'none',
             scrollbarWidth: 'none',
-            gap: '2px',
+            gap: '0.5px',
             width: '100%',
             height: '100%',
           }}
@@ -114,18 +116,18 @@ export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
+                  gap: '10px',
                   flexShrink: 0,
                   whiteSpace: 'nowrap',
-                  padding: '0 16px',
+                  padding: '0 20px',
                   height: '100%',
                   borderRadius: '0px',
                   border: 'none',
-                  borderBottom: isActive ? '3px solid #FF9933' : '3px solid transparent',
+                  borderBottom: isActive ? '4px solid #FF9933' : '4px solid transparent',
                   background: isActive ? '#1B365D' : 'transparent',
                   color: '#FFFFFF',
                   fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.8rem',
+                  fontSize: '0.9rem',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   letterSpacing: '0.01em',
@@ -142,7 +144,7 @@ export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
                 }}
               >
                 <Icon
-                  size={14}
+                  size={18}
                   color={isActive ? '#FF9933' : '#E2E8F0'}
                   style={{ flexShrink: 0 }}
                 />
@@ -152,6 +154,6 @@ export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
           })}
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 };

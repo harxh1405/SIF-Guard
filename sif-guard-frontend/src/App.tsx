@@ -63,7 +63,7 @@ function AppContent() {
   const [shortcutsOpen, setShortcutsOpen] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const mainContentRef = useRef<HTMLElement>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
 
   // Background Audio Controller for the entire platform ("Modi hai to Mumkin hai")
   useEffect(() => {
@@ -246,7 +246,17 @@ function AppContent() {
 
   // Authenticated: Show full existing SIF-Guard Application
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)', overflow: 'hidden' }}>
+    <div
+      ref={mainContentRef}
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: 'var(--bg-primary)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+      }}
+    >
       <audio
         ref={audioRef}
         loop
@@ -264,27 +274,35 @@ function AppContent() {
         onToggleAudio={toggleAudio}
       />
 
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        <Navigation
-          activeTab={activeTab}
-          onTabChange={handleNavigate}
-          isCollapsed={isCollapsed}
-          onToggleCollapse={toggleCollapse}
-        />
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={handleNavigate}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleCollapse}
+      />
 
-        <main ref={mainContentRef} className="app-main-content" style={{ flex: 1, minWidth: 0, padding: '24px 24px', overflowY: 'auto', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
-          <Suspense fallback={<ModuleLoadingFallback />}>
-            {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
-            {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
-            {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
-            {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
-            {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}
-            {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
-            {activeTab === 'knowledge' && <KnowledgeLSRPage />}
-            {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
-          </Suspense>
-        </main>
-      </div>
+      <main
+        className="app-main-content"
+        style={{
+          flex: 1,
+          minWidth: 0,
+          padding: '24px 24px',
+          maxWidth: '1600px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        <Suspense fallback={<ModuleLoadingFallback />}>
+          {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
+          {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
+          {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
+          {activeTab === 'explorer' && <ReportsExplorerPage onNavigate={handleNavigate} />}
+          {activeTab === 'clusters' && <PrecursorClustersPage onNavigate={handleNavigate} />}
+          {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
+          {activeTab === 'knowledge' && <KnowledgeLSRPage />}
+          {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
+        </Suspense>
+      </main>
 
       <KeyboardShortcutsModal
         isOpen={shortcutsOpen}

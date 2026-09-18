@@ -3,14 +3,11 @@ import {
   Server,
   CheckCircle2,
   XCircle,
-  Globe,
-  Eye,
-  ArrowDown,
+  LogOut,
 } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
 import { useAuth } from '../../context/AuthContext';
-import { UserMenu } from './UserMenu';
 
 interface Props {
   theme: 'dark' | 'light';
@@ -123,10 +120,9 @@ const OilIndiaBadgeSvg: React.FC<{ size?: number }> = ({ size = 38 }) => (
 );
 
 export const Header: React.FC<Props> = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [error, setError] = useState<boolean>(false);
-  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'small'>('normal');
 
   useEffect(() => {
     getHealth()
@@ -139,190 +135,21 @@ export const Header: React.FC<Props> = () => {
       });
   }, []);
 
-  const handleFontSizeChange = (size: 'small' | 'normal' | 'large') => {
-    setFontSize(size);
-    const root = document.documentElement;
-    if (size === 'small') root.style.fontSize = '92%';
-    else if (size === 'large') root.style.fontSize = '108%';
-    else root.style.fontSize = '100%';
-  };
-
-  const handleSkipToMain = () => {
-    const mainEl = document.querySelector('main');
-    if (mainEl) {
-      mainEl.focus();
-      mainEl.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <header
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
+        position: 'relative',
+        zIndex: 10,
         background: '#FFFFFF',
         borderBottom: '1px solid #D1D5DB',
+        flexShrink: 0,
       }}
     >
-      {/* =========================================================================
-         TIER 1: TOP UTILITY STRIP (Dark Navy #0D233A)
-         ========================================================================= */}
-      <div
-        style={{
-          backgroundColor: '#0D233A',
-          color: '#E2E8F0',
-          fontSize: '0.72rem',
-          fontFamily: 'var(--font-sans)',
-          minHeight: '34px',
-          display: 'flex',
-          alignItems: 'center',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '1600px',
-            width: '100%',
-            margin: '0 auto',
-            padding: '0 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {/* Left: Official Ministry Line */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 700, color: '#FF9933', letterSpacing: '0.04em' }}>
-              GOVERNMENT OF INDIA
-            </span>
-            <span style={{ opacity: 0.4 }}>|</span>
-            <span style={{ fontWeight: 500, color: '#F1F5F9' }}>
-              Ministry of Petroleum &amp; Natural Gas
-            </span>
-            <span style={{ opacity: 0.4 }}>|</span>
-            <span style={{ fontWeight: 600, color: '#CBD5E1' }}>Oil India Limited (A Maharatna PSU)</span>
-          </div>
-
-          {/* Right: Accessibility & Language Suite */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={handleSkipToMain}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#CBD5E1',
-                fontSize: '0.7rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px',
-              }}
-            >
-              <ArrowDown size={10} /> Skip to Main Content
-            </button>
-
-            <span style={{ opacity: 0.3 }}>|</span>
-
-            <button
-              type="button"
-              onClick={() => alert('Screen Reader Access Enabled (ARIA Live Region Active)')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#CBD5E1',
-                fontSize: '0.7rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px',
-              }}
-            >
-              <Eye size={10} /> Screen Reader Access
-            </button>
-
-            <span style={{ opacity: 0.3 }}>|</span>
-
-            {/* Font Size Controls: A- | A | A+ */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)' }}>
-              <span style={{ fontSize: '0.66rem', color: '#94A3B8', marginRight: '2px' }}>Font:</span>
-              <button
-                type="button"
-                onClick={() => handleFontSizeChange('small')}
-                style={{
-                  padding: '1px 5px',
-                  borderRadius: '2px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: fontSize === 'small' ? '#FF9933' : 'transparent',
-                  color: fontSize === 'small' ? '#000000' : '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: '0.66rem',
-                  cursor: 'pointer',
-                }}
-              >
-                A-
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFontSizeChange('normal')}
-                style={{
-                  padding: '1px 5px',
-                  borderRadius: '2px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: fontSize === 'normal' ? '#FF9933' : 'transparent',
-                  color: fontSize === 'normal' ? '#000000' : '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: '0.66rem',
-                  cursor: 'pointer',
-                }}
-              >
-                A
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFontSizeChange('large')}
-                style={{
-                  padding: '1px 5px',
-                  borderRadius: '2px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: fontSize === 'large' ? '#FF9933' : 'transparent',
-                  color: fontSize === 'large' ? '#000000' : '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: '0.66rem',
-                  cursor: 'pointer',
-                }}
-              >
-                A+
-              </button>
-            </div>
-
-            <span style={{ opacity: 0.3 }}>|</span>
-
-            {/* Bhasha / Language Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Globe size={11} color="#FF9933" />
-              <span style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.7rem' }}>English</span>
-              <span style={{ opacity: 0.4 }}>/</span>
-              <span style={{ fontWeight: 600, color: '#CBD5E1', fontSize: '0.7rem', cursor: 'pointer' }}>हिन्दी</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-         TIER 2: MAIN MASTHEAD (Pure White #FFFFFF)
-         ========================================================================= */}
       <div
         style={{
           padding: '12px 24px',
           background: '#FFFFFF',
-          borderBottom: '1px solid #D1D5DB',
-          minHeight: '72px',
+          minHeight: '70px',
           display: 'flex',
           alignItems: 'center',
         }}
@@ -392,7 +219,7 @@ export const Header: React.FC<Props> = () => {
             </div>
           </div>
 
-          {/* Right: Crisp Bordered Utility Controls & User Dropdown */}
+          {/* Right: Crisp Bordered Utility Controls & Single Sign Out Button */}
           <div
             style={{
               display: 'flex',
@@ -446,8 +273,40 @@ export const Header: React.FC<Props> = () => {
               )}
             </div>
 
-            {/* Integrated User Profile Dropdown Menu */}
-            <UserMenu user={user} profile={profile} onSignOut={signOut} />
+            {/* Single Sign Out Button */}
+            {user && (
+              <button
+                type="button"
+                onClick={signOut}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '4px',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  color: '#DC2626',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  fontFamily: 'var(--font-sans)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FEE2E2';
+                  e.currentTarget.style.borderColor = '#FCA5A5';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FEF2F2';
+                  e.currentTarget.style.borderColor = '#FECACA';
+                }}
+                title={user.email ? `Sign out (${user.email})` : 'Sign out'}
+              >
+                <LogOut size={13} color="#DC2626" />
+                <span>Sign Out</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
