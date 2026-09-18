@@ -31,7 +31,7 @@ BFT_CASES = {
     "BFT-005": {
         "text": "During operation of a grinding machine, the machine guard had been removed to make access easier. The equipment continued to operate without the guard installed.",
         "expected_barrier": "machine guarding",
-        "expected_barrier_failure": "machine guard removed, missing, or bypassed",
+        "expected_barrier_failure": "machine guard removed, missing, or not in place",
         "expected_activity": "machinery operation / grinding",
         "expected_hazard": "rotating machinery / caught-in",
         "expected_potential_consequence": "severe / fatal caught-in or struck-by injury"

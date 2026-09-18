@@ -8,6 +8,7 @@ import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
 import { EvidenceHighlighter } from '../components/common/EvidenceHighlighter';
 import { AIExplanationPanel } from '../components/common/AIExplanationPanel';
+import { SafetyFingerprint } from '../components/fingerprint/SafetyFingerprint';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
@@ -892,8 +893,8 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
               }}
             >
               <option value="ALL">All Sources</option>
-              <option value="osha_severe">OSHA Severe Injury</option>
-              <option value="osha_construction">OSHA Construction</option>
+              <option value="manual">Manual Narrative</option>
+              <option value="ocr">OCR Scan / Document</option>
               <option value="oil_hsse">OIL HSSE Data</option>
             </select>
           </div>
@@ -1177,20 +1178,50 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
 
                       {/* Source Dataset */}
                       <td>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: 'var(--surface-elevated)',
-                            border: '1px solid var(--border-subtle)',
-                            color: 'var(--text-secondary)',
-                            fontFamily: 'var(--font-mono)',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {r.source_dataset}
-                        </span>
+                        {(() => {
+                          const orig = (r as any).data_origin || (r.source_record_id.startsWith("BFT") || r.source_record_id.startsWith("REC-BFT") ? "synthetic" : r.source_dataset);
+                          const isSynth = orig === "synthetic" || r.source_record_id.startsWith("BFT") || r.source_record_id.startsWith("REC-BFT");
+                          const isManual = orig === "manual" || r.source_record_id.startsWith("RAW");
+                          const isOcr = orig === "ocr" || r.source_record_id.startsWith("OCR");
+
+                          const label = isSynth
+                            ? "Synthetic Test"
+                            : isManual
+                            ? "Manual Narrative"
+                            : isOcr
+                            ? "OCR Scan"
+                            : "OIL HSSE";
+
+                          const color = isSynth
+                            ? "#E8AA3D"
+                            : isManual || isOcr
+                            ? "#F2A933"
+                            : "#4DCEA0";
+
+                          const bg = isSynth
+                            ? "rgba(232, 170, 61, 0.15)"
+                            : isManual || isOcr
+                            ? "rgba(242, 169, 51, 0.15)"
+                            : "rgba(77, 206, 160, 0.12)";
+
+                          return (
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                background: bg,
+                                border: `1px solid ${color}40`,
+                                color: color,
+                                fontWeight: 600,
+                                fontFamily: 'var(--font-mono)',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {label}
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       {/* Site / Facility */}
@@ -1727,6 +1758,19 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* 3.5 Signature Safety Fingerprint DAG */}
+                <SafetyFingerprint
+                  fingerprint={{
+                    activity: selectedReport.activity,
+                    hazard: selectedReport.hazard,
+                    exposure: selectedReport.exposure,
+                    barrier_failure: selectedReport.barrier_failure || selectedReport.barrier,
+                    potential_consequence: selectedReport.potential_consequence,
+                    life_saving_rules: (analysisData?.life_saving_rules || selectedReport.life_saving_rules || []).map(r => r.rule_name),
+                  }}
+                  height={320}
+                />
 
                 {/* 4. AI Explanation & NLP Model Assessment */}
                 <div>

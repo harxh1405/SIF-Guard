@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import {
   ShieldAlert,
   ShieldCheck,
@@ -111,7 +110,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 color: 'var(--text-muted)',
               }}
             >
-              NLP Precursor Classification
+              XGBoost SIF Classifier (v1.0.0)
             </div>
             <div
               style={{
@@ -125,10 +124,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
               }}
             >
               {isSIF
-                ? 'SIF Potential (High Risk)'
+                ? 'SIF POTENTIAL (High Precursor Risk)'
                 : isNonSIF
-                ? 'Non-SIF (Standard Event)'
-                : 'Uncertain / Triage Required'}
+                ? 'NON-SIF (Standard Safety Event)'
+                : 'UNCERTAIN (Expert Review Required)'}
             </div>
             <div
               style={{
@@ -139,8 +138,8 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              Confidence: <strong>{(confidence * 100).toFixed(1)}%</strong> | Score:{' '}
-              {(score * 100).toFixed(1)}%
+              SIF Probability: <strong>{(score * 100).toFixed(1)}%</strong> | Model Confidence:{' '}
+              {(confidence * 100).toFixed(1)}%
             </div>
           </div>
         </div>
@@ -193,10 +192,10 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 style={{
                   fontSize: '0.9rem',
                   fontWeight: 700,
-                  color: isSIF ? 'var(--danger)' : 'var(--success)',
+                  color: isSIF ? 'var(--danger)' : isNonSIF ? 'var(--success)' : 'var(--warning)',
                 }}
               >
-                {isSIF ? 'Catastrophic / Fatal' : 'Low Potential'}
+                {isSIF ? 'Catastrophic / Fatal' : isNonSIF ? 'Low Potential' : 'Not determined'}
               </span>
             </div>
           </div>
@@ -389,70 +388,113 @@ export const AIExplanationPanel: React.FC<Props> = ({
       )}
 
       {/* Matched IOGP Life-Saving Rules */}
-      {lsrMatches.length > 0 && (
-        <div
-          style={{
-            background: 'var(--surface-elevated)',
-            padding: '16px 20px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-subtle)',
-          }}
-        >
+      {lsrMatches.length > 0 && (() => {
+        const primaryMatch = lsrMatches[0];
+        const secondaryMatches = lsrMatches.slice(1);
+
+        return (
           <div
             style={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              color: 'var(--text-muted)',
-              marginBottom: '10px',
+              background: 'var(--surface-elevated)',
+              padding: '18px 20px',
+              borderRadius: '12px',
+              border: '1px solid var(--border-subtle)',
               display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
+              flexDirection: 'column',
+              gap: '14px',
             }}
           >
-            <Layers size={14} color="var(--primary-bright)" /> Matched IOGP Life-Saving Rules
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {lsrMatches.map((m, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
+            <div
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                color: 'var(--text-muted)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <Layers size={14} color="#F2A933" /> Matched IOGP Life-Saving Rules
+            </div>
+
+            {/* Primary Match */}
+            {primaryMatch && (
+              <div
                 style={{
+                  padding: '14px 16px',
+                  borderRadius: '10px',
+                  background: 'rgba(242, 169, 51, 0.1)',
+                  border: '1px solid rgba(242, 169, 51, 0.4)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  background: 'var(--background-secondary)',
-                  border: '1px solid var(--border-subtle)',
                 }}
               >
+                <div>
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 800,
+                      color: '#F2A933',
+                      textTransform: 'uppercase',
+                      fontFamily: 'var(--font-mono)',
+                      display: 'block',
+                      marginBottom: '2px',
+                    }}
+                  >
+                    Primary Rule Match
+                  </span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#F4F3EE' }}>
+                    {primaryMatch.rule_name}
+                  </span>
+                </div>
                 <span
                   style={{
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  {m.rule_name}
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--primary-bright)',
-                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    color: '#F2A933',
+                    fontWeight: 800,
                     fontFamily: 'var(--font-mono)',
-                    fontVariantNumeric: 'tabular-nums',
                   }}
                 >
-                  {(m.score * 100).toFixed(0)}% Match
+                  {(primaryMatch.score * 100).toFixed(0)}% Match
                 </span>
-              </motion.div>
-            ))}
+              </div>
+            )}
+
+            {/* Secondary Related Matches */}
+            {secondaryMatches.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ fontSize: '0.7rem', color: '#9CA8AA', fontWeight: 600, fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
+                  Related Safety Signals
+                </div>
+                {secondaryMatches.map((m, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      background: 'rgba(17, 36, 41, 0.4)',
+                      border: '1px solid #203238',
+                      opacity: 0.85,
+                    }}
+                  >
+                    <span style={{ fontSize: '0.82rem', color: '#9CA8AA', fontWeight: 500 }}>
+                      {m.rule_name}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#647477', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+                      {(m.score * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

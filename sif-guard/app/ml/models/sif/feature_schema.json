@@ -1,0 +1,17 @@
+{
+  "features": [
+    "activity",
+    "hazard",
+    "hazardous_substance",
+    "exposure",
+    "energy_source",
+    "equipment",
+    "human_factor",
+    "environmental_factor",
+    "barrier",
+    "barrier_failure",
+    "potential_consequence"
+  ],
+  "target": "sif_potential",
+  "missing_value_strategy": "unknown"
+}

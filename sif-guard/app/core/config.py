@@ -15,11 +15,22 @@ class Settings(BaseSettings):
 
     # NLP & Embeddings
     EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"
-    SIF_MODEL_PATH: str = "app/ml/models/sif_xgboost_v1.json"
     MODEL_DIR: str = "app/ml/models"
-    LSR_THRESHOLD: float = 0.55
-    SIMILARITY_THRESHOLD: float = 0.65
+    LSR_THRESHOLD: float = 0.65
+    SIMILARITY_THRESHOLD: float = 0.70
     BATCH_SIZE: int = 32
+
+    # SIF XGBoost Classifier Settings
+    SIF_CLASSIFIER_MODE: str = "xgboost"  # xgboost, heuristic
+    SIF_MODEL_PATH: str = "app/ml/models/sif/xgboost_model.json"
+    SIF_PREPROCESSOR_PATH: str = "app/ml/models/sif/preprocessor.joblib"
+    SIF_HIGH_THRESHOLD: float = 0.70
+    SIF_UNCERTAIN_THRESHOLD: float = 0.40
+
+    # OCR Settings
+    OCR_PROVIDER: str = "tesseract"
+    OCR_VERIFICATION_THRESHOLD: float = 0.85
+    OCR_MAX_FILE_SIZE_MB: float = 15.0
 
     # MLflow
     MLFLOW_TRACKING_URI: str = "http://localhost:5000"

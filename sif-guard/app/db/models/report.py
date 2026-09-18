@@ -10,6 +10,7 @@ class SafetyReport(Base):
     id = Column(String(64), primary_key=True, index=True)
     source_dataset = Column(String(64), index=True, nullable=False)
     source_record_id = Column(String(128), index=True, nullable=False)
+    data_origin = Column(String(32), index=True, nullable=False, default="oil_hsse") # synthetic, osha, oil_hsse, manual, ocr
 
     report_type = Column(String(64), nullable=True, default="incident")
     report_text = Column(Text, nullable=False)

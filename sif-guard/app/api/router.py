@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from app.api.routes import health, reports, analysis, patterns, analytics, lsr, knowledge, review, dashboard, facility
+from app.api.routes import health, reports, analysis, patterns, analytics, lsr, knowledge, review, dashboard, facility, ocr
 
 api_router = APIRouter()
 
 api_router.include_router(health.router, tags=["Health"])
+api_router.include_router(ocr.router, tags=["OCR & Document Ingestion"])
 api_router.include_router(reports.router, tags=["Reports"])
 api_router.include_router(analysis.router, tags=["Analysis"])
 api_router.include_router(patterns.router, tags=["Patterns & Similarity"])

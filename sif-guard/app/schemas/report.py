@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict
 class SafetyReportBase(BaseModel):
     source_dataset: str
     source_record_id: str
+    data_origin: Optional[str] = "oil_hsse"
     report_type: Optional[str] = "incident"
     report_text: str
     report_summary: Optional[str] = None
@@ -78,3 +79,5 @@ class ImportSummary(BaseModel):
     duplicates: int
     invalid: int
     source: str
+    imported_ids: List[str] = Field(default_factory=list)
+    first_imported_id: Optional[str] = None

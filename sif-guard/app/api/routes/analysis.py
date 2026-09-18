@@ -19,8 +19,14 @@ router = APIRouter()
 
 
 def run_single_report_analysis(db: Session, report: SafetyReport) -> AnalysisResponse:
+    trace_id = f"ANL-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
+    from app.core.logging import logger
+
+    logger.info(f"ANALYSIS START trace_id={trace_id} report_id={report.id} narrative_len={len(report.report_text)}")
+
     # 1. Extraction
     extraction = extraction_service.extract(report.report_text, report.raw_data)
+    logger.info(f"INFO extraction.complete trace_id={trace_id} report_id={report.id} activity={extraction.activity} hazard={extraction.hazard} barrier={extraction.barrier} barrier_failure={extraction.barrier_failure}")
     
     # Update report structured fields if not already populated
     if not report.activity and extraction.activity:
@@ -33,22 +39,28 @@ def run_single_report_analysis(db: Session, report: SafetyReport) -> AnalysisRes
     # 2. Embeddings
     if not report.embedding:
         report.embedding = embedding_service.encode(report.report_text)
+    logger.info(f"INFO embedding.complete trace_id={trace_id} report_id={report.id} dim={len(report.embedding) if report.embedding else 0}")
 
     # 3. SIF Classification
     sif_res = sif_classifier.predict(report.report_text, extraction, report.raw_data)
+    logger.info(f"INFO sif.result trace_id={trace_id} report_id={report.id} model={sif_res.model_type} classification={sif_res.classification} probability={sif_res.score:.4f}")
+    
+    # Persist authoritative classification on SafetyReport model
     report.sif_potential = sif_res.classification
     report.sif_score = sif_res.score
     report.sif_confidence = sif_res.confidence
 
     # 4. LSR Mapping
     lsr_matches = lsr_matcher.map_report(report.report_text)
-    report.life_saving_rules = [m.model_dump() for m in lsr_matches]
+    logger.info(f"INFO lsr.mapping trace_id={trace_id} report_id={report.id} rules={[m.rule_name for m in lsr_matches]}")
 
     # 5. Fingerprint
     fingerprint = fingerprint_service.generate_fingerprint(extraction, lsr_matches)
+    logger.info(f"INFO fingerprint.complete trace_id={trace_id} report_id={report.id} barrier_failure={fingerprint.barrier_failure}")
 
     # 6. Similarity
     similar = similarity_service.find_similar_reports(db, report, limit=3)
+    logger.info(f"INFO similarity.complete trace_id={trace_id} report_id={report.id} top_report={similar[0]['source_record_id'] if similar else 'none'}")
 
     # Persist ReportAnalysis
     existing_analysis = db.query(ReportAnalysis).filter(ReportAnalysis.report_id == report.id).first()
@@ -78,6 +90,7 @@ def run_single_report_analysis(db: Session, report: SafetyReport) -> AnalysisRes
 
     return AnalysisResponse(
         report_id=report.id,
+        trace_id=trace_id,
         extraction=extraction,
         sif=sif_res,
         life_saving_rules=lsr_matches,

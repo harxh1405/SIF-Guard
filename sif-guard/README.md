@@ -1,81 +1,145 @@
 # SIF-Guard — Serious Injury & Fatality (SIF) Precursor Intelligence Platform Backend
 
-SIF-Guard is an AI/NLP-powered safety intelligence platform engineered for Oil India Limited (OIL). It ingests unstructured and semi-structured HSE incident narratives and observations to proactively detect Serious Injury & Fatality (SIF) precursors.
+SIF-Guard is an enterprise-grade AI and NLP platform built for **Oil India Limited (OIL)** to transform unstructured safety observation reports, near-miss records, unsafe acts, and incident logs into actionable precursor intelligence.
 
-The core guiding principle is:
+The fundamental platform principle is:
 ```
 Actual Outcome != Potential Outcome
 ```
-An event with zero actual injury (e.g. entering a confined vessel without atmospheric testing) is flagged as `SIF_POTENTIAL = YES`.
+An event with zero actual injury (e.g., entering a confined vessel without atmospheric testing or opening a pressurized flange without zero-energy verification) is classified with high **`SIF_POTENTIAL`**.
 
 ---
 
-## Key Features
+## 🏗️ System Conceptual Flow
 
-1. **Source Adapter Architecture (`DataSourceAdapter`)**:
-   - `OSHASevereInjuryAdapter`: Ingests OSHA Severe Injury / Incident dataset.
-   - `OSHAConstructionAdapter`: Ingests OSHA Construction dataset, preserving structured mechanism fields (`task_assigned`, `fat_cause`, `evn_factor`, `hum_factor`, `fall_ht`, `hazsub`).
-   - `SmartQHSEAdapter`: Ingests HSE knowledge, IOGP Life-Saving Rules, and process safety standards.
-   - `CSBAdapter`: Optional future adapter for Chemical Safety Board investigation reports.
-   - `OILHSSEAdapter`: Adapter for Oil India Limited confidential Unsafe Act / Unsafe Condition / Near Miss datasets.
-
-2. **Unified Safety Report (`SafetyReport`)**:
-   - Standardized internal relational & vector model with raw metadata preservation.
-
-3. **Domain Preprocessing & Terminology Expansion**:
-   - Automatic acronym expansion (`LOTO`, `PTW`, `PPE`, `H2S`, `SIMOPS`, etc.) preserving domain-specific terms.
-
-4. **NLP Extraction & Dense Vector Embeddings**:
-   - Extracts activity, hazard, exposure, energy source, equipment, human/environmental factors, barriers, barrier failures, and potential consequences.
-   - Embeddings generated via `BAAI/bge-base-en-v1.5` and indexed with `pgvector`.
-
-5. **IOGP 9 Life-Saving Rules (LSR) Mapping**:
-   - Automatic semantic similarity & keyword matching against IOGP 576 Life-Saving Rules.
-
-6. **Explainable SIF Classification**:
-   - XGBoost classifier combining dense embeddings + 16 structured precursor indicator flags.
-   - Configurable weak supervision rules for strong precursor signals.
-   - Returns classification (`SIF_POTENTIAL`, `NON_SIF`, `UNCERTAIN`), probability score, confidence score, and clear risk factors.
-
-7. **Safety Precursor Fingerprints & Pattern Clustering**:
-   - Generates `SafetyPrecursorFingerprint`.
-   - Semantic similarity search over report embeddings.
-   - HDBSCAN precursor clustering generating human-interpretable pattern labels.
-
-8. **Trends & Hotspot Analytics**:
-   - Precursor density calculation (`SIF Potential Reports / Total Reports`).
-   - Temporal trend detection with z-score anomaly indicators.
-   - Hotspot rankings for sites, activities, hazards, barriers, and Life-Saving Rules.
-
-9. **Human-in-the-Loop Review**:
-   - Review queue for uncertain reports with feedback loop for model retraining.
-
----
-
-## Quickstart
-
-### Local Setup with Virtual Environment
-```bash
-# 1. Activate virtual environment
-source venv/bin/activate
-
-# 2. Seed database with IOGP Life-Saving Rules and Terminology
-python sif-guard/scripts/seed_data.py
-
-# 3. Run test suite
-pytest sif-guard/tests -v
-
-# 4. Start API server
-uvicorn sif-guard.app.main:app --reload --port 8000
 ```
-
-### Docker Compose
-```bash
-docker compose up -d
+INPUT
+  │
+  ├── Typed report
+  ├── CSV/XLSX/JSON import
+  ├── Image (PNG, JPG, JPEG)
+  └── PDF (Native or Scanned)
+        │
+        ▼
+DOCUMENT / TEXT PROCESSING
+        │
+        ├── Direct text
+        ├── Native PDF text extraction (pypdf)
+        └── Tesseract OCR (pytesseract)
+        │
+        ▼
+NORMALIZED / VERIFIED TEXT
+        │
+        ▼
+SAFETY INFORMATION EXTRACTION (10 Dimensions)
+        │
+        ├── activity
+        ├── hazard
+        ├── hazardous_substance
+        ├── exposure
+        ├── energy_source
+        ├── equipment
+        ├── human_factor
+        ├── environmental_factor
+        ├── barrier & barrier_failure
+        └── potential_consequence
+        │
+        ├──────────────────────┐
+        │                      │
+        ▼                      ▼
+FEATURE ENGINEERING        BGE EMBEDDINGS (bge-base-en-v1.5)
+        │                      │
+        ▼                      ├── Cosine Similarity Search
+TRAINED XGBOOST               │
+        │                      └── HDBSCAN Pattern Clustering
+        ▼
+SIF PROBABILITY & SHAP EXPLAINABILITY
+        │
+        ├─────────────────────── IOGP LIFE-SAVING RULES MAPPING
+        │
+        ▼
+SAFETY PRECURSOR FINGERPRINT
+        │
+        ▼
+DATABASE / REST API / DASHBOARD
 ```
 
 ---
 
-## Interactive API Documentation
-Access Swagger UI at:
-`http://localhost:8000/docs`
+## 🌟 Core Backend Capabilities
+
+1. **Provider-Agnostic OCR Layer (`app/services/ocr/`)**:
+   - Supports native PDF text parsing (fast path), scanned document OCR via Tesseract (`pytesseract`), and image preprocessing.
+   - Configurable quality gate threshold (`OCR_VERIFICATION_THRESHOLD=0.85`).
+   - Endpoint: `POST /api/v1/ocr/extract`.
+
+2. **Structured Categorical Feature Engineering (`app/ml/features.py` & `preprocessor.py`)**:
+   - Defines authoritative 11-dimension safety feature list (`SIF_FEATURE_COLUMNS`).
+   - Fits `OneHotEncoder` via `ColumnTransformer` strictly on training data (no data leakage).
+
+3. **Offline Trained XGBoost Classifier (`app/services/sif/classifier.py`)**:
+   - Trained on ~5,000 domain synthetic safety records including ~500 safe vs. unsafe counterfactual pairs.
+   - Evaluates probability via `predict_proba()` and applies operating thresholds:
+     - `score >= 0.70` => `SIF_POTENTIAL`
+     - `0.40 <= score < 0.70` => `UNCERTAIN`
+     - `score < 0.40` => `NON_SIF`
+   - SHAP TreeExplainer integration (`top_factors`) for dashboard explainability.
+
+4. **BGE Dense Vector Embeddings & HDBSCAN Clustering**:
+   - `BAAI/bge-base-en-v1.5` dense embeddings for semantic search and HDBSCAN precursor cluster discovery.
+
+5. **IOGP Life-Saving Rules Mapping (`app/services/lsr/matcher.py`)**:
+   - Maps unstructured reports against 9 canonical IOGP Life-Saving Rules.
+
+---
+
+## 📦 Model Artifacts & Locations
+
+Artifacts are persisted in `app/ml/models/sif/`:
+- `xgboost_model.json`: Trained XGBoost booster model
+- `preprocessor.joblib`: Fitted OneHotEncoder / ColumnTransformer
+- `feature_schema.json`: Feature column definitions and missing-value strategy
+- `metrics.json`: Test metrics (Accuracy: 100%, Precision: 100%, Recall: 100%, ROC-AUC: 1.0, 0 False Negatives)
+- `model_metadata.json`: Model versioning, hyperparameter config, and operating thresholds
+
+---
+
+## 🛠️ Offline Training & Dataset Generation
+
+```bash
+# 1. Generate ~5,000 synthetic safety records with counterfactual pairs
+python scripts/generate_sif_dataset.py
+
+# 2. Train XGBoost classifier & save model artifacts
+python scripts/train_sif_xgboost.py
+```
+
+---
+
+## 🧪 Testing & Verification
+
+Run the full pytest suite (unit tests, ML pipeline tests, OCR tests, and full BFT-001..BFT-010 API regression):
+
+```bash
+PYTHONPATH=. pytest tests/ -v
+```
+
+---
+
+## ⚙️ Environment Configuration
+
+Added settings in `app/core/config.py`:
+- `SIF_CLASSIFIER_MODE`: `"xgboost"` (or `"heuristic"`)
+- `SIF_MODEL_PATH`: `"app/ml/models/sif/xgboost_model.json"`
+- `SIF_PREPROCESSOR_PATH`: `"app/ml/models/sif/preprocessor.joblib"`
+- `SIF_HIGH_THRESHOLD`: `0.70`
+- `SIF_UNCERTAIN_THRESHOLD`: `0.40`
+- `OCR_PROVIDER`: `"tesseract"`
+- `OCR_VERIFICATION_THRESHOLD`: `0.85`
+- `OCR_MAX_FILE_SIZE_MB`: `15.0`
+
+---
+
+## ⚠️ Synthetic Data Disclaimer
+
+> **Notice**: The initial XGBoost model is trained using synthetic safety data and is intended for prototype validation and operating threshold demonstration. It must not be interpreted as a production-validated SIF model or as representative of actual OIL incident frequencies.

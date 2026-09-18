@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ExtractionSchema(BaseModel):
@@ -17,10 +17,13 @@ class ExtractionSchema(BaseModel):
 
 
 class SIFResultSchema(BaseModel):
-    classification: str # SIF_POTENTIAL, NON_SIF, UNCERTAIN
+    classification: str  # SIF_POTENTIAL, NON_SIF, UNCERTAIN
     score: float
     confidence: float
     risk_factors: List[str]
+    model_type: Optional[str] = "xgboost"
+    model_version: Optional[str] = "1.0.0"
+    top_factors: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
 
 
 class LSRMatchSchema(BaseModel):
@@ -46,6 +49,7 @@ class FingerprintSchema(BaseModel):
 
 class AnalysisResponse(BaseModel):
     report_id: str
+    trace_id: Optional[str] = None
     extraction: ExtractionSchema
     sif: SIFResultSchema
     life_saving_rules: List[LSRMatchSchema]

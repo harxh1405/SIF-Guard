@@ -10,6 +10,7 @@ import { PrecursorClustersPage } from './pages/PrecursorClustersPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { KnowledgeLSRPage } from './pages/KnowledgeLSRPage';
 import { ReviewQueuePage } from './pages/ReviewQueuePage';
+import { DesignSystemPage } from './pages/DesignSystemPage';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthPage } from './components/auth/AuthPage';
@@ -25,6 +26,7 @@ const TAB_ORDER: TabId[] = [
   'analytics',
   'knowledge',
   'review',
+  'design-system',
 ];
 
 function AppContent() {
@@ -175,6 +177,7 @@ function AppContent() {
           {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
           {activeTab === 'knowledge' && <KnowledgeLSRPage />}
           {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
+          {activeTab === 'design-system' && <DesignSystemPage />}
         </main>
       </div>
 

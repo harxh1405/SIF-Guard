@@ -126,7 +126,7 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
                 gap: '5px',
               }}
             >
-              <CheckCircle2 size={12} /> Live ({health.embedding_model.split('/')[1] || health.embedding_model})
+              <CheckCircle2 size={12} /> Live {health.embedding_model ? `(${health.embedding_model.split('/')[1] || health.embedding_model})` : ''}
             </span>
           ) : (
             <span

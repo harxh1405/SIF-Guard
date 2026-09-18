@@ -21,7 +21,8 @@ export type TabId =
   | 'clusters'
   | 'analytics'
   | 'knowledge'
-  | 'review';
+  | 'review'
+  | 'design-system';
 
 interface Props {
   activeTab: TabId;
@@ -38,26 +39,27 @@ export const Navigation: React.FC<Props> = ({
 }) => {
   const sections = [
     {
-      title: 'INTELLIGENCE',
+      title: 'COMMAND CENTER',
       items: [
-        { id: 'dashboard' as TabId, label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'facility' as TabId, label: 'Facility Digital Twin', icon: Radar },
-        { id: 'analytics' as TabId, label: 'Analytics & Trends', icon: BarChart3 },
-        { id: 'clusters' as TabId, label: 'Precursor Clusters', icon: Boxes },
+        { id: 'dashboard' as TabId, label: 'Command Center', icon: LayoutDashboard },
+        { id: 'facility' as TabId, label: 'Refinery 3D View', icon: Radar },
       ],
     },
     {
-      title: 'OPERATIONS',
+      title: 'INVESTIGATION',
       items: [
-        { id: 'explorer' as TabId, label: 'Incident Explorer', icon: FileText },
+        { id: 'explorer' as TabId, label: 'Reports', icon: FileText },
+        { id: 'clusters' as TabId, label: 'Pattern Explorer', icon: Boxes },
+        { id: 'knowledge' as TabId, label: 'Life-Saving Rules', icon: BookOpen },
+        { id: 'analytics' as TabId, label: 'Exploration Workspace', icon: BarChart3 },
         { id: 'review' as TabId, label: 'Review Queue', icon: UserCheck },
       ],
     },
     {
-      title: 'KNOWLEDGE',
+      title: 'DATA & SYSTEM',
       items: [
-        { id: 'knowledge' as TabId, label: 'LSR & Knowledge', icon: BookOpen },
-        { id: 'ingestion' as TabId, label: 'Data Ingestion', icon: UploadCloud },
+        { id: 'ingestion' as TabId, label: 'Capture & OCR', icon: UploadCloud },
+        { id: 'design-system' as TabId, label: 'Design System', icon: Boxes },
       ],
     },
   ];

@@ -1275,7 +1275,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[
-                  { step: '01', title: 'INGEST', subtitle: 'Enterprise & OSHA stream' },
+                  { step: '01', title: 'INGEST', subtitle: 'Multi-format Safety Report Ingestion' },
                   { step: '02', title: 'UNDERSTAND', subtitle: 'Domain NLP acronyms' },
                   { step: '03', title: 'CLASSIFY', subtitle: 'Actual != Potential outcome' },
                   { step: '04', title: 'MAP', subtitle: 'IOGP 9 Life-Saving Rules' },
@@ -1366,7 +1366,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 step: '01',
                 title: 'INGEST',
                 badge: 'MULTISOURCE INGESTION',
-                desc: 'Continuous ingestion of Unsafe Act, Unsafe Condition, and Near-Miss records from OIL enterprise and OSHA reporting formats. Normalizes multi-rig logs into unified event payloads.',
+                desc: 'Continuous ingestion of Unsafe Act, Unsafe Condition, and Near-Miss records from OIL enterprise field reports and digital documents. Normalizes multi-rig logs into unified event payloads.',
                 metrics: 'Ingests 1,400+ reports/sec · Multi-facility stream',
               },
               {

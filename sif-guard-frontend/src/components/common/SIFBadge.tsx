@@ -9,7 +9,14 @@ interface Props {
 }
 
 export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, size = 'md' }) => {
-  const formattedScore = score !== undefined && score !== null ? `${Math.round(score > 1 ? score : score * 100)}%` : null;
+  const formatScore = (val: number): string => {
+    const pct = val > 1 ? val : val * 100;
+    if (pct > 99.0 && pct < 100.0) {
+      return `${pct.toFixed(1)}%`;
+    }
+    return `${Math.round(pct)}%`;
+  };
+  const formattedScore = score !== undefined && score !== null ? formatScore(score) : null;
 
   const getPadding = () => {
     switch (size) {
