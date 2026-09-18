@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ShieldAlert,
   Sun,
@@ -222,19 +222,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     };
   }, []);
 
-  const [scrollY, setScrollY] = useState(0);
-
-  // Monitor scroll for navbar styling and hero DOM receding transform
+  // Optimized scroll listener for navbar glass styling (Zero re-renders during normal scrolling)
+  const isScrolledRef = useRef(false);
   useEffect(() => {
-    let ticking = false;
     const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setScrollY(window.scrollY);
-          setIsScrolled(window.scrollY > 30);
-          ticking = false;
-        });
-        ticking = true;
+      const scrolled = window.scrollY > 30;
+      if (scrolled !== isScrolledRef.current) {
+        isScrolledRef.current = scrolled;
+        setIsScrolled(scrolled);
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -266,14 +261,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   const selectedRule = LSR_RULES_DATA.find((r) => r.id === activeRuleId) || LSR_RULES_DATA[0];
-
-  // DOM wrapper receding transform on scroll (leaves Three.js camera untouched)
-  const heroRecede = Math.min(1, Math.max(0, scrollY / 600));
-  const wrapperScale = (1 - heroRecede * 0.04).toFixed(4); // 1.0 -> 0.96
-  const wrapperTranslateY = (-heroRecede * 30).toFixed(1);
-  const wrapperOpacity = (1 - heroRecede * 0.08).toFixed(3); // stays high: 1.0 -> 0.92
-  const headlineTranslateY = (-heroRecede * 36).toFixed(1); // headline: translateY(0 -> -36px)
-  const telemetryOpacity = (1 - heroRecede * 0.25).toFixed(3); // telemetry: subtle fade
 
   return (
     <div
@@ -531,17 +518,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           delayMs={140}
           staggerMs={130}
           style={{
-            fontSize: 'clamp(3.5rem, 6vw, 6.5rem)',
+            fontSize: 'clamp(2.5rem, 5.5vw, 6.2rem)',
             fontWeight: 800,
-            lineHeight: 1.04,
+            lineHeight: 1.05,
             letterSpacing: '-0.045em',
             color: t.textPrimary,
             margin: '0 auto 20px auto',
-            maxWidth: '820px',
+            maxWidth: '840px',
             position: 'relative',
             zIndex: 2,
-            transform: `translateY(${headlineTranslateY}px)`,
-            transition: 'transform 0.1s linear',
           }}
           lineStyles={(idx) =>
             idx === 1
@@ -553,7 +538,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* 3. Centered Description (Sequential Reveal) */}
         <p
           style={{
-            fontSize: 'clamp(1rem, 1.25vw, 1.15rem)',
+            fontSize: 'clamp(0.95rem, 1.2vw, 1.15rem)',
             color: t.textSecondary,
             lineHeight: 1.65,
             maxWidth: '720px',
@@ -617,7 +602,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             marginBottom: '36px',
             position: 'relative',
             zIndex: 2,
-            opacity: heroMounted ? Number(telemetryOpacity) : 0,
+            opacity: heroMounted ? 1 : 0,
             transform: heroMounted ? 'translateY(0)' : 'translateY(12px)',
             transition:
               'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.52s, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.52s',
@@ -638,28 +623,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               LIVE FACILITY TELEMETRY STREAM
             </span>
           </div>
-          <span style={{ color: t.border }}>|</span>
+          <span className="telemetry-divider" style={{ color: t.border }}>|</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: t.textMuted }}>QUADRANTS:</span>
             <span style={{ color: t.textPrimary, fontWeight: 700 }}>
               <CountUpNumber value={zones.length > 0 ? zones.length : 7} suffix=" ZONES" /> ACTIVE
             </span>
           </div>
-          <span style={{ color: t.border }}>|</span>
+          <span className="telemetry-divider" style={{ color: t.border }}>|</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: t.textMuted }}>FIDELITY:</span>
             <span style={{ color: '#20D997', fontWeight: 700 }}>
               <CountUpNumber value={98.7} decimals={1} suffix="%" />
             </span>
           </div>
-          <span style={{ color: t.border }}>|</span>
+          <span className="telemetry-divider" style={{ color: t.border }}>|</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: t.textMuted }}>FATALITY ESCALATION:</span>
             <span style={{ color: '#20D997', fontWeight: 700 }}>
               <CountUpNumber value={0} suffix=" INCIDENTS" />
             </span>
           </div>
-          <span style={{ color: t.border }}>|</span>
+          <span className="telemetry-divider" style={{ color: t.border }}>|</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: t.accentSoft, fontWeight: 600 }}>
               <CountUpNumber value={12} suffix=" PRECURSOR SIGNALS" />
@@ -669,10 +654,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* 6. Centered 3D Refinery Digital Twin Centerpiece — DIRECTLY BELOW HUD */}
         <div
+          className="hero-3d-viewport"
           style={{
             position: 'relative',
             width: 'min(1480px, 94vw)',
-            height: 'clamp(620px, 72vh, 820px)',
+            height: 'clamp(360px, 64vh, 760px)',
             margin: '0 auto',
             borderRadius: '0',
             overflow: 'visible',
@@ -684,12 +670,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             WebkitMaskImage:
               'linear-gradient(180deg, black 0%, black 48%, rgba(0, 0, 0, 0.9) 64%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.15) 92%, transparent 100%)',
             zIndex: 2,
-            opacity: heroMounted ? Number(wrapperOpacity) : 0,
+            opacity: heroMounted ? 1 : 0,
             transform: heroMounted
-              ? `translateY(${wrapperTranslateY}px) scale(${wrapperScale})`
+              ? 'translateY(0) scale(1)'
               : 'translateY(36px) scale(0.94)',
             transition: heroMounted
-              ? 'opacity 0.3s ease'
+              ? 'opacity 0.4s ease'
               : 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
             willChange: 'transform, opacity',
           }}
@@ -976,9 +962,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           4. SECTION 3: THE AI EXTRACTION ENGINE (5-STAGE CONNECTED PIPELINE)
           ============================================================= */}
       <section
+        className="landing-section"
         style={{
           position: 'relative',
-          padding: '90px 48px',
           maxWidth: '1360px',
           margin: '0 auto',
           overflow: 'hidden',
@@ -1191,9 +1177,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ============================================================= */}
       <section
         id="workflow"
+        className="landing-section"
         style={{
           position: 'relative',
-          padding: '100px 48px',
           maxWidth: '1360px',
           margin: '0 auto',
         }}
@@ -1532,8 +1518,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ============================================================= */}
       <section
         id="analysis"
+        className="landing-section"
         style={{
-          padding: '90px 48px',
           maxWidth: '1240px',
           margin: '0 auto',
         }}
@@ -1560,14 +1546,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <div
+            className="analysis-showcase-grid"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)',
-              gap: '28px',
               backgroundColor: t.bgSection,
               border: '1px solid ' + t.border,
               borderRadius: '18px',
-              padding: '36px',
+              padding: 'clamp(20px, 4vw, 36px)',
             }}
           >
             {/* Raw Report Box */}
@@ -1717,23 +1701,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           7. SECTION 6: SIF INTELLIGENCE RADIAL GAUGE & METRICS
           ============================================================= */}
       <section
+        className="landing-section"
         style={{
-          padding: '80px 48px',
           maxWidth: '1200px',
           margin: '0 auto',
         }}
       >
         <ScrollReveal>
           <div
+            className="radial-gauge-grid"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr)',
-              gap: '36px',
-              alignItems: 'center',
               backgroundColor: t.bgSection,
               border: '1px solid ' + t.border,
               borderRadius: '20px',
-              padding: '44px',
+              padding: 'clamp(24px, 4vw, 44px)',
             }}
           >
             {/* Radial Intelligence Ring */}
@@ -1878,8 +1859,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ============================================================= */}
       <section
         id="rules"
+        className="landing-section"
         style={{
-          padding: '90px 48px',
           maxWidth: '1240px',
           margin: '0 auto',
         }}
@@ -2018,8 +1999,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           9. SECTION 8: PRECURSOR INTELLIGENCE (CONNECTED NETWORK)
           ============================================================= */}
       <section
+        className="landing-section"
         style={{
-          padding: '80px 48px',
           maxWidth: '1240px',
           margin: '0 auto',
         }}
@@ -2115,8 +2096,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           10. SECTION 9: BEFORE VS SIF-GUARD
           ============================================================= */}
       <section
+        className="landing-section"
         style={{
-          padding: '80px 48px',
           maxWidth: '1240px',
           margin: '0 auto',
         }}
@@ -2198,9 +2179,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ============================================================= */}
       <section
         id="demo"
+        className="landing-section"
         style={{
           position: 'relative',
-          padding: '90px 48px',
           maxWidth: '1280px',
           margin: '0 auto',
           overflow: 'hidden',
@@ -2380,8 +2361,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           12. SECTION 11: DASHBOARD PREVIEW
           ============================================================= */}
       <section
+        className="landing-section"
         style={{
-          padding: '80px 48px',
           maxWidth: '1240px',
           margin: '0 auto',
         }}
@@ -2495,7 +2476,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ============================================================= */}
       <section
         style={{
-          padding: '120px 48px 100px 48px',
+          padding: 'clamp(64px, 8vw, 120px) clamp(16px, 4vw, 48px) clamp(56px, 7vw, 100px) clamp(16px, 4vw, 48px)',
           maxWidth: '900px',
           margin: '0 auto',
           textAlign: 'center',

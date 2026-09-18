@@ -4,7 +4,6 @@ import type { DashboardSummary } from '../types/api';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyTelemetryState } from '../components/common/EmptyTelemetryState';
-import { RefineryHeroSection } from '../components/facility/RefineryHeroSection';
 import { DataFlowPipeline } from '../components/common/DataFlowPipeline';
 import { CountUpNumber } from '../components/common/CountUpNumber';
 import { motion, AnimatePresence } from 'motion/react';
@@ -85,16 +84,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate, theme = 'dark' }) =
       transition={{ duration: 0.25, ease: 'easeOut' }}
       style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
     >
-      {/* 1. Large Visual Moment: Refinery Digital-Twin Hero Experience */}
-      <RefineryHeroSection
-        onNavigate={onNavigate}
-        theme={theme}
-        totalReports={data.total_reports}
-        sifCount={data.sif_precursor_count}
-        monitoredSites={data.sites}
-      />
-
-      {/* 2. Top Header Controls & Ratio Indicator */}
+      {/* Top Header Controls & Ratio Indicator */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <h2 className="section-title" style={{ margin: 0, fontSize: '1.25rem' }}>

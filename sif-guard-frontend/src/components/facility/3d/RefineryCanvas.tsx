@@ -105,6 +105,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   const selectedZoneIdRef = useRef<string | null>(selectedZoneId);
   const hoveredZoneIdRef = useRef<string | null>(hoveredZoneId);
   const isDraggingRef = useRef<boolean>(false);
+  const isVisibleRef = useRef<boolean>(true);
   const dragStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const pointerPosRef = useRef<{ clientX: number; clientY: number } | null>(null);
   const rafHoverIdRef = useRef<number | null>(null);
@@ -327,6 +328,10 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+
+      // Skip GPU render passes when offscreen or document is backgrounded
+      if (!isVisibleRef.current || document.hidden) return;
+
       const elapsedTime = (performance.now() - startRenderTime) * 0.001;
 
       // Programmatic Camera Lerp (Used ONLY during Reset View or preset selection)
@@ -381,14 +386,24 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         });
       });
 
-
       controls.update();
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 9. Handle Window Resize
+    // 9. Intersection Observer to Pause Loop when offscreen
+    const viewportObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    if (containerRef.current) {
+      viewportObserver.observe(containerRef.current);
+    }
+
+    // 10. Handle Window Resize
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = containerRef.current.clientWidth;
@@ -402,6 +417,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      viewportObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
       if (rafHoverIdRef.current !== null) {
         cancelAnimationFrame(rafHoverIdRef.current);

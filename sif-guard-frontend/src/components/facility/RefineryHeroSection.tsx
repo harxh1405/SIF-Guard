@@ -100,28 +100,24 @@ export const RefineryHeroSection: React.FC<RefineryHeroSectionProps> = ({
   monitoredSites = 9,
 }) => {
   const [activePin, setActivePin] = useState<SpatialPin | null>(REFINERY_PINS[1]); // Default to Pump Station
-  const [isHovered, setIsHovered] = useState(false);
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const bgImageRef = useRef<HTMLDivElement>(null);
 
   const isLight = theme === 'light';
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !bgImageRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 6;
 
-    // Subtle 2-4px parallax shift
-    setMouseOffset({
-      x: x * 6,
-      y: y * 6,
-    });
+    bgImageRef.current.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(1.02)`;
   }, []);
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
-    setMouseOffset({ x: 0, y: 0 });
+    if (bgImageRef.current) {
+      bgImageRef.current.style.transform = 'translate3d(0px, 0px, 0) scale(1.0)';
+    }
   };
 
   const getRiskColor = (level: string) => {
@@ -141,7 +137,6 @@ export const RefineryHeroSection: React.FC<RefineryHeroSectionProps> = ({
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       style={{
         position: 'relative',
@@ -187,16 +182,18 @@ export const RefineryHeroSection: React.FC<RefineryHeroSectionProps> = ({
 
         {/* Layered Refinery Asset with smooth edge fade and parallax */}
         <div
+          ref={bgImageRef}
           style={{
             position: 'absolute',
             inset: '-10px',
-            transform: `translate3d(${mouseOffset.x}px, ${mouseOffset.y}px, 0) scale(${isHovered ? 1.02 : 1.00})`,
+            transform: 'translate3d(0px, 0px, 0) scale(1.0)',
             transition: 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
             backgroundImage: `url(${refineryMapImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center 45%',
             opacity: isLight ? 0.35 : 0.45,
             filter: isLight ? 'contrast(1.1) brightness(0.95)' : 'contrast(1.15) brightness(0.75)',
+            willChange: 'transform',
           }}
         />
 
