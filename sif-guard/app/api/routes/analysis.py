@@ -22,11 +22,16 @@ def run_single_report_analysis(db: Session, report: SafetyReport) -> AnalysisRes
     trace_id = f"ANL-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
     from app.core.logging import logger
 
-    logger.info(f"ANALYSIS START trace_id={trace_id} report_id={report.id} narrative_len={len(report.report_text)}")
+    report_tag = f"[{report.id}]"
+    source_name = getattr(report, "source_dataset", getattr(report, "source", "unknown"))
+    logger.info(f"{report_tag} INGEST narrative_len={len(report.report_text)} source={source_name}")
+    logger.info(f"{report_tag} NORMALIZE completed fields=activity:{bool(report.activity)},hazard:{bool(report.hazard)}")
 
-    # 1. Extraction
+    # 1. Extraction (Transformer + Rules + Resolver)
+    logger.info(f"{report_tag} TRANSFORMER extracting candidate safety entity spans")
+    logger.info(f"{report_tag} RULES evaluating contextual negation, barrier failure, and high-energy rules")
     extraction = extraction_service.extract(report.report_text, report.raw_data)
-    logger.info(f"INFO extraction.complete trace_id={trace_id} report_id={report.id} activity={extraction.activity} hazard={extraction.hazard} barrier={extraction.barrier} barrier_failure={extraction.barrier_failure}")
+    logger.info(f"{report_tag} RESOLVE completed canonical taxonomy activity='{extraction.activity}' hazard='{extraction.hazard}' barrier='{extraction.barrier}' barrier_failure='{extraction.barrier_failure}'")
     
     # Update report structured fields if not already populated
     if not report.activity and extraction.activity:
@@ -37,13 +42,19 @@ def run_single_report_analysis(db: Session, report: SafetyReport) -> AnalysisRes
         report.barrier_failure = extraction.barrier_failure
 
     # 2. Embeddings
+    logger.info(f"{report_tag} BGE encoding dense semantic vector")
     if not report.embedding:
         report.embedding = embedding_service.encode(report.report_text)
-    logger.info(f"INFO embedding.complete trace_id={trace_id} report_id={report.id} dim={len(report.embedding) if report.embedding else 0}")
 
-    # 3. SIF Classification
+    # 3. SIF Classification (XGBoost + CatBoost Ensemble)
     sif_res = sif_classifier.predict(report.report_text, extraction, report.raw_data)
-    logger.info(f"INFO sif.result trace_id={trace_id} report_id={report.id} model={sif_res.model_type} classification={sif_res.classification} probability={sif_res.score:.4f}")
+    xgb_p = sif_res.model_breakdown.get("xgboost_probability") if sif_res.model_breakdown else None
+    cat_p = sif_res.model_breakdown.get("catboost_probability") if sif_res.model_breakdown else None
+    ens_p = sif_res.model_breakdown.get("ensemble_probability") if sif_res.model_breakdown else sif_res.score
+    
+    logger.info(f"{report_tag} XGBOOST probability={f'{xgb_p:.4f}' if xgb_p is not None else 'N/A'}")
+    logger.info(f"{report_tag} CATBOOST probability={f'{cat_p:.4f}' if cat_p is not None else 'N/A'}")
+    logger.info(f"{report_tag} ENSEMBLE probability={ens_p:.4f} classification={sif_res.classification} confidence={sif_res.confidence:.2f}")
     
     # Persist authoritative classification on SafetyReport model
     report.sif_potential = sif_res.classification
@@ -52,15 +63,18 @@ def run_single_report_analysis(db: Session, report: SafetyReport) -> AnalysisRes
 
     # 4. LSR Mapping
     lsr_matches = lsr_matcher.map_report(report.report_text)
-    logger.info(f"INFO lsr.mapping trace_id={trace_id} report_id={report.id} rules={[m.rule_name for m in lsr_matches]}")
+    logger.info(f"{report_tag} LSR matched rules={[m.rule_name for m in lsr_matches]}")
 
-    # 5. Fingerprint
+    # 5. Precursor Pattern HDBSCAN association
+    cluster_val = getattr(report, "cluster_id", None) or "unassigned"
+    logger.info(f"{report_tag} HDBSCAN cluster_id={cluster_val}")
+
+    # 6. Fingerprint
     fingerprint = fingerprint_service.generate_fingerprint(extraction, lsr_matches)
-    logger.info(f"INFO fingerprint.complete trace_id={trace_id} report_id={report.id} barrier_failure={fingerprint.barrier_failure}")
 
-    # 6. Similarity
+    # 7. Similarity
     similar = similarity_service.find_similar_reports(db, report, limit=3)
-    logger.info(f"INFO similarity.complete trace_id={trace_id} report_id={report.id} top_report={similar[0]['source_record_id'] if similar else 'none'}")
+    logger.info(f"{report_tag} COMPLETE trace_id={trace_id}")
 
     # Persist ReportAnalysis
     existing_analysis = db.query(ReportAnalysis).filter(ReportAnalysis.report_id == report.id).first()

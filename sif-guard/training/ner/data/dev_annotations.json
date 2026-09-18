@@ -1,0 +1,102 @@
+[
+  {
+    "report_id": "DEV-NER-001",
+    "domain": "confined_space",
+    "text": "Worker entered storage vessel without atmospheric testing or standby attendant.",
+    "entities": [
+      {"start": 15, "end": 29, "label": "EQUIPMENT", "text": "storage vessel"},
+      {"start": 38, "end": 57, "label": "BARRIER_FAILURE", "text": "atmospheric testing"},
+      {"start": 61, "end": 78, "label": "BARRIER", "text": "standby attendant"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-002",
+    "domain": "lifting",
+    "text": "During crane lifting operation, the suspended load swung into the pedestrian walkway because barricading was missing.",
+    "entities": [
+      {"start": 7, "end": 30, "label": "ACTIVITY", "text": "crane lifting operation"},
+      {"start": 36, "end": 50, "label": "HAZARD", "text": "suspended load"},
+      {"start": 66, "end": 84, "label": "EXPOSURE", "text": "pedestrian walkway"},
+      {"start": 93, "end": 116, "label": "BARRIER_FAILURE", "text": "barricading was missing"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-003",
+    "domain": "pressure_isolation",
+    "text": "Depressurization of process line was not verified before flange unbolting, causing hazardous fluid release.",
+    "entities": [
+      {"start": 0, "end": 16, "label": "BARRIER", "text": "Depressurization"},
+      {"start": 20, "end": 32, "label": "EQUIPMENT", "text": "process line"},
+      {"start": 37, "end": 49, "label": "BARRIER_FAILURE", "text": "not verified"},
+      {"start": 57, "end": 73, "label": "ACTIVITY", "text": "flange unbolting"},
+      {"start": 83, "end": 107, "label": "HAZARD", "text": "hazardous fluid release"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-004",
+    "domain": "machine_guarding",
+    "text": "Coupling guard was removed on slurry pump while motor was operating, exposing rotating shaft.",
+    "entities": [
+      {"start": 0, "end": 26, "label": "BARRIER_FAILURE", "text": "Coupling guard was removed"},
+      {"start": 30, "end": 41, "label": "EQUIPMENT", "text": "slurry pump"},
+      {"start": 78, "end": 92, "label": "HAZARD", "text": "rotating shaft"},
+      {"start": 78, "end": 92, "label": "ENERGY_SOURCE", "text": "rotating shaft"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-005",
+    "domain": "hot_work",
+    "text": "Welding on crude oil storage tank commenced without valid hot work permit or LEL gas testing.",
+    "entities": [
+      {"start": 0, "end": 7, "label": "ACTIVITY", "text": "Welding"},
+      {"start": 11, "end": 33, "label": "EQUIPMENT", "text": "crude oil storage tank"},
+      {"start": 58, "end": 73, "label": "BARRIER_FAILURE", "text": "hot work permit"},
+      {"start": 77, "end": 92, "label": "BARRIER_FAILURE", "text": "LEL gas testing"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-006",
+    "domain": "excavation",
+    "text": "Deep pipeline trench excavation had no protective shoring or ladder egress, risking cave-in collapse.",
+    "entities": [
+      {"start": 5, "end": 31, "label": "ACTIVITY", "text": "pipeline trench excavation"},
+      {"start": 39, "end": 57, "label": "BARRIER_FAILURE", "text": "protective shoring"},
+      {"start": 61, "end": 74, "label": "BARRIER_FAILURE", "text": "ladder egress"},
+      {"start": 84, "end": 101, "label": "HAZARD", "text": "cave-in collapse"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-007",
+    "domain": "low_risk_office",
+    "text": "During routine inspection of administrative office, loose desk drawer handle was noted and repaired by facilities.",
+    "entities": [
+      {"start": 7, "end": 25, "label": "ACTIVITY", "text": "routine inspection"},
+      {"start": 58, "end": 76, "label": "EQUIPMENT", "text": "desk drawer handle"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  },
+  {
+    "report_id": "DEV-NER-008",
+    "domain": "negation_and_corrective",
+    "text": "Gas testing was not performed before entry. After the incident, continuous gas testing was introduced.",
+    "entities": [
+      {"start": 0, "end": 29, "label": "BARRIER_FAILURE", "text": "Gas testing was not performed"},
+      {"start": 64, "end": 102, "label": "BARRIER", "text": "continuous gas testing was introduced"}
+    ],
+    "is_reviewed": true,
+    "status": "development_ground_truth"
+  }
+]

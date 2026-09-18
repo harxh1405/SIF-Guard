@@ -30,7 +30,7 @@ class OCRService:
         fn_lower = filename.lower()
         if fn_lower.endswith(".pdf"):
             return self.provider.extract_pdf(file_bytes, filename)
-        elif fn_lower.endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
+        elif fn_lower.endswith((".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff")):
             return self.provider.extract_image(file_bytes, filename)
         else:
             return OCRResultSchema(
@@ -39,7 +39,7 @@ class OCRService:
                 source_type="unsupported",
                 pages=0,
                 requires_verification=True,
-                warnings=[f"Unsupported file format '{filename}'. Supported: PNG, JPG, JPEG, PDF."],
+                warnings=[f"Unsupported file format '{filename}'. Supported: PNG, JPG, JPEG, WEBP, PDF."],
                 ocr_provider=settings.OCR_PROVIDER,
             )
 

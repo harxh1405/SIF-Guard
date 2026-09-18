@@ -477,13 +477,73 @@ class RuleBasedExtractor:
         )
 
 
+class HybridSafetyExtractor:
+    """
+    Hybrid extractor combining Transformer NER, Domain Rules (negation, barrier failure, context),
+    and Entity Resolution with guaranteed fallback to RuleBasedExtractor.
+    """
+
+    def __init__(self):
+        self.rule_fallback = RuleBasedExtractor()
+
+    def extract(self, text: str, report_metadata: Optional[Dict[str, Any]] = None) -> ExtractionSchema:
+        try:
+            from app.services.extraction.transformer.extractor import transformer_extractor
+            from app.services.extraction.rules.barrier_rules import barrier_rule_engine
+            from app.services.extraction.rules.activity_rules import activity_rule_engine
+            from app.services.extraction.rules.hazard_rules import hazard_rule_engine
+            from app.services.extraction.rules.energy_rules import energy_rule_engine
+            from app.services.extraction.rules.exposure_rules import exposure_consequence_engine
+            from app.services.extraction.resolver.resolver import entity_resolver
+            from app.core.logging import logger
+
+            # 1. Run Transformer NER
+            transformer_spans = transformer_extractor.extract(text)
+
+            # 2. Run modular Domain Rules
+            barrier_res = barrier_rule_engine.evaluate(text)
+            activity = activity_rule_engine.evaluate(text)
+            hazard = hazard_rule_engine.evaluate(text)
+            energy = energy_rule_engine.evaluate(text)
+            exposure = exposure_consequence_engine.evaluate_exposure(text)
+            consequence = exposure_consequence_engine.evaluate_consequence(text)
+
+            # 3. Fallback complement for any uncaptured fields
+            fallback_res = self.rule_fallback.extract(text, report_metadata)
+
+            rule_res = {
+                "activity": activity or fallback_res.activity,
+                "hazard": hazard or fallback_res.hazard,
+                "barrier": barrier_res["barrier"] or fallback_res.barrier,
+                "barrier_failure": barrier_res["barrier_failure"] or fallback_res.barrier_failure,
+                "all_barriers": barrier_res.get("all_barriers", []),
+                "all_failures": barrier_res.get("all_failures", []),
+                "exposure": exposure or fallback_res.exposure,
+                "energy_source": energy or fallback_res.energy_source,
+                "potential_consequence": consequence or fallback_res.potential_consequence,
+                "hazardous_substance": fallback_res.hazardous_substance,
+                "equipment": fallback_res.equipment,
+                "human_factor": fallback_res.human_factor,
+                "environmental_factor": fallback_res.environmental_factor,
+            }
+
+            # 4. Resolve entities, canonicalize, and produce ExtractionSchema
+            resolved = entity_resolver.resolve(transformer_spans, rule_res)
+            return resolved.schema
+        except Exception as e:
+            from app.core.logging import logger
+            logger.warning(f"Hybrid extraction encountered error: {e}. Falling back to RuleBasedExtractor.")
+            return self.rule_fallback.extract(text, report_metadata)
+
+
 class ExtractionService:
 
     def __init__(self, extractor=None):
-        self.extractor = extractor or RuleBasedExtractor()
+        self.extractor = extractor or HybridSafetyExtractor()
 
     def extract(self, text: str, report_metadata: Optional[Dict[str, Any]] = None) -> ExtractionSchema:
         return self.extractor.extract(text, report_metadata)
 
 
 extraction_service = ExtractionService()
+

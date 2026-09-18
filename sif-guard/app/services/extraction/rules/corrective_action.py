@@ -1,0 +1,44 @@
+import re
+from typing import Tuple, List
+
+
+CORRECTIVE_PREFIXES = [
+    r"\bafter the (?:incident|event|occurrence|accident)\b",
+    r"\bfollowing the (?:incident|event|occurrence|accident)\b",
+    r"\bcorrective action(?:s)?(?:\s*:)?\b",
+    r"\bremedial action(?:s)?(?:\s*:)?\b",
+    r"\bsubsequently\b",
+    r"\blater\b",
+    r"\bas a result of the incident\b"
+]
+
+
+class CorrectiveActionDetector:
+    """
+    Separates the incident event description from post-incident remedial or corrective actions.
+    Prevents newly introduced controls from being classified as the original barrier failure.
+    """
+
+    def partition_text(self, text: str) -> Tuple[str, str]:
+        lower = text.lower()
+        for pat in CORRECTIVE_PREFIXES:
+            m = re.search(pat, lower)
+            if m:
+                incident_part = text[:m.start()].strip()
+                corrective_part = text[m.start():].strip()
+                return incident_part, corrective_part
+        return text, ""
+
+    def filter_narrative(self, text: str) -> str:
+        incident_part, _ = self.partition_text(text)
+        return incident_part
+
+    def is_corrective_measure(self, text: str, phrase: str) -> bool:
+        _, corrective_part = self.partition_text(text)
+        if not corrective_part:
+            return False
+        return phrase.lower() in corrective_part.lower()
+
+
+corrective_detector = CorrectiveActionDetector()
+corrective_action_filter = corrective_detector
