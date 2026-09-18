@@ -28,7 +28,7 @@ export const FacilityMetricsHUD: React.FC<FacilityMetricsHUDProps> = ({ summary 
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: '14px',
         marginBottom: '20px',
       }}

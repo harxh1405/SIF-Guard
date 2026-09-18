@@ -222,14 +222,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
         />
       ) : (
         /* Split-Pane Triage Workspace */
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '400px 1fr',
-            gap: '24px',
-            alignItems: 'start',
-          }}
-        >
+        <div className="responsive-grid-sidebar">
           {/* Left Column: Queue List */}
           <div
             className="card"

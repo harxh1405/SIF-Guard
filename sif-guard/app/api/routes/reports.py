@@ -35,6 +35,11 @@ async def import_reports(
             lines = contents.decode("utf-8", errors="ignore").strip().split("\n")
             if len(lines) == 1 or filename.endswith(".json"):
                 data = json.loads(contents)
+                if isinstance(data, dict):
+                    for k in ["reports", "data", "records", "items", "incidents"]:
+                        if k in data and isinstance(data[k], list):
+                            data = data[k]
+                            break
                 df = pd.DataFrame(data if isinstance(data, list) else [data])
             else:
                 data = [json.loads(line) for line in lines if line.strip()]
