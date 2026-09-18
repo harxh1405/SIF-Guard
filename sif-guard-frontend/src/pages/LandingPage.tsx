@@ -429,6 +429,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Preload refinery.webp on landing page mount only
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = '/images/refinery.webp';
+    link.type = 'image/webp';
+    document.head.appendChild(link);
+    return () => {
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
+    };
+  }, []);
+
   const handleFontSizeChange = (size: 'small' | 'normal' | 'large') => {
     setFontSize(size);
     try {
@@ -543,7 +558,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   });
 
   return (
-    <div className={`india-gov-page font-size-${fontSize}`}>
+    <div className="india-gov-page">
+      {/* =========================================================================
+          FIXED ANIMATED BACKGROUND LAYER (REFINERY.WEBP + SLOW KEN BURNS + SCRIM)
+          Stationary behind content, position: fixed, inset: 0, outside any transform/filter
+          ========================================================================= */}
+      <div className="landing-bg-fixed" aria-hidden="true">
+        <div className="landing-bg-image" />
+        <div className="landing-bg-scrim" />
+      </div>
+
+      {/* Landing Page Content Wrapper with Transparent Base */}
+      <div className={`landing-content-wrapper font-size-${fontSize}`}>
       {/* Background Audio Player */}
       <audio
         ref={audioRef}
@@ -1370,6 +1396,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       </footer>
+      </div>
 
       {/* Accessibility Toast Feedback */}
       {toastMessage && (
