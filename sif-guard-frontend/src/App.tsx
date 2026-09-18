@@ -14,7 +14,6 @@ const PrecursorClustersPage = lazy(() => import('./pages/PrecursorClustersPage')
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
 const KnowledgeLSRPage = lazy(() => import('./pages/KnowledgeLSRPage').then((m) => ({ default: m.KnowledgeLSRPage })));
 const ReviewQueuePage = lazy(() => import('./pages/ReviewQueuePage').then((m) => ({ default: m.ReviewQueuePage })));
-const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage').then((m) => ({ default: m.DesignSystemPage })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/auth/AuthPage').then((m) => ({ default: m.AuthPage })));
 
@@ -47,7 +46,6 @@ const TAB_ORDER: TabId[] = [
   'analytics',
   'knowledge',
   'review',
-  'design-system',
 ];
 
 function AppContent() {
@@ -58,12 +56,68 @@ function AppContent() {
     return (
       (localStorage.getItem('sifguard-theme') as 'dark' | 'light') ||
       (localStorage.getItem('sif_guard_theme') as 'dark' | 'light') ||
-      'dark'
+      'light'
     );
   });
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [shortcutsOpen, setShortcutsOpen] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const mainContentRef = useRef<HTMLElement>(null);
+
+  // Background Audio Controller for the entire platform ("Modi hai to Mumkin hai")
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.75;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    const startPlayback = () => {
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {
+          const handleFirstGesture = () => {
+            audio
+              .play()
+              .then(() => setIsPlaying(true))
+              .catch(() => {});
+            window.removeEventListener('click', handleFirstGesture);
+            window.removeEventListener('keydown', handleFirstGesture);
+            window.removeEventListener('touchstart', handleFirstGesture);
+          };
+          window.addEventListener('click', handleFirstGesture, { once: true });
+          window.addEventListener('keydown', handleFirstGesture, { once: true });
+          window.addEventListener('touchstart', handleFirstGesture, { once: true });
+        });
+    };
+
+    startPlayback();
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {});
+    }
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -193,10 +247,21 @@ function AppContent() {
   // Authenticated: Show full existing SIF-Guard Application
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)', overflow: 'hidden' }}>
+      <audio
+        ref={audioRef}
+        loop
+        preload="auto"
+      >
+        <source src="/audio/bg_audio.webm" type="audio/webm" />
+        <source src="/audio/bg_audio.m4a" type="audio/mp4" />
+      </audio>
+
       <Header
         theme={theme}
         onToggleTheme={toggleTheme}
         onOpenShortcuts={() => setShortcutsOpen(true)}
+        isPlaying={isPlaying}
+        onToggleAudio={toggleAudio}
       />
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
@@ -217,7 +282,6 @@ function AppContent() {
             {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
             {activeTab === 'knowledge' && <KnowledgeLSRPage />}
             {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
-            {activeTab === 'design-system' && <DesignSystemPage />}
           </Suspense>
         </main>
       </div>

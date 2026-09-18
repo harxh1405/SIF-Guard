@@ -19,6 +19,9 @@ sif_guard.db
 node_modules/
 dist/
 build/
+.next/
+out/
+.turbo/
 .npm
 *.log
 

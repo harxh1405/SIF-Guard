@@ -119,8 +119,7 @@ async def import_reports(
         imported_count += 1
         newly_added.append(r)
 
-    # Automatically analyze all newly imported reports immediately upon ingestion
-    for r in newly_added:
+        # Run automated analysis pipeline on imported report
         try:
             run_single_report_analysis(db, r)
         except Exception as e:

@@ -33,10 +33,16 @@ export const BarrierHealthChart: React.FC<BarrierHealthChartProps> = ({
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      backgroundColor: '#ffffff',
+      borderColor: '#cbd5e1',
+      borderWidth: 1,
+      padding: [10, 14],
+      textStyle: { color: '#0f172a', fontSize: 12 },
+      extraCssText: 'box-shadow: 0 6px 20px rgba(0,51,102,0.12); border-radius: 6px;',
     },
     legend: {
       data: ['Failed / Defective', 'Effective / Intact', 'Unverified / Unknown'],
-      textStyle: { color: '#9CA8AA', fontSize: 11 },
+      textStyle: { color: '#475569', fontSize: 11, fontWeight: 600 },
       top: 0,
       right: 0,
     },
@@ -49,13 +55,14 @@ export const BarrierHealthChart: React.FC<BarrierHealthChartProps> = ({
     },
     xAxis: {
       type: 'value',
-      axisLabel: { color: '#9CA8AA' },
-      splitLine: { lineStyle: { color: '#203238', type: 'dashed' } },
+      axisLabel: { color: '#64748b' },
+      splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } },
     },
     yAxis: {
       type: 'category',
       data: categories,
-      axisLabel: { color: '#F4F3EE', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#cbd5e1' } },
+      axisLabel: { color: '#0f172a', fontSize: 11, fontWeight: 500 },
     },
     series: [
       {
@@ -63,7 +70,7 @@ export const BarrierHealthChart: React.FC<BarrierHealthChartProps> = ({
         type: 'bar',
         stack: 'total',
         label: { show: false },
-        itemStyle: { color: '#E54F4F', borderRadius: [0, 0, 0, 0] },
+        itemStyle: { color: '#dc2626', borderRadius: [0, 0, 0, 0] },
         data: failed,
       },
       {
@@ -71,7 +78,7 @@ export const BarrierHealthChart: React.FC<BarrierHealthChartProps> = ({
         type: 'bar',
         stack: 'total',
         label: { show: false },
-        itemStyle: { color: '#4DCEA0', borderRadius: [0, 0, 0, 0] },
+        itemStyle: { color: '#16a34a', borderRadius: [0, 0, 0, 0] },
         data: effective,
       },
       {
@@ -79,7 +86,7 @@ export const BarrierHealthChart: React.FC<BarrierHealthChartProps> = ({
         type: 'bar',
         stack: 'total',
         label: { show: false },
-        itemStyle: { color: '#E8AA3D', borderRadius: [0, 4, 4, 0] },
+        itemStyle: { color: '#ff9933', borderRadius: [0, 4, 4, 0] },
         data: unknown,
       },
     ],

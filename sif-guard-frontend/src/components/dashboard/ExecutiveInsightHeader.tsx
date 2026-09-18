@@ -29,29 +29,29 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
     switch (severity) {
       case 'critical':
         return {
-          badgeBg: 'rgba(229, 79, 79, 0.15)',
-          badgeColor: '#E54F4F',
-          badgeBorder: 'rgba(229, 79, 79, 0.35)',
-          glow: '0 0 24px rgba(229, 79, 79, 0.18)',
-          icon: <ShieldAlert size={20} color="#E54F4F" />,
+          badgeBg: '#fef2f2',
+          badgeColor: '#dc2626',
+          badgeBorder: '#fecaca',
+          topBorder: '#dc2626',
+          icon: <ShieldAlert size={18} color="#dc2626" />,
         };
       case 'warning':
         return {
-          badgeBg: 'rgba(242, 169, 51, 0.15)',
-          badgeColor: '#F2A933',
-          badgeBorder: 'rgba(242, 169, 51, 0.35)',
-          glow: '0 0 24px rgba(242, 169, 51, 0.18)',
-          icon: <AlertTriangle size={20} color="#F2A933" />,
+          badgeBg: '#fef3c7',
+          badgeColor: '#b45309',
+          badgeBorder: '#fde68a',
+          topBorder: '#ff9933',
+          icon: <AlertTriangle size={18} color="#b45309" />,
         };
       default:
         return {
-          badgeBg: 'rgba(77, 206, 160, 0.15)',
-          badgeColor: '#4DCEA0',
-          badgeBorder: 'rgba(77, 206, 160, 0.35)',
-          glow: '0 0 24px rgba(77, 206, 160, 0.18)',
-          icon: <TrendingUp size={20} color="#4DCEA0" />,
+          badgeBg: '#f0fdf4',
+          badgeColor: '#15803d',
+          badgeBorder: '#bbf7d0',
+          topBorder: '#16a34a',
+          icon: <TrendingUp size={18} color="#15803d" />,
         };
-    };
+    }
   };
 
   const style = getSeverityStyle(primaryInsight.severity);
@@ -59,48 +59,37 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
   return (
     <div
       style={{
-        backgroundColor: 'var(--bg-card, #0D171A)',
-        border: '1px solid var(--border, #203238)',
-        borderRadius: 'var(--radius-md, 8px)',
-        padding: '24px 28px',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderTop: `4px solid ${style.topBorder}`,
+        borderRadius: 'var(--radius-md)',
+        padding: '22px 26px',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: `${style.glow}, 0 8px 32px rgba(0,0,0,0.4)`,
-        marginBottom: '24px',
+        boxShadow: 'var(--shadow-card)',
+        marginBottom: '20px',
       }}
     >
-      {/* Background Accent Bar */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: '4px',
-          backgroundColor: style.badgeColor,
-        }}
-      />
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Header Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {style.icon}
             <span
               style={{
                 fontFamily: 'var(--font-mono, monospace)',
                 fontSize: '0.72rem',
-                fontWeight: 700,
-                letterSpacing: '0.08em',
+                fontWeight: 800,
+                letterSpacing: '0.06em',
                 textTransform: 'uppercase',
                 color: style.badgeColor,
                 backgroundColor: style.badgeBg,
                 border: `1px solid ${style.badgeBorder}`,
-                padding: '4px 10px',
+                padding: '3px 9px',
                 borderRadius: '4px',
               }}
             >
-              SAFETY SIGNAL BRIEFING · {primaryInsight.type}
+              HSE STATUTORY ADVISORY · {primaryInsight.type}
             </span>
           </div>
 
@@ -110,15 +99,19 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: primaryInsight.change >= 0 ? '#E54F4F' : '#4DCEA0',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: primaryInsight.change >= 0 ? '#dc2626' : '#16a34a',
+                backgroundColor: primaryInsight.change >= 0 ? '#fef2f2' : '#f0fdf4',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                border: `1px solid ${primaryInsight.change >= 0 ? '#fecaca' : '#bbf7d0'}`,
               }}
             >
-              <TrendingUp size={14} style={{ transform: primaryInsight.change < 0 ? 'rotate(180deg)' : 'none' }} />
+              <TrendingUp size={13} style={{ transform: primaryInsight.change < 0 ? 'rotate(180deg)' : 'none' }} />
               <span>
                 {primaryInsight.change >= 0 ? `+${primaryInsight.change}%` : `${primaryInsight.change}%`}{' '}
-                vs previous period
+                vs previous baseline
               </span>
             </div>
           )}
@@ -128,13 +121,13 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
         <div>
           <h2
             style={{
-              fontFamily: 'var(--font-serif, Fraunces, serif)',
-              fontSize: '1.45rem',
-              fontWeight: 600,
-              color: 'var(--text-primary, #F4F3EE)',
-              margin: '0 0 8px 0',
-              lineHeight: 1.25,
-              letterSpacing: '-0.01em',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '1.32rem',
+              fontWeight: 700,
+              color: 'var(--primary)',
+              margin: '0 0 6px 0',
+              lineHeight: 1.35,
+              letterSpacing: '-0.015em',
             }}
           >
             "{primaryInsight.description}"
@@ -146,15 +139,33 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '16px',
-                marginTop: '12px',
-                fontSize: '0.82rem',
-                color: 'var(--text-secondary, #9CA8AA)',
+                gap: '14px',
+                marginTop: '10px',
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)',
               }}
             >
               {primaryInsight.evidence.map((ev, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: style.badgeColor }} />
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: 'var(--surface-hover)',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--border-subtle)',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      borderRadius: '50%',
+                      backgroundColor: style.badgeColor,
+                    }}
+                  />
                   <span>{ev}</span>
                 </div>
               ))}
@@ -166,33 +177,32 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
         {onExploreClick && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '4px' }}>
             <button
+              type="button"
               onClick={() => onExploreClick(primaryInsight)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 16px',
-                backgroundColor: 'rgba(32, 50, 56, 0.6)',
-                border: '1px solid var(--border, #203238)',
+                padding: '7px 14px',
+                backgroundColor: '#003366',
+                border: '1px solid #002244',
                 borderRadius: '6px',
-                color: 'var(--text-primary, #F4F3EE)',
-                fontSize: '0.82rem',
+                color: '#ffffff',
+                fontSize: '0.8rem',
                 fontWeight: 600,
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = style.badgeColor;
-                e.currentTarget.style.backgroundColor = style.badgeBg;
+                e.currentTarget.style.backgroundColor = '#002244';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border, #203238)';
-                e.currentTarget.style.backgroundColor = 'rgba(32, 50, 56, 0.6)';
+                e.currentTarget.style.backgroundColor = '#003366';
               }}
             >
-              <Filter size={14} />
-              <span>Explore Underlying Reports</span>
-              <ChevronRight size={14} />
+              <Filter size={13} color="#ff9933" />
+              <span>Explore Underlying Precursor Reports</span>
+              <ChevronRight size={13} />
             </button>
           </div>
         )}

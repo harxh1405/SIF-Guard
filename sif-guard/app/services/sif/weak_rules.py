@@ -69,19 +69,19 @@ class WeakSupervisionRules:
 
         # 8. Toxic Gas & Hazardous Atmosphere Exposure
         if any(kw in t_lower for kw in ["h2s", "toxic gas", "hazardous atmosphere", "methane", "gas leak", "gas test"]) or extraction.hazard == "toxic gas / hazardous atmosphere" or extraction.barrier == "gas testing":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["h2s", "toxic", "without gas", "no gas", "required gas test"]):
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["h2s", "toxic", "without gas", "no gas", "required gas test", "gas leak"]):
                 risk_factors.append("Worker exposure to toxic gas (H2S) or hazardous asphyxiating atmosphere")
                 return "SIF_POTENTIAL", 0.95, risk_factors
 
         # 9. Vehicle & Mobile Equipment Interaction Precursor
         if any(kw in t_lower for kw in ["vehicle", "moving vehicle", "forklift", "truck", "traffic", "pedestrian", "barricad", "exclusion zone"]) or extraction.activity == "vehicle / pedestrian interaction" or extraction.barrier == "exclusion zone / barricading":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["not barricaded", "un-barricaded", "exclusion zone", "struck-by", "no barricade", "breached", "operating zone"]):
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["not barricaded", "un-barricaded", "exclusion zone", "struck-by", "no barricade", "breached", "pedestrians", "operating zone"]):
                 risk_factors.append("Work in vehicle pathway without exclusion zone barricades or traffic isolation")
-                return "SIF_POTENTIAL", 0.90, risk_factors
+                return "SIF_POTENTIAL", 0.93, risk_factors
 
         # 10. Hot Work Near Flammables Precursor
         if any(kw in t_lower for kw in ["welding", "hot work", "hydrocarbon", "flammable", "combustible"]) or extraction.activity == "hot work":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["without confirming", "gas test", "sparks"]):
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["without confirming", "gas test", "sparks", "without completing", "no valid"]):
                 risk_factors.append("Hot work / welding near hydrocarbon equipment without flammable gas verification")
                 return "SIF_POTENTIAL", 0.94, risk_factors
 
@@ -106,8 +106,8 @@ class WeakSupervisionRules:
                 risk_factors.append(f"Operational hazard present: {extraction.hazard}")
                 return "SIF_POTENTIAL", 0.80, risk_factors
 
-        # Default fallback if narrative is benign
-        return "NON_SIF", 0.80, ["Routine operational observation without critical barrier failures"]
+        # Default fallback if no definitive rule matched
+        return "UNCERTAIN", 0.50, ["Ambiguous narrative features requiring reviewer evaluation"]
 
 
 weak_rules_engine = WeakSupervisionRules()

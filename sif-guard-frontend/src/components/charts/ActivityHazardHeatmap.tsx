@@ -31,13 +31,19 @@ export const ActivityHazardHeatmap: React.FC<ActivityHazardHeatmapProps> = ({
   const option = {
     tooltip: {
       position: 'top',
+      backgroundColor: '#ffffff',
+      borderColor: '#cbd5e1',
+      borderWidth: 1,
+      padding: [10, 14],
+      textStyle: { color: '#0f172a', fontSize: 12 },
+      extraCssText: 'box-shadow: 0 6px 20px rgba(0,51,102,0.12); border-radius: 6px;',
       formatter: (params: any) => {
         const actName = activities[params.value[0]] || 'Activity';
         const hazName = hazards[params.value[1]] || 'Hazard';
         const val = params.value[2];
-        return `<div style="font-weight:600;color:#F4F3EE;margin-bottom:4px">${actName} × ${hazName}</div>
-          <div style="font-size:12px;color:#9CA8AA">Report Signals: <strong style="color:#F2A933">${val}</strong></div>
-          <div style="font-size:11px;color:#4DCEA0;margin-top:4px">Click to filter dashboard reports</div>`;
+        return `<div style="font-weight:700;color:#003366;margin-bottom:4px">${actName} × ${hazName}</div>
+          <div style="font-size:12px;color:#475569">Precursor Reports: <strong style="color:#b45309">${val}</strong></div>
+          <div style="font-size:11px;color:#16a34a;margin-top:4px;font-weight:600">Click to filter dashboard reports</div>`;
       },
     },
     grid: {
@@ -50,13 +56,15 @@ export const ActivityHazardHeatmap: React.FC<ActivityHazardHeatmapProps> = ({
       type: 'category',
       data: activities,
       splitArea: { show: true },
-      axisLabel: { color: '#9CA8AA', rotate: 25, fontSize: 11 },
+      axisLine: { lineStyle: { color: '#cbd5e1' } },
+      axisLabel: { color: '#64748b', rotate: 25, fontSize: 11, fontWeight: 500 },
     },
     yAxis: {
       type: 'category',
       data: hazards,
       splitArea: { show: true },
-      axisLabel: { color: '#9CA8AA', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#cbd5e1' } },
+      axisLabel: { color: '#0f172a', fontSize: 11, fontWeight: 500 },
     },
     visualMap: {
       min: 0,
@@ -67,7 +75,7 @@ export const ActivityHazardHeatmap: React.FC<ActivityHazardHeatmapProps> = ({
       bottom: '0%',
       show: false,
       inRange: {
-        color: ['#0D171A', '#112429', '#203238', '#F2A933', '#E54F4F'],
+        color: ['#f1f5f9', '#e0f2fe', '#fef3c7', '#ff9933', '#dc2626'],
       },
     },
     series: [
@@ -77,19 +85,20 @@ export const ActivityHazardHeatmap: React.FC<ActivityHazardHeatmapProps> = ({
         data: seriesData,
         label: {
           show: true,
-          color: '#F4F3EE',
+          color: '#0f172a',
           fontSize: 11,
+          fontWeight: 700,
           formatter: (params: any) => (params.value[2] > 0 ? params.value[2] : ''),
         },
         itemStyle: {
-          borderColor: '#0D171A',
+          borderColor: '#ffffff',
           borderWidth: 2,
           borderRadius: 2,
         },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
-            shadowColor: 'rgba(242, 169, 51, 0.5)',
+            shadowColor: 'rgba(0, 51, 102, 0.3)',
           },
         },
       },

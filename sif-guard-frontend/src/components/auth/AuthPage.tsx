@@ -7,7 +7,7 @@ interface AuthPageProps {
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, loginAsDemo } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -125,92 +125,101 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
         style={{
           width: '100%',
           maxWidth: '440px',
-          backgroundColor: 'var(--bg-card, #17110D)',
-          border: '1px solid var(--border-color, #33251C)',
+          backgroundColor: 'var(--bg-card, #ffffff)',
+          border: '1px solid var(--border, #cbd5e1)',
           borderRadius: '12px',
-          boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.7)',
-          padding: '36px 32px',
+          boxShadow: '0 10px 30px rgba(0, 51, 102, 0.10)',
+          padding: '0 0 32px 0',
           boxSizing: 'border-box',
+          overflow: 'hidden',
         }}
       >
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-secondary, #B3A194)',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              padding: '0 0 16px 0',
-              transition: 'color 0.15s ease',
-            }}
-          >
-            <ArrowLeft size={14} /> Back to Overview
-          </button>
-        )}
+        {/* Enterprise Accent Top Stripe */}
+        <div style={{ height: '3px', background: 'linear-gradient(90deg, #0284c7, #38bdf8)' }} />
 
-        {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '52px',
-              height: '52px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 106, 0, 0.12)',
-              border: '1px solid rgba(255, 106, 0, 0.3)',
-              marginBottom: '16px',
-            }}
-          >
-            <ShieldAlert size={28} color="var(--primary, #FF6A00)" />
-          </div>
+        <div style={{ padding: '28px 32px 0 32px' }}>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary, #475569)',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                padding: '0 0 16px 0',
+                transition: 'color 0.15s ease',
+              }}
+            >
+              <ArrowLeft size={14} /> Back to Overview
+            </button>
+          )}
 
-          <h1
-            style={{
-              margin: '0 0 6px 0',
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: 'var(--text-primary, #F5EFEB)',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            SIF-Guard
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontSize: '0.875rem',
-              color: 'var(--text-secondary, #B3A194)',
-              lineHeight: 1.4,
-            }}
-          >
-            Precursor Intelligence &amp; HSSE Safety Portal
-          </p>
-          <div
-            style={{
-              display: 'inline-block',
-              marginTop: '8px',
-              padding: '2px 10px',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: 'var(--primary, #FF6A00)',
-              backgroundColor: 'rgba(255, 106, 0, 0.08)',
-              borderRadius: '9999px',
-              border: '1px solid rgba(255, 106, 0, 0.2)',
-            }}
-          >
-            Oil India Limited — SIH 2026
+          {/* Brand Header */}
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '54px',
+                height: '54px',
+                borderRadius: '12px',
+                backgroundColor: '#0f172a',
+                border: '1px solid rgba(2, 132, 199, 0.4)',
+                boxShadow: '0 4px 16px rgba(2, 132, 199, 0.25)',
+                marginBottom: '14px',
+              }}
+            >
+              <ShieldAlert size={30} color="#0284c7" />
+            </div>
+
+            <h1
+              style={{
+                margin: '0 0 4px 0',
+                fontSize: '1.5rem',
+                fontWeight: 800,
+                color: 'var(--primary, #0f172a)',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              SIF-GUARD
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                fontSize: '0.84rem',
+                color: 'var(--text-secondary, #475569)',
+                lineHeight: 1.35,
+              }}
+            >
+              Enterprise Precursor &amp; Barrier Risk Platform
+            </p>
+            <div
+              style={{
+                display: 'inline-block',
+                marginTop: '8px',
+                padding: '3px 10px',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#0284c7',
+                backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                borderRadius: '4px',
+                border: '1px solid rgba(2, 132, 199, 0.25)',
+              }}
+            >
+              Industrial Process Safety &amp; Barrier Verification
+            </div>
           </div>
         </div>
+
+        <div style={{ padding: '0 32px' }}>
 
         {/* Tab Toggle */}
         <div
@@ -502,6 +511,33 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
               <span>{mode === 'signup' ? 'Create Account' : 'Sign In'}</span>
             )}
           </button>
+
+          {/* Quick Demo Mode Access */}
+          <div style={{ marginTop: '14px' }}>
+            <button
+              type="button"
+              onClick={loginAsDemo}
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '10px 16px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                backgroundColor: 'rgba(255, 115, 0, 0.08)',
+                color: 'var(--primary, #FF7300)',
+                border: '1px solid rgba(255, 115, 0, 0.25)',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <span>⚡ Enter as Demo Safety Auditor (Offline / Local)</span>
+            </button>
+          </div>
         </form>
 
         {/* Footer info */}
@@ -548,5 +584,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
+
+export default AuthPage;
