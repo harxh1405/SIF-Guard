@@ -227,7 +227,7 @@ function AppContent() {
         onToggleAudio={toggleAudio}
       />
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Navigation
           activeTab={activeTab}
           onTabChange={handleNavigate}
@@ -235,7 +235,7 @@ function AppContent() {
           onToggleCollapse={toggleCollapse}
         />
 
-        <main ref={mainContentRef} style={{ flex: 1, minWidth: 0, padding: '28px 36px', overflowY: 'auto', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
+        <main ref={mainContentRef} style={{ flex: 1, minWidth: 0, padding: '24px 24px', overflowY: 'auto', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
           {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
           {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
           {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}

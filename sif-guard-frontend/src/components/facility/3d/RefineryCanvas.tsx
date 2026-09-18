@@ -729,7 +729,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             style={{
               padding: '10px 18px',
               backgroundColor: 'var(--primary)',
-              color: '#000000',
+              color: '#ffffff',
               fontWeight: 700,
               fontSize: '13px',
               borderRadius: '8px',
@@ -946,7 +946,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 border: 'none',
                 fontWeight: isActive ? 700 : 500,
                 backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                color: isActive ? '#000000' : 'var(--text-secondary)',
+                color: isActive ? '#ffffff' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,

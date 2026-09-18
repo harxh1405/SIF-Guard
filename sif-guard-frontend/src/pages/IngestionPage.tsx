@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { extractDocumentOCR } from '../api/ocr';
 import type { OCRExtractResponse } from '../api/ocr';
@@ -51,11 +51,25 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
   const [analysisData, setAnalysisData] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const cameraVideoRef = useRef<HTMLVideoElement>(null);
 
   const isOcrSource = source === 'pdf' || source === 'image' || source === 'camera';
+
+  useEffect(() => {
+    const video = cameraVideoRef.current;
+    if (!cameraStream || !video) return;
+
+    video.srcObject = cameraStream;
+    void video.play().catch(() => undefined);
+
+    return () => {
+      cameraStream.getTracks().forEach((track) => track.stop());
+    };
+  }, [cameraStream]);
 
   // Handle document/image file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +141,71 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
     setStep(3); // Directly advance to 03 Verify & Review (skipping 02 OCR)
   };
 
-  // Handle Camera Capture
+  // Request the device camera only in response to the user's button click.
+  const requestCameraAccess = async () => {
+    setError(null);
+    setSource('camera');
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError('This browser does not support direct camera access. Please choose an image file instead.');
+      cameraInputRef.current?.click();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false,
+      });
+      setCameraStream(stream);
+    } catch (err) {
+      const name = err instanceof DOMException ? err.name : '';
+      setError(
+        name === 'NotAllowedError'
+          ? 'Camera access was denied. Allow camera access in your browser settings, then try again.'
+          : 'Unable to access a camera on this device. Please check that it is connected and not being used by another app.',
+      );
+      setSource('pdf');
+    }
+  };
+
+  const cancelCameraCapture = () => {
+    setCameraStream(null);
+    setSource('pdf');
+  };
+
+  const captureCameraFrame = () => {
+    const video = cameraVideoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      setError('The camera is still starting. Please wait a moment and try again.');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      setError('Unable to capture an image from the camera.');
+      return;
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        setError('Unable to create a camera image. Please try again.');
+        return;
+      }
+      const file = new File([blob], `safety-report-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      setCameraStream(null);
+      setSelectedFile(file);
+      setAnalyzedReport(null);
+      setAnalysisData(null);
+      void processOCR(file);
+    }, 'image/jpeg', 0.92);
+  };
+
+  // Fallback for browsers that provide their own native camera picker.
   const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -193,6 +271,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
   };
 
   const handleReset = () => {
+    setCameraStream(null);
     setStep(1);
     setOcrResult(null);
     setSelectedFile(null);
@@ -274,8 +353,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '12px',
-          backgroundColor: 'var(--bg-card, #0D171A)',
-          border: '1px solid var(--border, #203238)',
+          backgroundColor: 'var(--surface, #FFFFFF)',
+          border: '1px solid var(--border, #CBD5E1)',
           borderRadius: '8px',
           padding: '16px',
         }}
@@ -289,19 +368,19 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             padding: '10px 14px',
             borderRadius: '6px',
             backgroundColor: step === 1
-              ? 'rgba(242, 169, 51, 0.15)'
+              ? 'rgba(217, 119, 6, 0.12)'
               : step > 1
-              ? 'rgba(77, 206, 160, 0.12)'
-              : 'rgba(17, 36, 41, 0.5)',
-            border: `1px solid ${step === 1 ? '#F2A933' : step > 1 ? '#4DCEA0' : '#203238'}`,
+              ? 'rgba(15, 138, 106, 0.10)'
+              : '#F8FAFC',
+            border: `1px solid ${step === 1 ? '#D97706' : step > 1 ? '#0F8A6A' : '#CBD5E1'}`,
           }}
         >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 700, color: step === 1 ? '#F2A933' : step > 1 ? '#4DCEA0' : '#647477' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 700, color: step === 1 ? '#D97706' : step > 1 ? '#0F8A6A' : '#64748B' }}>
             01
           </span>
           <div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#F4F3EE' }}>01 Capture</div>
-            <div style={{ fontSize: '0.72rem', color: '#9CA8AA' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 650, color: '#0F2742' }}>01 Capture</div>
+            <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
               {step > 1 ? '✓ Complete' : 'PDF / Narrative / Camera'}
             </div>
           </div>
@@ -318,18 +397,18 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             backgroundColor: !isOcrSource
               ? 'rgba(100, 116, 119, 0.08)' // Muted skipped state for manual narrative
               : step === 2
-              ? 'rgba(242, 169, 51, 0.15)'
+              ? 'rgba(217, 119, 6, 0.12)'
               : step > 2
-              ? 'rgba(77, 206, 160, 0.12)'
-              : 'rgba(17, 36, 41, 0.5)',
+              ? 'rgba(15, 138, 106, 0.10)'
+              : '#F8FAFC',
             border: `1px solid ${
               !isOcrSource
                 ? 'rgba(100, 116, 119, 0.25)'
                 : step === 2
-                ? '#F2A933'
+                ? '#D97706'
                 : step > 2
-                ? '#4DCEA0'
-                : '#203238'
+                ? '#0F8A6A'
+                : '#CBD5E1'
             }`,
           }}
         >
@@ -338,7 +417,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               fontFamily: 'var(--font-mono)',
               fontSize: '0.9rem',
               fontWeight: 700,
-              color: !isOcrSource ? '#647477' : step === 2 ? '#F2A933' : step > 2 ? '#4DCEA0' : '#647477',
+              color: !isOcrSource ? '#64748B' : step === 2 ? '#D97706' : step > 2 ? '#0F8A6A' : '#64748B',
             }}
           >
             02
@@ -348,7 +427,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               style={{
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                color: !isOcrSource ? '#829195' : '#F4F3EE',
+                color: !isOcrSource ? '#475569' : '#0F2742',
               }}
             >
               02 OCR
@@ -356,7 +435,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             <div
               style={{
                 fontSize: '0.72rem',
-                color: !isOcrSource ? '#647477' : step > 2 ? '#4DCEA0' : '#9CA8AA',
+                color: !isOcrSource ? '#64748B' : step > 2 ? '#0F8A6A' : '#64748B',
                 fontStyle: !isOcrSource ? 'italic' : 'normal',
               }}
             >
@@ -380,19 +459,19 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             padding: '10px 14px',
             borderRadius: '6px',
             backgroundColor: step === 3
-              ? 'rgba(242, 169, 51, 0.15)'
+              ? 'rgba(217, 119, 6, 0.12)'
               : step > 3
-              ? 'rgba(77, 206, 160, 0.12)'
-              : 'rgba(17, 36, 41, 0.5)',
-            border: `1px solid ${step === 3 ? '#F2A933' : step > 3 ? '#4DCEA0' : '#203238'}`,
+              ? 'rgba(15, 138, 106, 0.10)'
+              : '#F8FAFC',
+            border: `1px solid ${step === 3 ? '#D97706' : step > 3 ? '#0F8A6A' : '#CBD5E1'}`,
           }}
         >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 700, color: step === 3 ? '#F2A933' : step > 3 ? '#4DCEA0' : '#647477' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 700, color: step === 3 ? '#D97706' : step > 3 ? '#0F8A6A' : '#64748B' }}>
             03
           </span>
           <div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#F4F3EE' }}>03 Verify & Review</div>
-            <div style={{ fontSize: '0.72rem', color: '#9CA8AA' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 650, color: '#0F2742' }}>03 Verify & Review</div>
+            <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
               {step === 3 ? '→ Current' : step > 3 ? '✓ Complete' : 'Pending'}
             </div>
           </div>
@@ -407,17 +486,17 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             padding: '10px 14px',
             borderRadius: '6px',
             backgroundColor: step === 4
-              ? 'rgba(77, 206, 160, 0.15)'
-              : 'rgba(17, 36, 41, 0.5)',
-            border: `1px solid ${step === 4 ? '#4DCEA0' : '#203238'}`,
+              ? 'rgba(15, 138, 106, 0.12)'
+              : '#F8FAFC',
+            border: `1px solid ${step === 4 ? '#0F8A6A' : '#CBD5E1'}`,
           }}
         >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 700, color: step === 4 ? '#4DCEA0' : '#647477' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', fontWeight: 700, color: step === 4 ? '#0F8A6A' : '#64748B' }}>
             04
           </span>
           <div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#F4F3EE' }}>04 Safety Intelligence</div>
-            <div style={{ fontSize: '0.72rem', color: step === 4 ? '#4DCEA0' : '#9CA8AA' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 650, color: '#0F2742' }}>04 Safety Intelligence</div>
+            <div style={{ fontSize: '0.72rem', color: step === 4 ? '#0F8A6A' : '#64748B' }}>
               {step === 4 ? '✓ Complete' : 'Pending'}
             </div>
           </div>
@@ -428,8 +507,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
       {step === 1 && (
         <div
           style={{
-            backgroundColor: 'var(--bg-card, #0D171A)',
-            border: '1px solid var(--border, #203238)',
+            backgroundColor: 'var(--surface, #FFFFFF)',
+            border: '1px solid var(--border, #CBD5E1)',
             borderRadius: '8px',
             padding: '28px',
             display: 'flex',
@@ -438,16 +517,16 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           }}
         >
           {/* Source Selection Toolbar */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', borderBottom: '1px solid #203238', paddingBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px' }}>
             <button
               onClick={() => setSource('pdf')}
               style={{
                 padding: '10px 18px',
                 borderRadius: '6px',
                 border: '1px solid',
-                borderColor: source === 'pdf' || source === 'image' ? '#F2A933' : '#203238',
-                backgroundColor: source === 'pdf' || source === 'image' ? 'rgba(242, 169, 51, 0.12)' : 'transparent',
-                color: source === 'pdf' || source === 'image' ? '#F2A933' : '#9CA8AA',
+                borderColor: source === 'pdf' || source === 'image' ? '#D97706' : '#CBD5E1',
+                backgroundColor: source === 'pdf' || source === 'image' ? '#FFF7ED' : '#FFFFFF',
+                color: source === 'pdf' || source === 'image' ? '#B45309' : '#475569',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -465,9 +544,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 padding: '10px 18px',
                 borderRadius: '6px',
                 border: '1px solid',
-                borderColor: source === 'manual_narrative' ? '#F2A933' : '#203238',
-                backgroundColor: source === 'manual_narrative' ? 'rgba(242, 169, 51, 0.12)' : 'transparent',
-                color: source === 'manual_narrative' ? '#F2A933' : '#9CA8AA',
+                borderColor: source === 'manual_narrative' ? '#D97706' : '#CBD5E1',
+                backgroundColor: source === 'manual_narrative' ? '#FFF7ED' : '#FFFFFF',
+                color: source === 'manual_narrative' ? '#B45309' : '#475569',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -480,17 +559,14 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             </button>
 
             <button
-              onClick={() => {
-                setSource('camera');
-                cameraInputRef.current?.click();
-              }}
+              onClick={requestCameraAccess}
               style={{
                 padding: '10px 18px',
                 borderRadius: '6px',
                 border: '1px solid',
-                borderColor: source === 'camera' ? '#F2A933' : '#203238',
-                backgroundColor: source === 'camera' ? 'rgba(242, 169, 51, 0.12)' : 'transparent',
-                color: source === 'camera' ? '#F2A933' : '#9CA8AA',
+                borderColor: source === 'camera' ? '#D97706' : '#CBD5E1',
+                backgroundColor: source === 'camera' ? '#FFF7ED' : '#FFFFFF',
+                color: source === 'camera' ? '#B45309' : '#475569',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -508,9 +584,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 padding: '10px 18px',
                 borderRadius: '6px',
                 border: '1px solid',
-                borderColor: source === 'structured' ? '#F2A933' : '#203238',
-                backgroundColor: source === 'structured' ? 'rgba(242, 169, 51, 0.12)' : 'transparent',
-                color: source === 'structured' ? '#F2A933' : '#9CA8AA',
+                borderColor: source === 'structured' ? '#D97706' : '#CBD5E1',
+                backgroundColor: source === 'structured' ? '#FFF7ED' : '#FFFFFF',
+                color: source === 'structured' ? '#B45309' : '#475569',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -532,6 +608,43 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             style={{ display: 'none' }}
           />
 
+          {source === 'camera' && cameraStream && (
+            <div
+              style={{
+                border: '1px solid #CBD5E1',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                backgroundColor: '#0F2742',
+              }}
+            >
+              <video
+                ref={cameraVideoRef}
+                autoPlay
+                muted
+                playsInline
+                style={{ display: 'block', width: '100%', maxHeight: '440px', objectFit: 'contain' }}
+              />
+              <div
+                style={{
+                  alignItems: 'center',
+                  backgroundColor: '#FFFFFF',
+                  display: 'flex',
+                  gap: '12px',
+                  justifyContent: 'space-between',
+                  padding: '14px 16px',
+                }}
+              >
+                <span style={{ color: '#475569', fontSize: '0.82rem' }}>Camera is on. Frame the report, then capture it for OCR.</span>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button type="button" onClick={cancelCameraCapture} className="btn btn-secondary">Cancel</button>
+                  <button type="button" onClick={captureCameraFrame} className="btn btn-primary">
+                    <Camera size={16} /> Capture photo
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Mode 1: Document / Image File Dropzone */}
           {(source === 'pdf' || source === 'image' || source === 'structured') && (
             <div
@@ -552,12 +665,12 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 }
               }}
               style={{
-                border: `2px dashed ${isDragging ? '#F2A933' : '#203238'}`,
+                border: `2px dashed ${isDragging ? '#D97706' : '#94A3B8'}`,
                 borderRadius: '8px',
                 padding: '48px 24px',
                 textAlign: 'center',
                 cursor: 'pointer',
-                backgroundColor: isDragging ? 'rgba(242, 169, 51, 0.05)' : 'rgba(17, 36, 41, 0.4)',
+                backgroundColor: isDragging ? '#FFF7ED' : '#F8FAFC',
                 transition: 'all 0.2s ease',
               }}
             >
@@ -568,11 +681,11 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
-              <UploadCloud size={48} color="#F2A933" style={{ marginBottom: '12px' }} />
-              <h3 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 6px 0' }}>
+              <UploadCloud size={48} color="#D97706" style={{ marginBottom: '12px' }} />
+              <h3 style={{ fontFamily: 'var(--font-serif)', color: '#0F2742', margin: '0 0 6px 0' }}>
                 Drag and drop report document or click to browse
               </h3>
-              <p style={{ color: '#9CA8AA', fontSize: '0.82rem', margin: 0 }}>
+              <p style={{ color: '#64748B', fontSize: '0.82rem', margin: 0 }}>
                 Supports PDF reports, scanned forms, site photo logs (PNG/JPG), and structured CSV/JSON logs.
               </p>
             </div>
@@ -582,10 +695,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           {source === 'manual_narrative' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#F4F3EE' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0F2742' }}>
                   Enter Human Safety Observation Narrative:
                 </label>
-                <span style={{ fontSize: '0.75rem', color: '#829195', fontStyle: 'italic' }}>
+                <span style={{ fontSize: '0.75rem', color: '#64748B', fontStyle: 'italic' }}>
                   OCR will be skipped automatically for direct text entry
                 </span>
               </div>
@@ -596,11 +709,11 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 rows={8}
                 style={{
                   width: '100%',
-                  backgroundColor: '#091114',
-                  border: '1px solid #203238',
+                  backgroundColor: '#F8FAFC',
+                  border: '1px solid #CBD5E1',
                   borderRadius: '6px',
                   padding: '14px',
-                  color: '#F4F3EE',
+                  color: '#0F2742',
                   fontSize: '0.9rem',
                   fontFamily: 'Inter, sans-serif',
                   lineHeight: 1.5,
@@ -613,8 +726,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   style={{
                     padding: '10px 22px',
                     borderRadius: '6px',
-                    backgroundColor: '#F2A933',
-                    color: '#080E10',
+                    backgroundColor: '#D97706',
+                    color: '#FFFFFF',
                     border: 'none',
                     fontWeight: 700,
                     cursor: pastedText.trim() ? 'pointer' : 'not-allowed',

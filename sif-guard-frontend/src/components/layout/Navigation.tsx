@@ -8,8 +8,6 @@ import {
   BarChart3,
   BookOpen,
   UserCheck,
-  PanelLeftClose,
-  PanelLeftOpen,
   Radar,
 } from 'lucide-react';
 
@@ -31,12 +29,7 @@ interface Props {
   onToggleCollapse: () => void;
 }
 
-export const Navigation: React.FC<Props> = ({
-  activeTab,
-  onTabChange,
-  isCollapsed,
-  onToggleCollapse,
-}) => {
+export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
   const sections = [
     {
       title: 'COMMAND CENTER',
@@ -64,103 +57,54 @@ export const Navigation: React.FC<Props> = ({
     },
   ];
 
+  const allItems = sections
+    .flatMap((section) => section.items)
+    .filter((tab) => tab.id !== 'design-system');
+
   return (
-    <motion.aside
-      animate={{ width: isCollapsed ? 74 : 246 }}
-      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+    <motion.nav
+      animate={{ width: '100%' }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       style={{
-        background: '#002244',
-        borderRight: '1px solid #00172e',
-        padding: isCollapsed ? '16px 6px' : '16px 10px',
+        background: '#205493',
+        borderBottom: '1px solid #1B365D',
+        height: '44px',
         display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        zIndex: 50,
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        flexShrink: 0,
-        height: '100%',
-        color: '#f8fafc',
+        alignItems: 'center',
+        position: 'relative',
+        zIndex: 20,
+        width: '100%',
+        borderRadius: '0px',
       }}
     >
-      {/* Sidebar Header with Collapse Button */}
       <div
         style={{
+          maxWidth: '1600px',
+          margin: '0 auto',
+          width: '100%',
+          padding: '0 24px',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: isCollapsed ? 'center' : 'space-between',
-          padding: isCollapsed ? '0 0 10px 0' : '0 8px 10px 8px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          marginBottom: '2px',
+          justifyContent: 'center',
         }}
       >
-        {!isCollapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span
-              style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                backgroundColor: '#ff9933',
-                display: 'inline-block',
-              }}
-            />
-            <span
-              style={{
-                fontSize: '0.66rem',
-                fontWeight: 800,
-                color: '#cbd5e1',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                fontFamily: 'var(--font-mono)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              OIL HSE PORTAL
-            </span>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={onToggleCollapse}
+        <div
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            border: 'none',
-            color: '#cbd5e1',
-            cursor: 'pointer',
-            padding: '5px',
-            borderRadius: '5px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'color 0.15s ease, background 0.15s ease',
+            flexWrap: 'nowrap',
+            whiteSpace: 'nowrap',
+            overflowX: 'auto',
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none',
+            gap: '2px',
+            width: '100%',
+            height: '100%',
           }}
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
-          {isCollapsed ? <PanelLeftOpen size={16} color="#ff9933" /> : <PanelLeftClose size={16} />}
-        </button>
-      </div>
-
-      {sections.map((section, sIdx) => (
-        <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {!isCollapsed && (
-            <div
-              style={{
-                fontSize: '0.63rem',
-                fontWeight: 800,
-                color: '#94a3b8',
-                letterSpacing: '0.08em',
-                fontFamily: 'var(--font-mono)',
-                padding: '6px 10px 3px 10px',
-                textTransform: 'uppercase',
-              }}
-            >
-              {section.title}
-            </div>
-          )}
-
-          {section.items.map((tab) => {
+          {allItems.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
 
@@ -169,57 +113,49 @@ export const Navigation: React.FC<Props> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                title={isCollapsed ? tab.label : undefined}
+                title={tab.label}
                 style={{
-                  position: 'relative',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: isCollapsed ? 'center' : 'flex-start',
-                  gap: isCollapsed ? '0' : '10px',
-                  padding: isCollapsed ? '9px 0' : '8px 12px',
-                  borderRadius: '6px',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                  padding: '0 16px',
+                  height: '100%',
+                  borderRadius: '0px',
                   border: 'none',
-                  borderLeft: isActive ? '3.5px solid #ff9933' : '3.5px solid transparent',
-                  background: isActive ? 'rgba(255, 153, 51, 0.16)' : 'transparent',
-                  color: isActive ? '#ffffff' : '#cbd5e1',
+                  borderBottom: isActive ? '3px solid #FF9933' : '3px solid transparent',
+                  background: isActive ? '#1B365D' : 'transparent',
+                  color: '#FFFFFF',
                   fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'background-color 0.15s ease-out, color 0.15s ease-out',
-                  width: '100%',
+                  transition: 'all 0.15s ease',
+                  letterSpacing: '0.01em',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.color = '#ffffff';
+                    e.currentTarget.style.background = 'rgba(27, 54, 93, 0.6)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#cbd5e1';
+                    e.currentTarget.style.background = 'transparent';
                   }
                 }}
               >
                 <Icon
-                  size={16}
-                  color={isActive ? '#ff9933' : '#94a3b8'}
-                  style={{
-                    transition: 'color 0.15s ease-out',
-                    flexShrink: 0,
-                  }}
+                  size={14}
+                  color={isActive ? '#FF9933' : '#E2E8F0'}
+                  style={{ flexShrink: 0 }}
                 />
-                {!isCollapsed && (
-                  <span style={{ letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
-                    {tab.label}
-                  </span>
-                )}
+                <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
-      ))}
-    </motion.aside>
+      </div>
+    </motion.nav>
   );
 };

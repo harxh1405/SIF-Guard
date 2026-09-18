@@ -111,7 +111,7 @@ export const LiveActivityTimeline: React.FC<LiveActivityTimelineProps> = ({
                           padding: '1px 4px',
                           borderRadius: '3px',
                           backgroundColor: 'var(--primary)',
-                          color: '#000',
+                          color: '#ffffff',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '2px',
