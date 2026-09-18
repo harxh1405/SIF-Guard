@@ -747,6 +747,8 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     }
   };
 
+  const isLight = theme === 'light';
+
   // WebGL Fallback screen
   if (!webGlSupported) {
     return (
@@ -780,8 +782,8 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             onClick={onFallback2D}
             style={{
               padding: '10px 18px',
-              backgroundColor: 'var(--primary)',
-              color: '#000000',
+              backgroundColor: isLight ? '#003366' : '#FF7300',
+              color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '13px',
               borderRadius: '8px',
@@ -798,8 +800,6 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       </div>
     );
   }
-
-  const isLight = theme === 'light';
 
   return (
     <div
@@ -979,7 +979,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             flexShrink: 0,
           }}
         >
-          <Compass size={14} color="var(--primary)" /> Focus:
+          <Compass size={14} color={isLight ? '#003366' : 'var(--primary)'} /> Focus:
         </span>
         {CAMERA_PRESETS.map((preset) => {
           const isActive = activePreset === preset.id;
@@ -998,12 +998,31 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 borderRadius: '6px',
                 border: 'none',
                 fontWeight: isActive ? 700 : 500,
-                backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                color: isActive ? '#000000' : 'var(--text-secondary)',
+                backgroundColor: isActive
+                  ? (isLight ? '#003366' : '#FF7300')
+                  : 'transparent',
+                color: isActive
+                  ? '#FFFFFF'
+                  : (isLight ? '#334155' : 'var(--text-secondary)'),
+                boxShadow: isActive
+                  ? (isLight ? '0 1px 4px rgba(0, 51, 102, 0.25)' : '0 2px 8px rgba(255, 115, 0, 0.35)')
+                  : 'none',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
                 transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = isLight ? '#e2e8f0' : 'rgba(255, 255, 255, 0.08)';
+                  e.currentTarget.style.color = isLight ? '#0f172a' : '#FFFFFF';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = isLight ? '#334155' : 'var(--text-secondary)';
+                }
               }}
             >
               {preset.label}

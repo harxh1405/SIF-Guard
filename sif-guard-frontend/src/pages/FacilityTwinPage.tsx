@@ -209,18 +209,25 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
-                padding: '5px 11px',
+                padding: '5px 12px',
                 borderRadius: '6px',
                 border: 'none',
-                backgroundColor: viewMode === '3d' ? 'var(--primary, #FF7300)' : 'transparent',
-                color: viewMode === '3d' ? '#000000' : 'var(--text-secondary)',
+                backgroundColor: viewMode === '3d'
+                  ? (isLight ? '#003366' : '#FF7300')
+                  : 'transparent',
+                color: viewMode === '3d'
+                  ? '#FFFFFF'
+                  : (isLight ? '#334155' : 'var(--text-secondary)'),
                 fontWeight: viewMode === '3d' ? 700 : 500,
                 fontSize: '11.5px',
                 cursor: 'pointer',
+                boxShadow: viewMode === '3d'
+                  ? (isLight ? '0 1px 4px rgba(0, 51, 102, 0.25)' : '0 2px 8px rgba(255, 115, 0, 0.35)')
+                  : 'none',
                 transition: 'all 0.15s ease',
               }}
             >
-              <Box size={13} /> 3D Twin
+              <Box size={13} color={viewMode === '3d' ? '#FFFFFF' : 'currentColor'} /> 3D Twin
             </button>
             <button
               onClick={() => setViewMode('2d')}
@@ -228,18 +235,25 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
-                padding: '5px 11px',
+                padding: '5px 12px',
                 borderRadius: '6px',
                 border: 'none',
-                backgroundColor: viewMode === '2d' ? 'var(--surface-elevated)' : 'transparent',
-                color: viewMode === '2d' ? 'var(--text-primary)' : 'var(--text-muted)',
+                backgroundColor: viewMode === '2d'
+                  ? (isLight ? '#003366' : '#FF7300')
+                  : 'transparent',
+                color: viewMode === '2d'
+                  ? '#FFFFFF'
+                  : (isLight ? '#334155' : 'var(--text-secondary)'),
                 fontWeight: viewMode === '2d' ? 700 : 500,
                 fontSize: '11.5px',
                 cursor: 'pointer',
+                boxShadow: viewMode === '2d'
+                  ? (isLight ? '0 1px 4px rgba(0, 51, 102, 0.25)' : '0 2px 8px rgba(255, 115, 0, 0.35)')
+                  : 'none',
                 transition: 'all 0.15s ease',
               }}
             >
-              <MapIcon size={13} /> 2D Map
+              <MapIcon size={13} color={viewMode === '2d' ? '#FFFFFF' : 'currentColor'} /> 2D Map
             </button>
           </div>
 
