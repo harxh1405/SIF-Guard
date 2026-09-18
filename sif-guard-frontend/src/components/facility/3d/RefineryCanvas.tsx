@@ -42,7 +42,7 @@ const disposeHierarchy = (obj: THREE.Object3D) => {
 interface RefineryCanvasProps {
   zones: FacilityZone[];
   selectedZoneId: string | null;
-  onSelectZone: (zoneId: string) => void;
+  onSelectZone: (zoneId: string | null) => void;
   hoveredZoneId: string | null;
   onHoverZone: (zoneId: string | null) => void;
   activeIncidents: ZoneIncident[];
@@ -55,6 +55,7 @@ interface RefineryCanvasProps {
   height?: string | number;
   containerStyle?: React.CSSProperties;
   transparentBg?: boolean;
+  resetSignal?: number;
 }
 
 export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
@@ -73,6 +74,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   height,
   containerStyle,
   transparentBg = false,
+  resetSignal,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -143,7 +145,15 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     targetLookAt.current.copy(initialTargetRef.current);
     isAnimatingCam.current = true;
     setActivePreset('overview');
-  }, []);
+    onSelectZone(null);
+  }, [onSelectZone]);
+
+  // Respond to programmatic external reset triggers
+  useEffect(() => {
+    if (resetSignal && resetSignal > 0) {
+      handleResetView();
+    }
+  }, [resetSignal, handleResetView]);
 
   // Smooth Camera Preset Transition (For full dashboard mode)
   const triggerCameraTransition = useCallback(
@@ -314,12 +324,13 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.rotateSpeed = 0.9;
-    controls.minDistance = 35;
-    controls.maxDistance = 220;
+    controls.minDistance = 25;
+    controls.maxDistance = 240;
     controls.minPolarAngle = 0.05;
     controls.maxPolarAngle = Math.PI / 2.05; // Prevent camera dipping below ground
     controls.autoRotate = false; // NO auto-rotation fighting user!
-    controls.enableZoom = false; // Mouse wheel belongs to website page scroll!
+    controls.enableZoom = true; // Smooth mouse wheel / scroll zoom enabled
+    controls.zoomSpeed = 0.85;
     controls.enablePan = false;
     renderer.domElement.style.touchAction = 'none';
     controls.update();
@@ -796,7 +807,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       style={{
         width: '100%',
         height: height || (minimalOverlay ? '100%' : '620px'),
-        minHeight: minimalOverlay ? 'unset' : '620px',
+        minHeight: height ? '100%' : (minimalOverlay ? 'unset' : '620px'),
         position: 'relative',
         backgroundColor: (minimalOverlay || transparentBg)
           ? 'transparent'
@@ -818,6 +829,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
+        onDoubleClick={handleResetView}
         style={{
           width: '100%',
           height: '100%',
@@ -1130,7 +1142,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             </button>
 
             <button
-              onClick={() => triggerCameraTransition([0, 68, 68], [0, 0, 2], 'overview')}
+              onClick={handleResetView}
               style={{
                 display: 'flex',
                 alignItems: 'center',

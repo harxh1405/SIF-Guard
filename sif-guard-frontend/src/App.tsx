@@ -14,7 +14,6 @@ const PrecursorClustersPage = lazy(() => import('./pages/PrecursorClustersPage')
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
 const KnowledgeLSRPage = lazy(() => import('./pages/KnowledgeLSRPage').then((m) => ({ default: m.KnowledgeLSRPage })));
 const ReviewQueuePage = lazy(() => import('./pages/ReviewQueuePage').then((m) => ({ default: m.ReviewQueuePage })));
-const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage').then((m) => ({ default: m.DesignSystemPage })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/auth/AuthPage').then((m) => ({ default: m.AuthPage })));
 
@@ -47,7 +46,6 @@ const TAB_ORDER: TabId[] = [
   'analytics',
   'knowledge',
   'review',
-  'design-system',
 ];
 
 function AppContent() {
@@ -284,7 +282,6 @@ function AppContent() {
             {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
             {activeTab === 'knowledge' && <KnowledgeLSRPage />}
             {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
-            {activeTab === 'design-system' && <DesignSystemPage />}
           </Suspense>
         </main>
       </div>

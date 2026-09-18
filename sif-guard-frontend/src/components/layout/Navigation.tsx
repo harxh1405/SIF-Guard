@@ -21,8 +21,7 @@ export type TabId =
   | 'clusters'
   | 'analytics'
   | 'knowledge'
-  | 'review'
-  | 'design-system';
+  | 'review';
 
 interface Props {
   activeTab: TabId;
@@ -59,7 +58,6 @@ export const Navigation: React.FC<Props> = ({
       title: 'DATA & SYSTEM',
       items: [
         { id: 'ingestion' as TabId, label: 'Capture & OCR', icon: UploadCloud },
-        { id: 'design-system' as TabId, label: 'Design System', icon: Boxes },
       ],
     },
   ];
