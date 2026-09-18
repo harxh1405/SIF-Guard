@@ -187,7 +187,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       />
 
       {/* Row 1: Safety Signal Trend & SIF Risk Distribution */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+      <div className="responsive-grid-2-1">
         <SafetyTrendChart
           data={trends}
           onSelectPeriod={() => onNavigate('explorer')}
@@ -201,7 +201,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Row 2: Failed Barrier Intelligence & Barrier Health */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div className="responsive-grid-1-1">
         <BarrierFailureChart
           data={summary?.top_barrier_failures || []}
           onSelectBarrier={handleBarrierSelect}
@@ -211,7 +211,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Row 3: Emerging Precursor Patterns & Activity Feed */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div className="responsive-grid-1-1">
         {/* Emerging Precursor Patterns Section */}
         <div
           style={{

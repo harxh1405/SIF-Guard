@@ -36,18 +36,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Cell,
-  Area,
-  AreaChart,
-} from 'recharts';
+import { InsightChartWrapper } from '../components/charts/InsightChartWrapper';
 
 interface Props {
   onNavigate?: (tab: TabId) => void;
@@ -55,144 +44,6 @@ interface Props {
 
 type DimensionTab = 'sites' | 'activities' | 'hazards' | 'barriers' | 'lsr' | 'trends';
 type MetricChoice = 'density' | 'sif_count' | 'total_reports';
-
-const CustomRankedTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const density = data.sif_density !== undefined ? (data.sif_density * 100).toFixed(1) : null;
-    const precursors = data.sif_count ?? data.count ?? 0;
-    const total = data.total_reports;
-    const title = data.displayName || data.site || data.activity || data.hazard || data.barrier_failure || data.rule_name;
-
-    const isHighRisk = data.sif_density >= 0.10 || precursors >= 4;
-    const isMediumRisk = data.sif_density > 0 || precursors > 0;
-
-    return (
-      <div
-        style={{
-          background: '#211710',
-          border: '1px solid #33251C',
-          borderRadius: '12px',
-          padding: '14px 18px',
-          boxShadow: '0 15px 40px rgba(0, 0, 0, 0.45)',
-          minWidth: '220px',
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: '0.92rem',
-            color: '#F5EEE8',
-            marginBottom: '10px',
-            borderBottom: '1px solid #33251C',
-            paddingBottom: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-          }}
-        >
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
-          {isHighRisk ? (
-            <span
-              style={{
-                fontSize: '0.65rem',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                background: 'rgba(232, 93, 93, 0.15)',
-                color: '#E85D5D',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              HIGH RISK
-            </span>
-          ) : isMediumRisk ? (
-            <span
-              style={{
-                fontSize: '0.65rem',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                background: 'rgba(255, 179, 71, 0.15)',
-                color: '#FFB347',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              ELEVATED
-            </span>
-          ) : (
-            <span
-              style={{
-                fontSize: '0.65rem',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                background: 'rgba(32, 217, 151, 0.15)',
-                color: '#20D997',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
-              NOMINAL
-            </span>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1' }}>
-            <span>SIF Precursors:</span>
-            <span
-              style={{
-                color: precursors > 0 ? '#E85D5D' : '#F5EEE8',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {precursors}
-            </span>
-          </div>
-
-          {total !== undefined && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1' }}>
-              <span>Total Reports:</span>
-              <span style={{ color: '#F5EEE8', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                {total}
-              </span>
-            </div>
-          )}
-
-          {density !== null && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1', paddingTop: '4px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
-              <span>Precursor Density:</span>
-              <span
-                style={{
-                  color: '#FF6A00',
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-mono)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {density}%
-              </span>
-            </div>
-          )}
-
-          {data.percentage !== undefined && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B5AAA1' }}>
-              <span>Share:</span>
-              <span style={{ color: '#FF6A00', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                {data.percentage.toFixed(1)}%
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
 
 export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<DimensionTab>('sites');
@@ -340,6 +191,356 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
     }));
   }, [sortedActivities, activityMetric]);
 
+  const siteChartOption = useMemo(() => {
+    const categories = siteChartData.map((s) => s.displayName);
+    const dataValues = siteChartData.map((s) => s.displayValue);
+
+    return {
+      grid: {
+        left: '2%',
+        right: '14%',
+        bottom: '3%',
+        top: '6%',
+        containLabel: true,
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any[]) => {
+          if (!params || !params.length) return '';
+          const item = params[0];
+          const entry = siteChartData[item.dataIndex];
+          if (!entry) return '';
+          const isHigh = entry.sif_density >= 0.10 || entry.sif_count >= 2;
+          const isMed = entry.sif_density > 0 || entry.sif_count > 0;
+          const badgeBg = isHigh ? 'rgba(244, 63, 94, 0.18)' : isMed ? 'rgba(245, 158, 11, 0.18)' : 'rgba(16, 185, 129, 0.18)';
+          const badgeColor = isHigh ? '#F43F5E' : isMed ? '#F59E0B' : '#10B981';
+          const badgeText = isHigh ? 'CRITICAL RISK' : isMed ? 'ELEVATED' : 'NOMINAL';
+
+          return `
+            <div style="font-weight:700;font-size:13px;color:#F4F3EE;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:5px;">
+              <span>${entry.displayName}</span>
+              <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${badgeBg};color:${badgeColor};font-weight:700;font-family:var(--font-mono);">${badgeText}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;color:#9CA8AA;gap:16px;">
+                <span>SIF Precursors:</span>
+                <strong style="color:${entry.sif_count > 0 ? '#F43F5E' : '#F4F3EE'};font-family:var(--font-mono);">${entry.sif_count}</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;color:#9CA8AA;gap:16px;">
+                <span>Total Reports:</span>
+                <strong style="color:#F4F3EE;font-family:var(--font-mono);">${entry.total_reports}</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;color:#9CA8AA;gap:16px;border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">
+                <span>Precursor Density:</span>
+                <strong style="color:#F59E0B;font-family:var(--font-mono);">${(entry.sif_density * 100).toFixed(1)}%</strong>
+              </div>
+            </div>
+          `;
+        },
+      },
+      xAxis: {
+        type: 'value',
+        axisLabel: {
+          color: '#9CA8AA',
+          fontSize: 11,
+          fontFamily: 'var(--font-mono)',
+          formatter: (val: number) => `${val}${siteMetric === 'density' ? '%' : ''}`,
+        },
+        splitLine: {
+          lineStyle: { color: '#203238', type: 'dashed' },
+        },
+      },
+      yAxis: {
+        type: 'category',
+        data: categories,
+        inverse: true,
+        axisTick: { show: false },
+        axisLine: { lineStyle: { color: '#203238' } },
+        axisLabel: {
+          color: '#F4F3EE',
+          fontSize: 12,
+          fontWeight: 500,
+          width: 140,
+          overflow: 'truncate',
+        },
+      },
+      series: [
+        {
+          name: siteMetric === 'density' ? 'SIF Density (%)' : siteMetric === 'sif_count' ? 'SIF Precursors' : 'Total Reports',
+          type: 'bar',
+          data: dataValues,
+          barMaxWidth: 20,
+          itemStyle: {
+            color: (params: any) => {
+              const entry = siteChartData[params.dataIndex];
+              if (!entry) return '#334155';
+              if (entry.sif_density >= 0.10 || entry.sif_count >= 2) {
+                return '#F43F5E'; // Laser Ruby
+              }
+              if (entry.sif_count > 0 || entry.sif_density > 0) {
+                return '#F59E0B'; // Sunburst Champagne
+              }
+              return '#334155'; // Titanium Slate
+            },
+            borderRadius: [0, 6, 6, 0],
+          },
+          label: {
+            show: true,
+            position: 'right',
+            distance: 8,
+            formatter: (params: any) => {
+              const entry = siteChartData[params.dataIndex];
+              if (!entry) return '';
+              if (siteMetric === 'density') {
+                return `${params.value}% (${entry.sif_count} SIF)`;
+              }
+              if (siteMetric === 'sif_count') {
+                return `${params.value} (${(entry.sif_density * 100).toFixed(1)}%)`;
+              }
+              return `${params.value}`;
+            },
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: 'var(--font-mono)',
+            color: '#9CA8AA',
+          },
+        },
+      ],
+    };
+  }, [siteChartData, siteMetric]);
+
+  const activityChartOption = useMemo(() => {
+    const categories = activityChartData.map((a) => a.displayName);
+    const dataValues = activityChartData.map((a) => a.displayValue);
+
+    return {
+      grid: {
+        left: '2%',
+        right: '14%',
+        bottom: '3%',
+        top: '6%',
+        containLabel: true,
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any[]) => {
+          if (!params || !params.length) return '';
+          const item = params[0];
+          const entry = activityChartData[item.dataIndex];
+          if (!entry) return '';
+          const isHigh = entry.sif_density >= 0.10 || entry.sif_count >= 2;
+          const isMed = entry.sif_density > 0 || entry.sif_count > 0;
+          const badgeBg = isHigh ? 'rgba(244, 63, 94, 0.18)' : isMed ? 'rgba(245, 158, 11, 0.18)' : 'rgba(16, 185, 129, 0.18)';
+          const badgeColor = isHigh ? '#F43F5E' : isMed ? '#F59E0B' : '#10B981';
+          const badgeText = isHigh ? 'CRITICAL TASK' : isMed ? 'ELEVATED' : 'NOMINAL';
+
+          return `
+            <div style="font-weight:700;font-size:13px;color:#F4F3EE;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:5px;">
+              <span>${entry.displayName}</span>
+              <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${badgeBg};color:${badgeColor};font-weight:700;font-family:var(--font-mono);">${badgeText}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;color:#9CA8AA;gap:16px;">
+                <span>SIF Precursors:</span>
+                <strong style="color:${entry.sif_count > 0 ? '#F43F5E' : '#F4F3EE'};font-family:var(--font-mono);">${entry.sif_count}</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;color:#9CA8AA;gap:16px;">
+                <span>Total Reports:</span>
+                <strong style="color:#F4F3EE;font-family:var(--font-mono);">${entry.total_reports}</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;color:#9CA8AA;gap:16px;border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">
+                <span>Precursor Density:</span>
+                <strong style="color:#F59E0B;font-family:var(--font-mono);">${(entry.sif_density * 100).toFixed(1)}%</strong>
+              </div>
+            </div>
+          `;
+        },
+      },
+      xAxis: {
+        type: 'value',
+        axisLabel: {
+          color: '#9CA8AA',
+          fontSize: 11,
+          fontFamily: 'var(--font-mono)',
+          formatter: (val: number) => `${val}${activityMetric === 'density' ? '%' : ''}`,
+        },
+        splitLine: {
+          lineStyle: { color: '#203238', type: 'dashed' },
+        },
+      },
+      yAxis: {
+        type: 'category',
+        data: categories,
+        inverse: true,
+        axisTick: { show: false },
+        axisLine: { lineStyle: { color: '#203238' } },
+        axisLabel: {
+          color: '#F4F3EE',
+          fontSize: 12,
+          fontWeight: 500,
+          width: 140,
+          overflow: 'truncate',
+        },
+      },
+      series: [
+        {
+          name: activityMetric === 'density' ? 'SIF Density (%)' : activityMetric === 'sif_count' ? 'SIF Precursors' : 'Total Reports',
+          type: 'bar',
+          data: dataValues,
+          barMaxWidth: 20,
+          itemStyle: {
+            color: (params: any) => {
+              const entry = activityChartData[params.dataIndex];
+              if (!entry) return '#334155';
+              if (entry.sif_density >= 0.10 || entry.sif_count >= 2) {
+                return '#F43F5E';
+              }
+              if (entry.sif_count > 0 || entry.sif_density > 0) {
+                return '#F59E0B';
+              }
+              return '#334155';
+            },
+            borderRadius: [0, 6, 6, 0],
+          },
+          label: {
+            show: true,
+            position: 'right',
+            distance: 8,
+            formatter: (params: any) => {
+              const entry = activityChartData[params.dataIndex];
+              if (!entry) return '';
+              if (activityMetric === 'density') {
+                return `${params.value}% (${entry.sif_count} SIF)`;
+              }
+              if (activityMetric === 'sif_count') {
+                return `${params.value} (${(entry.sif_density * 100).toFixed(1)}%)`;
+              }
+              return `${params.value}`;
+            },
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: 'var(--font-mono)',
+            color: '#9CA8AA',
+          },
+        },
+      ],
+    };
+  }, [activityChartData, activityMetric]);
+
+  const trendChartOption = useMemo(() => {
+    const periods = trendData.map((d) => d.period);
+    const totalReports = trendData.map((d) => d.total_reports);
+    const sifPrecursors = trendData.map((d) => d.sif_precursors);
+    const sifDensity = trendData.map((d) => Math.round(d.sif_density * 100));
+    const isSparse = periods.length <= 2;
+
+    return {
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '8%',
+        top: '16%',
+        containLabel: true,
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any[]) => {
+          if (!params || !params.length) return '';
+          const periodName = params[0].name;
+          let html = `<div style="font-weight:700;font-size:13px;color:#F4F3EE;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:4px;">Period: ${periodName}</div>`;
+          params.forEach((item) => {
+            const isDensity = item.seriesName.includes('Density');
+            const val = isDensity ? `${item.value}%` : item.value;
+            html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;margin-top:4px;">
+              <span style="display:flex;align-items:center;gap:6px;color:#9CA8AA;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${item.color};"></span>
+                ${item.seriesName}
+              </span>
+              <span style="font-weight:700;font-family:var(--font-mono);color:#F4F3EE;">${val}</span>
+            </div>`;
+          });
+          return html;
+        },
+      },
+      legend: {
+        data: ['Total Reports', 'SIF Precursors', 'SIF Precursor Density (%)'],
+        textStyle: { color: '#9CA8AA', fontSize: 11 },
+        top: 0,
+        right: 0,
+      },
+      xAxis: {
+        type: 'category',
+        data: periods.length ? periods : ['Current Period'],
+        axisPointer: { type: 'shadow' },
+        axisLine: { lineStyle: { color: '#203238' } },
+        axisLabel: { color: '#9CA8AA', fontSize: 11, fontFamily: 'var(--font-mono)' },
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: 'Reports',
+          min: 0,
+          axisLabel: { color: '#9CA8AA', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#203238', type: 'dashed' } },
+        },
+        {
+          type: 'value',
+          name: 'Density (%)',
+          min: 0,
+          max: 100,
+          axisLabel: { color: '#9CA8AA', formatter: '{value}%', fontSize: 11 },
+          splitLine: { show: false },
+        },
+      ],
+      series: [
+        {
+          name: 'Total Reports',
+          type: 'bar',
+          barMaxWidth: isSparse ? 36 : 26,
+          itemStyle: {
+            color: '#334155', // Titanium Slate
+            borderColor: '#475569',
+            borderWidth: 1,
+            borderRadius: [4, 4, 0, 0],
+          },
+          data: totalReports,
+        },
+        {
+          name: 'SIF Precursors',
+          type: 'bar',
+          barMaxWidth: isSparse ? 36 : 26,
+          itemStyle: {
+            color: '#F43F5E', // Laser Ruby
+            borderRadius: [4, 4, 0, 0],
+          },
+          data: sifPrecursors,
+        },
+        {
+          name: 'SIF Precursor Density (%)',
+          type: 'line',
+          yAxisIndex: 1,
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: {
+            color: '#F59E0B', // Sunburst Champagne
+            borderColor: '#FFFFFF',
+            borderWidth: 2,
+          },
+          lineStyle: { width: 3, color: '#F59E0B' },
+          data: sifDensity,
+        },
+      ],
+    };
+  }, [trendData]);
+
+  const latestTrend = useMemo(() => {
+    if (!trendData.length) return null;
+    return trendData[trendData.length - 1];
+  }, [trendData]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -410,7 +611,7 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
           gap: '16px',
         }}
       >
@@ -614,36 +815,46 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                ============================================================ */}
             {activeTab === 'sites' && (
               <>
-                {/* PRIMARY CHART CARD: Horizontal Ranked Bar Chart */}
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  {/* Chart Header & Controls */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '16px',
-                      marginBottom: '20px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                        {siteMetric === 'density'
-                          ? 'SIF Precursor Density by Facility'
-                          : siteMetric === 'sif_count'
-                          ? 'SIF Precursor Count by Facility'
-                          : 'Total Incident Reports by Facility'}
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        Facilities ranked by {siteMetric === 'density' ? 'precursor concentration ratio' : siteMetric === 'sif_count' ? 'precursor count' : 'total report volume'}
-                      </p>
-                    </div>
-
-                    {/* Chart Contextual Controls */}
+                {/* PRIMARY CHART CARD: ECharts Horizontal Ranked Bar Chart */}
+                <InsightChartWrapper
+                  title={
+                    siteMetric === 'density'
+                      ? 'SIF Precursor Density by Facility'
+                      : siteMetric === 'sif_count'
+                      ? 'SIF Precursor Count by Facility'
+                      : 'Total Incident Reports by Facility'
+                  }
+                  subtitle={`Facilities ranked by ${
+                    siteMetric === 'density'
+                      ? 'precursor concentration ratio'
+                      : siteMetric === 'sif_count'
+                      ? 'precursor count'
+                      : 'total report volume'
+                  }`}
+                  option={siteChartOption}
+                  height={Math.min(460, Math.max(300, siteChartData.length * 36 + 40))}
+                  empty={siteChartData.length === 0}
+                  emptyMessage="No facility safety signals recorded."
+                  onChartClick={() => onNavigate && onNavigate('explorer')}
+                  headerAction={
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      {topSite && (
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-mono)',
+                            color: '#F43F5E',
+                            background: 'rgba(244, 63, 94, 0.12)',
+                            border: '1px solid rgba(244, 63, 94, 0.3)',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                          }}
+                        >
+                          Hotspot: {topSite.site || 'Unknown'} ({(topSite.sif_density * 100).toFixed(1)}%)
+                        </span>
+                      )}
+
                       {/* Metric Selector */}
                       <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-elevated)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
                         <button
@@ -730,60 +941,8 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                         </button>
                       )}
                     </div>
-                  </div>
-
-                  {/* Horizontal Bar Chart Container */}
-                  <div
-                    style={{
-                      height: `${Math.min(420, Math.max(280, siteChartData.length * 36 + 40))}px`,
-                      width: '100%',
-                    }}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={siteChartData}
-                        layout="vertical"
-                        margin={{ top: 8, right: 30, left: 160, bottom: 8 }}
-                      >
-                        <CartesianGrid
-                          horizontal={false}
-                          vertical={true}
-                          stroke="var(--border-subtle)"
-                          strokeDasharray="3 3"
-                        />
-                        <XAxis
-                          type="number"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }}
-                          tickFormatter={(val) => `${val}${siteMetric === 'density' ? '%' : ''}`}
-                          domain={[0, 'auto']}
-                        />
-                        <YAxis
-                          type="category"
-                          dataKey="displayName"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 12, fontFamily: 'var(--font-main)', fill: 'var(--text-primary)', fontWeight: 500 }}
-                          width={160}
-                          tickLine={false}
-                        />
-                        <Tooltip content={<CustomRankedTooltip metricType={siteMetric} />} cursor={{ fill: 'rgba(255, 106, 0, 0.04)' }} />
-                        <Bar dataKey="displayValue" radius={[0, 6, 6, 0]} barSize={20}>
-                          {siteChartData.map((entry, index) => {
-                            let fill = '#C6530A';
-                            if (index === 0 && entry.displayValue > 0) {
-                              fill = '#FF6A00'; // Visual dominant top facility
-                            } else if (entry.displayValue === 0) {
-                              fill = '#71300C'; // Inactive/zero muted
-                            } else if (index < 3 && entry.displayValue > 0) {
-                              fill = '#D95B0B';
-                            }
-                            return <Cell key={`cell-${index}`} fill={fill} />;
-                          })}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                  }
+                />
 
                 {/* KEY INSIGHT CARD (Data-driven) */}
                 <div
@@ -805,12 +964,12 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                         width: '34px',
                         height: '34px',
                         borderRadius: '8px',
-                        background: 'rgba(255, 106, 0, 0.12)',
-                        border: '1px solid rgba(255, 106, 0, 0.25)',
+                        background: 'rgba(244, 63, 94, 0.12)',
+                        border: '1px solid rgba(244, 63, 94, 0.25)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'var(--primary)',
+                        color: '#F43F5E',
                         flexShrink: 0,
                         marginTop: '2px',
                       }}
@@ -824,7 +983,7 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                             fontSize: '0.7rem',
                             fontFamily: 'var(--font-mono)',
                             fontWeight: 700,
-                            color: 'var(--primary)',
+                            color: '#F43F5E',
                             letterSpacing: '0.08em',
                             textTransform: 'uppercase',
                           }}
@@ -835,8 +994,8 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                       <p style={{ fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.5, margin: 0 }}>
                         {topSite && topSite.sif_count > 0 ? (
                           <>
-                            <strong style={{ color: 'var(--primary-bright)' }}>{topSite.site}</strong> currently shows the highest SIF precursor density at{' '}
-                            <strong style={{ color: 'var(--danger)', fontFamily: 'var(--font-mono)' }}>{(topSite.sif_density * 100).toFixed(1)}%</strong>{' '}
+                            <strong style={{ color: '#F43F5E' }}>{topSite.site}</strong> currently shows the highest SIF precursor density at{' '}
+                            <strong style={{ color: '#F43F5E', fontFamily: 'var(--font-mono)' }}>{(topSite.sif_density * 100).toFixed(1)}%</strong>{' '}
                             ({topSite.sif_count} precursors out of {topSite.total_reports} reports).{' '}
                             {kpis.highRiskSites > 1
                               ? `${kpis.highRiskSites} facilities require active barrier triage.`
@@ -983,10 +1142,10 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                                           width: `${Math.min(100, Math.max(0, s.sif_density * 100))}%`,
                                           height: '100%',
                                           background: isHigh
-                                            ? 'var(--danger)'
+                                            ? '#F43F5E'
                                             : isMed
-                                            ? 'var(--primary)'
-                                            : 'var(--text-muted)',
+                                            ? '#F59E0B'
+                                            : '#334155',
                                           borderRadius: '3px',
                                         }}
                                       />
@@ -997,7 +1156,7 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                                         fontVariantNumeric: 'tabular-nums',
                                         fontSize: '0.82rem',
                                         fontWeight: 600,
-                                        color: isHigh ? 'var(--danger)' : isMed ? 'var(--text-primary)' : 'var(--text-muted)',
+                                        color: isHigh ? '#F43F5E' : isMed ? '#F59E0B' : 'var(--text-muted)',
                                         minWidth: '45px',
                                         textAlign: 'right',
                                       }}
@@ -1052,97 +1211,68 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                ============================================================ */}
             {activeTab === 'activities' && (
               <>
-                <div className="card" style={{ padding: '24px 28px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '16px',
-                      marginBottom: '20px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                        Operational Task Precursor Distribution
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        High-risk activities ranked by {activityMetric === 'density' ? 'precursor density' : 'precursor count'}
-                      </p>
-                    </div>
+                <InsightChartWrapper
+                  title="Operational Task Precursor Distribution"
+                  subtitle={`High-risk activities ranked by ${activityMetric === 'density' ? 'precursor density' : 'precursor count'}`}
+                  option={activityChartOption}
+                  height={Math.min(460, Math.max(300, activityChartData.length * 36 + 40))}
+                  empty={activityChartData.length === 0}
+                  emptyMessage="No activity safety signals recorded."
+                  onChartClick={() => onNavigate && onNavigate('explorer')}
+                  headerAction={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      {sortedActivities[0] && (
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-mono)',
+                            color: '#F43F5E',
+                            background: 'rgba(244, 63, 94, 0.12)',
+                            border: '1px solid rgba(244, 63, 94, 0.3)',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                          }}
+                        >
+                          Priority: {sortedActivities[0].activity}
+                        </span>
+                      )}
 
-                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-elevated)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
-                      <button
-                        onClick={() => setActivityMetric('density')}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          background: activityMetric === 'density' ? 'var(--primary)' : 'transparent',
-                          color: activityMetric === 'density' ? '#FFFFFF' : 'var(--text-secondary)',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Density (%)
-                      </button>
-                      <button
-                        onClick={() => setActivityMetric('sif_count')}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          background: activityMetric === 'sif_count' ? 'var(--primary)' : 'transparent',
-                          color: activityMetric === 'sif_count' ? '#FFFFFF' : 'var(--text-secondary)',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        SIF Count
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-elevated)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
+                        <button
+                          onClick={() => setActivityMetric('density')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: activityMetric === 'density' ? 'var(--primary)' : 'transparent',
+                            color: activityMetric === 'density' ? '#FFFFFF' : 'var(--text-secondary)',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Density (%)
+                        </button>
+                        <button
+                          onClick={() => setActivityMetric('sif_count')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: activityMetric === 'sif_count' ? 'var(--primary)' : 'transparent',
+                            color: activityMetric === 'sif_count' ? '#FFFFFF' : 'var(--text-secondary)',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          SIF Count
+                        </button>
+                      </div>
                     </div>
-                  </div>
-
-                  <div style={{ height: `${Math.min(420, Math.max(280, activityChartData.length * 36 + 40))}px`, width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={activityChartData}
-                        layout="vertical"
-                        margin={{ top: 8, right: 30, left: 160, bottom: 8 }}
-                      >
-                        <CartesianGrid horizontal={false} vertical={true} stroke="var(--border-subtle)" strokeDasharray="3 3" />
-                        <XAxis
-                          type="number"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }}
-                          tickFormatter={(val) => `${val}${activityMetric === 'density' ? '%' : ''}`}
-                        />
-                        <YAxis
-                          type="category"
-                          dataKey="displayName"
-                          stroke="var(--text-muted)"
-                          tick={{ fontSize: 12, fontFamily: 'var(--font-main)', fill: 'var(--text-primary)', fontWeight: 500 }}
-                          width={160}
-                          tickLine={false}
-                        />
-                        <Tooltip content={<CustomRankedTooltip metricType={activityMetric} />} cursor={{ fill: 'rgba(255, 106, 0, 0.04)' }} />
-                        <Bar dataKey="displayValue" radius={[0, 6, 6, 0]} barSize={20}>
-                          {activityChartData.map((entry, index) => (
-                            <Cell
-                              key={`act-${index}`}
-                              fill={index === 0 && entry.displayValue > 0 ? '#FF6A00' : entry.displayValue === 0 ? '#71300C' : '#C6530A'}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                  }
+                />
 
                 {/* Activity Intelligence Table */}
                 <div className="card" style={{ padding: '24px 28px' }}>
@@ -1166,7 +1296,7 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                             <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                               {a.total_reports}
                             </td>
-                            <td style={{ textAlign: 'right', color: a.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                            <td style={{ textAlign: 'right', color: a.sif_count > 0 ? '#F43F5E' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                               {a.sif_count}
                             </td>
                             <td>
@@ -1176,11 +1306,12 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                                     style={{
                                       width: `${Math.min(100, Math.max(0, a.sif_density * 100))}%`,
                                       height: '100%',
-                                      background: a.sif_density > 0.1 ? 'var(--danger)' : 'var(--primary)',
+                                      background: a.sif_density >= 0.1 ? '#F43F5E' : a.sif_density > 0 ? '#F59E0B' : '#10B981',
+                                      borderRadius: '3px',
                                     }}
                                   />
                                 </div>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600 }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600, color: a.sif_density >= 0.1 ? '#F43F5E' : a.sif_density > 0 ? '#F59E0B' : 'var(--text-secondary)' }}>
                                   {(a.sif_density * 100).toFixed(1)}%
                                 </span>
                               </div>
@@ -1218,15 +1349,15 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                     <tbody>
                       {hazardData.map((h, idx) => (
                         <tr key={idx}>
-                          <td style={{ fontWeight: 600, color: 'var(--primary-bright)' }}>{h.hazard}</td>
+                          <td style={{ fontWeight: 600, color: h.sif_count > 0 ? '#F43F5E' : 'var(--text-primary)' }}>{h.hazard}</td>
                           <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.total_reports}</td>
-                          <td style={{ textAlign: 'right', color: h.sif_count > 0 ? 'var(--danger)' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.sif_count}</td>
+                          <td style={{ textAlign: 'right', color: h.sif_count > 0 ? '#F43F5E' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{h.sif_count}</td>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                               <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${Math.min(100, Math.max(0, h.sif_density * 100))}%`, height: '100%', background: 'var(--primary)' }} />
+                                <div style={{ width: `${Math.min(100, Math.max(0, h.sif_density * 100))}%`, height: '100%', background: h.sif_density >= 0.1 ? '#F43F5E' : h.sif_density > 0 ? '#F59E0B' : '#10B981', borderRadius: '3px' }} />
                               </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600 }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600, color: h.sif_density >= 0.1 ? '#F43F5E' : h.sif_density > 0 ? '#F59E0B' : 'var(--text-secondary)' }}>
                                 {(h.sif_density * 100).toFixed(1)}%
                               </span>
                             </div>
@@ -1263,15 +1394,15 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                     <tbody>
                       {barrierData.map((b, idx) => (
                         <tr key={idx}>
-                          <td style={{ fontWeight: 600, color: 'var(--danger)' }}>{b.barrier_failure}</td>
+                          <td style={{ fontWeight: 600, color: '#F43F5E' }}>{b.barrier_failure}</td>
                           <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.total_reports}</td>
-                          <td style={{ textAlign: 'right', color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.sif_count}</td>
+                          <td style={{ textAlign: 'right', color: '#F43F5E', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{b.sif_count}</td>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                               <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${Math.min(100, Math.max(0, b.sif_density * 100))}%`, height: '100%', background: 'var(--danger)' }} />
+                                <div style={{ width: `${Math.min(100, Math.max(0, b.sif_density * 100))}%`, height: '100%', background: '#F43F5E', borderRadius: '3px' }} />
                               </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600, color: 'var(--danger)' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600, color: '#F43F5E' }}>
                                 {(b.sif_density * 100).toFixed(1)}%
                               </span>
                             </div>
@@ -1307,14 +1438,14 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                     <tbody>
                       {lsrData.map((lsr, idx) => (
                         <tr key={idx}>
-                          <td style={{ fontWeight: 600, color: 'var(--primary-bright)' }}>{lsr.rule_name}</td>
+                          <td style={{ fontWeight: 600, color: lsr.percentage >= 20 ? '#F43F5E' : 'var(--text-primary)' }}>{lsr.rule_name}</td>
                           <td style={{ textAlign: 'right', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{lsr.count}</td>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                               <div style={{ flex: 1, height: '6px', background: 'var(--surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ width: `${Math.min(100, Math.max(0, lsr.percentage))}%`, height: '100%', background: 'var(--primary)' }} />
+                                <div style={{ width: `${Math.min(100, Math.max(0, lsr.percentage))}%`, height: '100%', background: lsr.percentage >= 20 ? '#F43F5E' : lsr.percentage >= 10 ? '#F59E0B' : '#334155', borderRadius: '3px' }} />
                               </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600 }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', fontSize: '0.82rem', fontWeight: 600, color: lsr.percentage >= 20 ? '#F43F5E' : lsr.percentage >= 10 ? '#F59E0B' : 'var(--text-secondary)' }}>
                                 {lsr.percentage.toFixed(1)}%
                               </span>
                             </div>
@@ -1332,69 +1463,105 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                ============================================================ */}
             {activeTab === 'trends' && (
               <>
-                <div className="card" style={{ padding: '24px 28px' }}>
+                <InsightChartWrapper
+                  title="Temporal Precursor Trajectory"
+                  subtitle="Chronological trend of SIF precursors vs total reported volume with precursor density."
+                  option={trendChartOption}
+                  height={340}
+                  empty={trendData.length === 0}
+                  emptyMessage="No temporal safety signals recorded."
+                  headerAction={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      {latestTrend && (
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              fontFamily: 'var(--font-mono)',
+                              color: '#F43F5E',
+                              background: 'rgba(244, 63, 94, 0.12)',
+                              border: '1px solid rgba(244, 63, 94, 0.3)',
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                            }}
+                          >
+                            {latestTrend.sif_precursors} SIF Precursors
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              fontFamily: 'var(--font-mono)',
+                              color: '#F59E0B',
+                              background: 'rgba(245, 158, 11, 0.12)',
+                              border: '1px solid rgba(245, 158, 11, 0.3)',
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                            }}
+                          >
+                            {(latestTrend.sif_density * 100).toFixed(1)}% Density
+                          </span>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-elevated)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
+                        <button
+                          onClick={() => setTrendGrouping('month')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: trendGrouping === 'month' ? 'var(--primary)' : 'transparent',
+                            color: trendGrouping === 'month' ? '#FFFFFF' : 'var(--text-secondary)',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          Monthly
+                        </button>
+                        <button
+                          onClick={() => setTrendGrouping('quarter')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: trendGrouping === 'quarter' ? 'var(--primary)' : 'transparent',
+                            color: trendGrouping === 'quarter' ? '#FFFFFF' : 'var(--text-secondary)',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          Quarterly
+                        </button>
+                      </div>
+                    </div>
+                  }
+                />
+                {trendData.length === 1 && (
                   <div
                     style={{
+                      fontSize: '0.78rem',
+                      color: 'var(--text-secondary)',
+                      background: 'rgba(51, 65, 85, 0.25)',
+                      border: '1px dashed var(--border)',
+                      borderRadius: '8px',
+                      padding: '10px 16px',
                       display: 'flex',
-                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '14px',
-                      marginBottom: '20px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-subtle)',
+                      gap: '10px',
                     }}
                   >
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                        Temporal Precursor Trajectory
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        Chronological trend of SIF precursors vs total reported volume
-                      </p>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <button
-                        onClick={() => setTrendGrouping('month')}
-                        className={`btn ${trendGrouping === 'month' ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ fontSize: '0.75rem', padding: '5px 12px' }}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        onClick={() => setTrendGrouping('quarter')}
-                        className={`btn ${trendGrouping === 'quarter' ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ fontSize: '0.75rem', padding: '5px 12px' }}
-                      >
-                        Quarterly
-                      </button>
-                    </div>
+                    <Sparkles size={15} color="#F59E0B" />
+                    <span>
+                      Aggregated telemetry for <strong>{trendData[0].period}</strong>. Multi-period comparison trajectory will render as more periods accumulate.
+                    </span>
                   </div>
-
-                  <div style={{ height: '340px', width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
-                        <defs>
-                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
-                            <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
-                          </linearGradient>
-                          <linearGradient id="colorSif" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--danger)" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="var(--danger)" stopOpacity={0.0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" />
-                        <XAxis dataKey="period" stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
-                        <YAxis stroke="var(--text-muted)" tick={{ fontSize: 11, fontFamily: 'var(--font-mono)', fill: 'var(--text-secondary)' }} />
-                        <Tooltip content={<CustomRankedTooltip metricType="trends" />} />
-                        <Area type="monotone" dataKey="total_reports" name="Total Reports" stroke="var(--primary)" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
-                        <Area type="monotone" dataKey="sif_precursors" name="SIF Precursors" stroke="var(--danger)" strokeWidth={3} fillOpacity={1} fill="url(#colorSif)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                )}
 
                 {/* Trend Table */}
                 <div className="card" style={{ padding: '24px 28px' }}>
@@ -1418,9 +1585,9 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
                           <tr key={idx}>
                             <td style={{ fontWeight: 600 }}>{t.period}</td>
                             <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.total_reports}</td>
-                            <td style={{ textAlign: 'right', color: 'var(--danger)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.sif_precursors}</td>
+                            <td style={{ textAlign: 'right', color: t.sif_precursors > 0 ? '#F43F5E' : 'var(--text-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{t.sif_precursors}</td>
                             <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{(t.sif_density * 100).toFixed(1)}%</td>
-                            <td style={{ textAlign: 'right', color: t.percentage_change > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                            <td style={{ textAlign: 'right', color: t.percentage_change > 0 ? '#F43F5E' : 'var(--success)', fontWeight: 600, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                               {t.percentage_change > 0 ? `+${t.percentage_change}%` : `${t.percentage_change}%`}
                             </td>
                             <td style={{ textAlign: 'center' }}>

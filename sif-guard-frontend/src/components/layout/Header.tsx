@@ -29,29 +29,14 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
   }, []);
 
   return (
-    <header
-      style={{
-        padding: '14px 28px',
-        background: 'var(--bg-header)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        transition: 'background-color 0.3s ease, border-color 0.3s ease',
-      }}
-    >
+    <header className="app-header">
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <motion.div
           whileHover={{ scale: 1.04 }}
           style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
+            width: '38px',
+            height: '38px',
+            borderRadius: '10px',
             background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
             display: 'flex',
             alignItems: 'center',
@@ -59,16 +44,17 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
             color: '#FFFFFF',
             boxShadow: '0 4px 16px rgba(255, 106, 0, 0.25)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
+            flexShrink: 0,
           }}
         >
-          <ShieldAlert size={22} />
+          <ShieldAlert size={20} />
         </motion.div>
 
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span
               style={{
-                fontSize: '1.25rem',
+                fontSize: '1.15rem',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
                 color: 'var(--text-primary)',
@@ -79,9 +65,9 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
             </span>
             <span
               style={{
-                fontSize: '0.65rem',
-                padding: '3px 8px',
-                borderRadius: '6px',
+                fontSize: '0.62rem',
+                padding: '2px 6px',
+                borderRadius: '5px',
                 background: 'rgba(255, 106, 0, 0.10)',
                 color: 'var(--primary-bright)',
                 fontWeight: 700,
@@ -93,29 +79,29 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
               OIL INDIA LIMITED
             </span>
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+          <p className="app-header-subtitle">
             Serious Injury & Fatality Precursor Intelligence Platform
           </p>
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="responsive-header-actions">
         {/* Backend Status Badge */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '12px',
+            padding: '5px 12px',
+            borderRadius: '10px',
             background: 'var(--surface-elevated)',
             border: '1px solid var(--border)',
-            fontSize: '0.78rem',
+            fontSize: '0.75rem',
             fontFamily: 'var(--font-mono)',
           }}
         >
-          <Server size={14} color="var(--primary)" />
-          <span style={{ color: 'var(--text-secondary)' }}>Backend:</span>
+          <Server size={13} color="var(--primary)" />
+          <span className="app-header-badge-text" style={{ color: 'var(--text-secondary)' }}>Backend:</span>
           {!error && health ? (
             <span
               style={{
@@ -126,7 +112,7 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
                 gap: '5px',
               }}
             >
-              <CheckCircle2 size={12} /> Live {health.embedding_model ? `(${health.embedding_model.split('/')[1] || health.embedding_model})` : ''}
+              <CheckCircle2 size={12} /> Live
             </span>
           ) : (
             <span

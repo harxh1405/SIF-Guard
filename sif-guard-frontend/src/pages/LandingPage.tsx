@@ -881,7 +881,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '20px',
             textAlign: 'left',
             position: 'relative',
@@ -1034,7 +1034,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
                 gap: '16px',
                 position: 'relative',
               }}
@@ -1560,9 +1560,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <div
+            className="responsive-grid-1-1"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)',
               gap: '28px',
               backgroundColor: t.bgSection,
               border: '1px solid ' + t.border,
@@ -1725,9 +1724,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       >
         <ScrollReveal>
           <div
+            className="responsive-grid-1-1"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr)',
               gap: '36px',
               alignItems: 'center',
               backgroundColor: t.bgSection,
@@ -2139,7 +2137,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </h2>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             {/* Traditional */}
             <ParallaxCard
               theme={theme}
@@ -2327,7 +2325,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
                     gap: '16px',
                   }}
                 >
@@ -2442,15 +2440,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Platform Preview Body */}
             <div style={{ padding: '36px', textAlign: 'center' }}>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: '16px',
-                  marginBottom: '28px',
-                  textAlign: 'left',
-                }}
-              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: '16px',
+                    marginBottom: '28px',
+                    textAlign: 'left',
+                  }}
+                >
                 {[
                   { label: 'SIF Precursor Density', val: <CountUpNumber end={24.8} decimals={1} suffix="%" />, sub: '+3.2% vs baseline' },
                   { label: 'Unsafe Acts Ingested', val: <CountUpNumber end={1420} />, sub: '98% classified' },

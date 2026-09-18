@@ -60,9 +60,9 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '16px',
-        marginBottom: '24px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: '14px',
+        marginBottom: '20px',
       }}
     >
       {kpis.map((kpi) => (

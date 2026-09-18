@@ -21,6 +21,24 @@ import {
 } from 'lucide-react';
 
 
+// Utility to recursively dispose Three.js meshes and materials
+const disposeHierarchy = (obj: THREE.Object3D) => {
+  obj.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach((m) => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    }
+  });
+};
+
 interface RefineryCanvasProps {
   zones: FacilityZone[];
   selectedZoneId: string | null;
@@ -386,28 +404,48 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       renderer.render(scene, camera);
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !animationFrameId) {
+        animate();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     animate();
 
-    // 9. Handle Window Resize
+    // 9. Handle Window & Container Resize
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = containerRef.current.clientWidth;
       const h = containerRef.current.clientHeight;
+      if (w === 0 || h === 0) return;
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
 
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
     window.addEventListener('resize', handleResize);
 
     return () => {
+      if (resizeObserver) resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
       if (rafHoverIdRef.current !== null) {
         cancelAnimationFrame(rafHoverIdRef.current);
       }
       controls.dispose();
       renderer.dispose();
+      if (sceneRef.current) {
+        disposeHierarchy(sceneRef.current);
+      }
     };
   }, []);
 
@@ -449,7 +487,10 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     // Rebuild structures with updated theme materials
     const oldRefinery = scene.getObjectByName('REFINERY_STRUCTURES');
-    if (oldRefinery) scene.remove(oldRefinery);
+    if (oldRefinery) {
+      scene.remove(oldRefinery);
+      disposeHierarchy(oldRefinery);
+    }
 
     const materials = createRefineryMaterials(theme);
     const refineryGroup = new THREE.Group();

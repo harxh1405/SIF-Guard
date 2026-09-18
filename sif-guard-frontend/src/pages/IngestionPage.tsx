@@ -272,7 +272,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
           gap: '12px',
           backgroundColor: 'var(--bg-card, #0D171A)',
           border: '1px solid var(--border, #203238)',
@@ -878,14 +878,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           </div>
 
           {/* Main 2-Column Responsive Workspace */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(320px, 1fr) minmax(450px, 1.4fr)',
-              gap: '24px',
-            }}
-            className="workspace-grid"
-          >
+          <div className="responsive-grid-sidebar workspace-grid">
             {/* Left Column: ORIGINAL REPORT */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div
