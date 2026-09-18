@@ -19,6 +19,7 @@ import {
   Shield,
   Layers,
   MapPin,
+  X,
 } from 'lucide-react';
 import './LandingPage.css';
 
@@ -190,6 +191,220 @@ const SAFETY_TOPICS = [
   },
 ];
 
+interface SearchItem {
+  id: string;
+  title: string;
+  category: 'critical' | 'oisd' | 'dgms' | 'permits' | 'facilities';
+  categoryLabel: string;
+  subtitle: string;
+  targetId: string;
+  recordId?: string;
+  badge: string;
+  badgeColor?: string;
+}
+
+const SEARCHABLE_ITEMS: SearchItem[] = [
+  // Critical SIF Precursors
+  {
+    id: 'sif-041',
+    title: 'Bypassed Energy Isolation (LOTO Omission)',
+    category: 'critical',
+    categoryLabel: 'Critical SIF',
+    subtitle: 'Duliajan CPF // Booster Pump BP-04 (LSR-01)',
+    targetId: 'precursor-feed',
+    recordId: 'OIL/HSE/2026/041',
+    badge: '96.8% Confidence',
+    badgeColor: '#dc2626',
+  },
+  {
+    id: 'sif-058',
+    title: 'Confined Space Entry without Gas Clearance',
+    category: 'critical',
+    categoryLabel: 'Critical SIF',
+    subtitle: 'Digboi Gathering Station // Storage Tank T-104 (LSR-03)',
+    targetId: 'precursor-feed',
+    recordId: 'OIL/HSE/2026/058',
+    badge: '98.4% Confidence',
+    badgeColor: '#ea580c',
+  },
+  {
+    id: 'sif-072',
+    title: 'Hot Work in Flammable Vapor Boundary',
+    category: 'critical',
+    categoryLabel: 'Critical SIF',
+    subtitle: 'Sivasagar Gas Station // Flange F-12 (LSR-02)',
+    targetId: 'precursor-feed',
+    recordId: 'OIL/HSE/2026/072',
+    badge: '99.1% Confidence',
+    badgeColor: '#dc2626',
+  },
+  {
+    id: 'sif-089',
+    title: 'Work at Height Rigging without Fall Arrest',
+    category: 'critical',
+    categoryLabel: 'High SIF',
+    subtitle: 'Jaisalmer Basin Gas Complex // Flare Riser R-08 (LSR-04)',
+    targetId: 'precursor-feed',
+    recordId: 'OIL/HSE/2026/089',
+    badge: '93.5% Confidence',
+    badgeColor: '#d97706',
+  },
+  // OISD Standards
+  {
+    id: 'oisd-156',
+    title: 'OISD Standard 156',
+    category: 'oisd',
+    categoryLabel: 'OISD Standard',
+    subtitle: 'Fire Protection and Safety Management in Refineries & Processing Units',
+    targetId: 'statutory',
+    badge: 'Statutory Code',
+    badgeColor: '#003366',
+  },
+  {
+    id: 'oisd-105',
+    title: 'OISD Standard 105 (PTW System)',
+    category: 'oisd',
+    categoryLabel: 'OISD Standard',
+    subtitle: 'Work Permit System for Hydrocarbon Processing Units',
+    targetId: 'statutory',
+    badge: 'Standard',
+    badgeColor: '#003366',
+  },
+  {
+    id: 'oisd-166',
+    title: 'OISD-GDN-166 (Elevated Work)',
+    category: 'oisd',
+    categoryLabel: 'OISD Standard',
+    subtitle: 'Guidelines for Safety in Working at Heights and Scaffolding Inspection',
+    targetId: 'statutory',
+    badge: 'Guideline',
+    badgeColor: '#003366',
+  },
+  // DGMS Directives
+  {
+    id: 'dgms-01',
+    title: 'DGMS Safety Circulars (Oil Mines)',
+    category: 'dgms',
+    categoryLabel: 'DGMS Directive',
+    subtitle: 'Statutory Directives for Hydrocarbon Extraction & Mechanical Ventilation',
+    targetId: 'statutory',
+    badge: 'Statutory',
+    badgeColor: '#b45309',
+  },
+  {
+    id: 'dgms-02',
+    title: 'DGMS Sniffing & Combustible Gas Protocol',
+    category: 'dgms',
+    categoryLabel: 'DGMS Directive',
+    subtitle: 'Mandatory continuous gas testing within 15m radius before hot work',
+    targetId: 'safety-topics',
+    badge: 'Circular',
+    badgeColor: '#b45309',
+  },
+  // Work Permits (PTW) & LSRs
+  {
+    id: 'ptw-loto',
+    title: 'LSR 01: Energy Isolation (LOTO)',
+    category: 'permits',
+    categoryLabel: 'Work Permit / LSR',
+    subtitle: 'Physical zero-energy lockout and padlock verification before maintenance',
+    targetId: 'safety-topics',
+    badge: 'Life-Saving Rule',
+    badgeColor: '#b45309',
+  },
+  {
+    id: 'ptw-sniff',
+    title: 'LSR 02: Hot Work & Atmospheric Sniffing',
+    category: 'permits',
+    categoryLabel: 'Work Permit / LSR',
+    subtitle: 'Continuous atmospheric LEL sniffing within 15 meters of cutting & welding',
+    targetId: 'safety-topics',
+    badge: 'Life-Saving Rule',
+    badgeColor: '#dc2626',
+  },
+  {
+    id: 'ptw-confined',
+    title: 'LSR 03: Confined Space Vessel Entry',
+    category: 'permits',
+    categoryLabel: 'Work Permit / LSR',
+    subtitle: 'Certified 4-gas atmospheric tests, standby rescue officer, and ventilation',
+    targetId: 'safety-topics',
+    badge: 'Life-Saving Rule',
+    badgeColor: '#003366',
+  },
+  {
+    id: 'ptw-heights',
+    title: 'LSR 04: Working at Elevated Heights',
+    category: 'permits',
+    categoryLabel: 'Work Permit / LSR',
+    subtitle: 'Dual-lanyard 100% tie-off, certified anchor points, and scaffolding tags',
+    targetId: 'safety-topics',
+    badge: 'Life-Saving Rule',
+    badgeColor: '#15803d',
+  },
+  {
+    id: 'ptw-swiss',
+    title: 'Swiss Cheese Barrier Engine',
+    category: 'permits',
+    categoryLabel: 'Safety Modeling',
+    subtitle: 'Real-time telemetry tracking of passive, active, and administrative barriers',
+    targetId: 'safety-topics',
+    badge: 'Predictive Model',
+    badgeColor: '#6b21a8',
+  },
+  {
+    id: 'ptw-ocr',
+    title: 'Multimodal PTW Ingestion & OCR',
+    category: 'permits',
+    categoryLabel: 'AI Digitization',
+    subtitle: 'OCR extraction of scanned handwritten permits to work with hazard categorization',
+    targetId: 'safety-topics',
+    badge: 'AI Core',
+    badgeColor: '#0369a1',
+  },
+  // Monitored Facilities
+  {
+    id: 'fac-duliajan',
+    title: 'Duliajan Central Processing Facility (CPF)',
+    category: 'facilities',
+    categoryLabel: 'Facility',
+    subtitle: 'Dibrugarh District, Assam — Crude Oil & Gas Dehydration Hub',
+    targetId: 'facilities',
+    badge: 'OIL-CPF-01',
+    badgeColor: '#15803d',
+  },
+  {
+    id: 'fac-digboi',
+    title: 'Digboi Field Gathering & Pumping Station',
+    category: 'facilities',
+    categoryLabel: 'Facility',
+    subtitle: 'Tinsukia District, Assam — Historic Production Wells & Distribution',
+    targetId: 'facilities',
+    badge: 'OIL-DGB-02',
+    badgeColor: '#15803d',
+  },
+  {
+    id: 'fac-sivasagar',
+    title: 'Sivasagar High-Pressure Wellheads & Manifolds',
+    category: 'facilities',
+    categoryLabel: 'Facility',
+    subtitle: 'Sivasagar District, Assam — Deep Extraction Manifolds & Flaring Unit',
+    targetId: 'facilities',
+    badge: 'OIL-SVS-03',
+    badgeColor: '#d97706',
+  },
+  {
+    id: 'fac-jaisalmer',
+    title: 'Jaisalmer Natural Gas Extraction Complex',
+    category: 'facilities',
+    categoryLabel: 'Facility',
+    subtitle: 'Jaisalmer Basin, Rajasthan — High-Sulfur Gas Compression & Processing',
+    targetId: 'facilities',
+    badge: 'OIL-RAJ-04',
+    badgeColor: '#15803d',
+  },
+];
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   onEnterPlatform,
 }) => {
@@ -197,36 +412,101 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [activeTab, setActiveTab] = useState<'all' | 'critical' | 'circulars'>('all');
   const [searchCategory, setSearchCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeSearchFilter, setActiveSearchFilter] = useState<{ query: string; category: string } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'larger'>('normal');
+  const [fontSize, setFontSize] = useState<'small' | 'normal' | 'large'>(() => {
+    try {
+      const saved = localStorage.getItem('sif_portal_font_size');
+      if (saved === 'small' || saved === 'normal' || saved === 'large') return saved;
+    } catch {
+      // ignore
+    }
+    return 'normal';
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Background Audio Controller for the audio track
+  const handleFontSizeChange = (size: 'small' | 'normal' | 'large') => {
+    setFontSize(size);
+    try {
+      localStorage.setItem('sif_portal_font_size', size);
+    } catch {
+      // ignore
+    }
+    const label = size === 'small' ? 'Decreased (90%)' : size === 'large' ? 'Increased (112%)' : 'Standard (100%)';
+    setToastMessage(`Text Size: ${label}`);
+    setTimeout(() => setToastMessage(null), 2000);
+  };
+
+  const searchMatches = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return SEARCHABLE_ITEMS.filter((item) => {
+      const matchesCategory = searchCategory === 'all' || item.category === searchCategory;
+      if (!matchesCategory) return false;
+      return (
+        item.title.toLowerCase().includes(q) ||
+        item.subtitle.toLowerCase().includes(q) ||
+        item.categoryLabel.toLowerCase().includes(q) ||
+        item.badge.toLowerCase().includes(q) ||
+        (item.recordId && item.recordId.toLowerCase().includes(q))
+      );
+    });
+  }, [searchQuery, searchCategory]);
+
+  const handleSelectSearchResult = (item: SearchItem) => {
+    setIsSearchOpen(false);
+    setActiveSearchFilter({ query: searchQuery, category: searchCategory });
+
+    if (item.recordId) {
+      const rec = AUDIT_RECORDS.find((r) => r.id === item.recordId);
+      if (rec) setSelectedRecord(rec);
+    }
+
+    const targetEl = document.getElementById(item.targetId);
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      targetEl.classList.add('india-section-highlight');
+      setTimeout(() => targetEl.classList.remove('india-section-highlight'), 2200);
+    }
+  };
+
+  const handleExecuteSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) {
+      setIsSearchOpen(false);
+      setActiveSearchFilter(null);
+      return;
+    }
+
+    setIsSearchOpen(false);
+    setActiveSearchFilter({ query: searchQuery, category: searchCategory });
+
+    if (searchMatches.length > 0) {
+      handleSelectSearchResult(searchMatches[0]);
+    } else {
+      const feed = document.getElementById('precursor-feed');
+      if (feed) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setActiveSearchFilter(null);
+    setIsSearchOpen(false);
+  };
+
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.volume = 0.35;
-
-    // Play on first explicit user interaction to comply with browser autoplay policy
-    const handleFirstInteraction = () => {
-      if (audio.paused) {
-        audio
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch(() => {});
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
       }
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
     };
-
-    document.addEventListener('click', handleFirstInteraction, { once: true });
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
-
-    return () => {
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
-    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const toggleAudioPlayback = () => {
@@ -245,8 +525,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   const filteredRecords = AUDIT_RECORDS.filter((rec) => {
-    if (activeTab === 'all') return true;
-    return rec.category === activeTab;
+    const matchesTab = activeTab === 'all' || rec.category === activeTab;
+    if (!matchesTab) return false;
+
+    if (activeSearchFilter?.query) {
+      const q = activeSearchFilter.query.toLowerCase().trim();
+      return (
+        rec.id.toLowerCase().includes(q) ||
+        rec.title.toLowerCase().includes(q) ||
+        rec.asset.toLowerCase().includes(q) ||
+        rec.rule.toLowerCase().includes(q) ||
+        rec.rawText.toLowerCase().includes(q)
+      );
+    }
+
+    return true;
   });
 
   return (
@@ -316,28 +609,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <span className="india-access-pipe">|</span>
 
             {/* Font Size Scaling */}
-            <div className="india-font-ctrls">
+            <div className="india-font-ctrls" role="group" aria-label="Text Size Controls">
               <button
                 type="button"
-                className={`india-font-btn ${fontSize === 'normal' ? 'active' : ''}`}
-                onClick={() => setFontSize('normal')}
-                title="Normal text size"
+                className={`india-font-btn ${fontSize === 'small' ? 'active' : ''}`}
+                onClick={() => handleFontSizeChange('small')}
+                title="Decrease text size (90%)"
+                aria-label="Decrease text size (A-)"
               >
                 A-
               </button>
               <button
                 type="button"
-                className={`india-font-btn ${fontSize === 'large' ? 'active' : ''}`}
-                onClick={() => setFontSize('large')}
-                title="Large text size"
+                className={`india-font-btn ${fontSize === 'normal' ? 'active' : ''}`}
+                onClick={() => handleFontSizeChange('normal')}
+                title="Standard text size (100%)"
+                aria-label="Standard text size (A)"
               >
                 A
               </button>
               <button
                 type="button"
-                className={`india-font-btn ${fontSize === 'larger' ? 'active' : ''}`}
-                onClick={() => setFontSize('larger')}
-                title="Largest text size"
+                className={`india-font-btn ${fontSize === 'large' ? 'active' : ''}`}
+                onClick={() => handleFontSizeChange('large')}
+                title="Increase text size (112%)"
+                aria-label="Increase text size (A+)"
               >
                 A+
               </button>
@@ -377,21 +673,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
-          {/* Official Search Bar with Dropdown */}
-          <div className="india-header-search">
-            <div className="india-search-box">
+          {/* Official Search Bar with Interactive Autocomplete Dropdown */}
+          <div className="india-header-search" ref={searchContainerRef}>
+            <form onSubmit={handleExecuteSearch} className="india-search-box">
               <Search className="india-search-icon" size={18} />
               <input
                 type="text"
                 className="india-search-input"
                 placeholder="Search directives, OISD standards, facilities, precursor records..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onFocus={() => setIsSearchOpen(true)}
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="india-search-clear"
+                  onClick={handleClearSearch}
+                  title="Clear search"
+                  aria-label="Clear search"
+                >
+                  <X size={15} />
+                </button>
+              )}
               <select
                 className="india-search-category"
                 value={searchCategory}
-                onChange={(e) => setSearchCategory(e.target.value)}
+                onChange={(e) => {
+                  setSearchCategory(e.target.value);
+                  setIsSearchOpen(true);
+                }}
                 aria-label="Filter Search by Category"
               >
                 <option value="all">All Categories</option>
@@ -402,13 +716,80 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <option value="facilities">Monitored Facilities</option>
               </select>
               <button
-                type="button"
+                type="submit"
                 className="india-search-btn"
-                onClick={onEnterPlatform}
+                title="Execute search"
               >
                 Search
               </button>
-            </div>
+            </form>
+
+            {/* Interactive Search Results Dropdown */}
+            {isSearchOpen && searchQuery.trim().length > 0 && (
+              <div className="india-search-dropdown" role="listbox">
+                <div className="india-search-dropdown-header">
+                  <span>
+                    {searchMatches.length} matching result{searchMatches.length === 1 ? '' : 's'} in{' '}
+                    <strong>
+                      {searchCategory === 'all'
+                        ? 'All Categories'
+                        : searchCategory === 'critical'
+                        ? 'Critical SIF Precursors'
+                        : searchCategory === 'oisd'
+                        ? 'OISD Standards'
+                        : searchCategory === 'dgms'
+                        ? 'DGMS Directives'
+                        : searchCategory === 'permits'
+                        ? 'Work Permits / LSR'
+                        : 'Facilities'}
+                    </strong>
+                  </span>
+                  <span className="india-search-dropdown-hint">Click or press Enter</span>
+                </div>
+
+                {searchMatches.length > 0 ? (
+                  <div className="india-search-results-list">
+                    {searchMatches.map((item) => (
+                      <div
+                        key={item.id}
+                        className="india-search-result-item"
+                        onClick={() => handleSelectSearchResult(item)}
+                        role="option"
+                        aria-selected={false}
+                      >
+                        <div className="india-search-result-left">
+                          <span
+                            className="india-search-badge"
+                            style={{
+                              borderColor: item.badgeColor ? `${item.badgeColor}40` : '#cbd5e1',
+                              color: item.badgeColor || '#003366',
+                              backgroundColor: item.badgeColor ? `${item.badgeColor}12` : '#f1f5f9',
+                            }}
+                          >
+                            {item.categoryLabel}
+                          </span>
+                          <div>
+                            <h5 className="india-search-result-title">{item.title}</h5>
+                            <p className="india-search-result-sub">{item.subtitle}</p>
+                          </div>
+                        </div>
+                        <span className="india-search-jump-icon">
+                          <ArrowRight size={14} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="india-search-no-results">
+                    <AlertTriangle size={18} color="#d97706" style={{ flexShrink: 0 }} />
+                    <div>
+                      <strong>No matching directives or records found.</strong>
+                      <p>Try searching for "LOTO", "OISD", "sniffing", "Digboi", or "Assam".</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -682,15 +1063,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
+          {/* Active Search Filter Status Banner */}
+          {activeSearchFilter?.query && (
+            <div className="india-search-active-bar">
+              <span>
+                Filtering records matching: <strong>"{activeSearchFilter.query}"</strong> ({filteredRecords.length} record{filteredRecords.length === 1 ? '' : 's'} found)
+              </span>
+              <button
+                type="button"
+                className="india-clear-filter-btn"
+                onClick={handleClearSearch}
+                title="Reset search and show all records"
+              >
+                <X size={13} />
+                <span>Clear Filter</span>
+              </button>
+            </div>
+          )}
+
           <div className="india-audit-layout">
             {/* Left list of records */}
             <div className="india-audit-list">
-              {filteredRecords.map((record) => (
-                <div
-                  key={record.id}
-                  className={`india-audit-card ${selectedRecord.id === record.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedRecord(record)}
-                >
+              {filteredRecords.length === 0 ? (
+                <div style={{ padding: '24px', background: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#64748b' }}>
+                  <AlertTriangle size={20} color="#d97706" style={{ marginBottom: '8px' }} />
+                  <h4 style={{ margin: '0 0 4px', color: '#0f172a', fontSize: '0.9rem' }}>No records matched "{activeSearchFilter?.query}"</h4>
+                  <p style={{ margin: '0 0 12px', fontSize: '0.78rem' }}>Try searching for "LOTO", "sniffing", "Digboi", or clear the filter.</p>
+                  <button type="button" className="india-clear-filter-btn" onClick={handleClearSearch}>
+                    Show All Records
+                  </button>
+                </div>
+              ) : (
+                filteredRecords.map((record) => (
+                  <div
+                    key={record.id}
+                    className={`india-audit-card ${selectedRecord.id === record.id ? 'selected' : ''}`}
+                    onClick={() => setSelectedRecord(record)}
+                  >
                   <div className="india-audit-card-head">
                     <span className="india-audit-id">{record.id}</span>
                     <span
@@ -707,8 +1116,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <span>•</span>
                     <span>{record.rule}</span>
                   </div>
-                </div>
-              ))}
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Right preview dossier of selected record */}
@@ -892,7 +1302,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* =========================================================================
           11. NATIONAL PORTAL OFFICIAL FOOTER (ENGLISH ONLY)
           ========================================================================= */}
-      <footer className="india-gov-footer">
+      <footer id="about-oil" className="india-gov-footer">
         <div className="india-top-stripe" />
         <div className="india-gov-wrap india-footer-content">
           <div className="india-footer-grid">
@@ -960,6 +1370,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       </footer>
+
+      {/* Accessibility Toast Feedback */}
+      {toastMessage && (
+        <div className="india-a11y-toast" role="status" aria-live="polite">
+          <Activity size={16} color="#ff9933" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 };
