@@ -1,250 +1,123 @@
 /* ==========================================================================
    NATIONAL PORTAL OF INDIA (india.gov.in) OFFICIAL DESIGN SYSTEM
    SIF-GUARD // Oil India Limited (Ministry of Petroleum & Natural Gas)
-   WARM VIBRANT SUNSET EDITION (Reference Architecture Spec)
+   Fully Responsive Multi-Device Edition (Mobile, Tablet, Laptop, Desktop)
    ========================================================================== */
 
 :root {
-  /* ==========================================================================
-     1. WARM VIBRANT SUNSET PALETTE (Per Reference Screenshot)
-     ========================================================================== */
-  --accent-primary: #F97316;     /* vivid orange */
-  --accent-deep: #EA580C;        /* deep warm accent */
-  --accent-highlight: #FB923C;   /* soft glowing amber/orange */
+  /* Official Government / PSU Color Tokens */
+  --gov-canvas-bg: #F1F3F5;
+  --gov-card-bg: #FFFFFF;
+  --gov-border: #D1D5DB;
+  --gov-navy-authority: #1B365D;
+  --gov-blue-secondary: #205493;
+  --gov-interactive-link: #005EA2;
+  --gov-text-primary: #111827;
+  --gov-text-secondary: #4B5563;
+  --gov-notice-bg: #FFF9E6;
+  --gov-notice-border: #D97706;
+  --gov-notice-text: #8C510A;
+  --gov-alert-accent: #B50909;
+  --gov-alert-tint: #FDF2F2;
+  --gov-success-text: #137752;
+  --gov-success-bg: #E6F4EA;
+  --gov-success-border: #A7F3D0;
 
-  /* Typography Colors (High contrast WCAG AA against light glass) */
-  --text-heading: #1C1917;       /* darkest warm charcoal for titles */
-  --text-body: #292524;          /* warm charcoal for standard text */
-  --text-muted: #57534E;         /* muted warm stone for secondary details */
-  --text-light: #F5F5F4;         /* crisp warm white for smoke glass & dark areas */
-  --text-light-muted: #D6D3D1;   /* soft muted text for smoke glass */
+  /* Legacy & Semantic Mappings */
+  --gov-navy-dark: #1B365D;
+  --gov-navy-primary: #1B365D;
+  --gov-navy-light: #205493;
+  --gov-saffron: #D97706;
+  --gov-saffron-dark: #8C510A;
+  --gov-green: #137752;
+  --gov-red: #B50909;
+  --gov-text-dark: #111827;
+  --gov-text-muted: #4B5563;
+  --gov-bg-gray: #F1F3F5;
+}
 
-  /* Functional Safety Status Colors (Used ONLY for real safety status) */
-  --status-red: #DC2626;
-  --status-amber: #D97706;
-  --status-green: #16A34A;
-
-  /* ==========================================================================
-     2. GLASS SPECIFICATION (One consistent blur and radius sitewide)
-     ========================================================================== */
-  --glass-blur: blur(16px) saturate(140%);
-  --glass-radius: 12px;
-
-  /* Variant 1: Light Frosted Glass (Dominant style: Hero, Cards, Search) */
-  --glass-light-bg: rgba(255, 255, 255, 0.58);
-  --glass-light-border: 1px solid rgba(255, 255, 255, 0.65);
-  --glass-light-shadow: 0 14px 36px rgba(234, 88, 12, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --glass-light-hover-bg: rgba(255, 255, 255, 0.78);
-  --glass-light-hover-border: rgba(249, 115, 22, 0.45);
-
-  /* Variant 2: Warm Smoke Glass (Sparingly for dark contrast bands: Dossier, Telemetry, Footer) */
-  --glass-smoke-bg: rgba(60, 48, 42, 0.48);
-  --glass-smoke-border: 1px solid rgba(255, 255, 255, 0.14);
-  --glass-smoke-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
-  --glass-smoke-hover-bg: rgba(75, 60, 52, 0.58);
-
-  /* Fallback without backdrop-filter */
-  --glass-light-fallback: rgba(255, 255, 255, 0.94);
-  --glass-smoke-fallback: rgba(45, 36, 32, 0.94);
+/* Global Viewport & Reset */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Page Base */
 .india-gov-page {
   min-height: 100vh;
   width: 100%;
-  background-color: transparent !important;
-  color: var(--text-body);
-  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--gov-canvas-bg);
+  color: var(--gov-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   box-sizing: border-box;
-  position: relative;
 }
 
-/* ==========================================================================
-   FIXED ANIMATED BACKGROUND LAYER
-   - Full viewport, stationary in viewport behind content
-   - Warm-graded CSS filter (sepia, saturation, hue-rotate)
-   - Warm sunset gradient overlay (scrim)
-   - Subtle Ken Burns animation runs on the graded layer (60fps)
-   - Max TWO edge glow blooms (one per side)
-   ========================================================================== */
 .landing-bg-fixed {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
+  display: none;
 }
 
-/* Edge Glow Bloom 1 (Left side: soft red-orange bloom) */
-.landing-bg-fixed::before {
-  content: '';
-  position: fixed;
-  top: 10%;
-  left: -180px;
-  width: 540px;
-  height: 640px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(234, 88, 12, 0.35) 0%, rgba(234, 88, 12, 0.12) 50%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Edge Glow Bloom 2 (Right side: soft red-orange bloom) */
-.landing-bg-fixed::after {
-  content: '';
-  position: fixed;
-  bottom: 12%;
-  right: -180px;
-  width: 580px;
-  height: 680px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(234, 88, 12, 0.30) 0%, rgba(234, 88, 12, 0.10) 50%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes landingKenBurns {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.08);
-  }
-}
-
-/* Background image warm-graded: reads warm vibrant orange like the reference */
-.landing-bg-image {
-  position: absolute;
-  top: -4%;
-  left: -4%;
-  width: 108%;
-  height: 108%;
-  background-image: url('/images/refinery.webp'), url('/images/refinery.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: sepia(0.40) saturate(1.65) hue-rotate(-15deg) brightness(1.18) contrast(1.05);
-  will-change: transform;
-  animation: landingKenBurns 30s ease-in-out infinite alternate;
-}
-
-/* Warm gradient overlay giving vibrant orange sunset energy */
-.landing-bg-scrim {
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(ellipse at 50% -10%, rgba(255, 122, 41, 0.42) 0%, rgba(234, 88, 12, 0.20) 55%, transparent 100%),
-    linear-gradient(180deg, rgba(255, 122, 41, 0.28) 0%, rgba(245, 158, 11, 0.14) 45%, rgba(28, 25, 23, 0.38) 100%);
-  pointer-events: none;
-}
-
-/* Content wrapper sitting directly above stationary background */
 .landing-content-wrapper {
-  position: relative;
-  z-index: 1;
-  background: transparent;
+  background-color: var(--gov-canvas-bg);
   min-height: 100vh;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .india-gov-page *,
 .india-gov-page *::before,
-.india-gov-page *::after,
-.india-gov-page button,
-.india-gov-page input,
-.india-gov-page select,
-.india-gov-page textarea {
+.india-gov-page *::after {
   box-sizing: border-box;
-  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Responsive Container */
 .india-gov-wrap {
+  width: 100%;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
+  .india-gov-wrap {
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 960px) {
   .india-gov-wrap {
     padding: 0 32px;
   }
 }
 
-/* Accessibility Font Scaling scoped to content wrapper */
-.landing-content-wrapper.font-size-small {
+/* Accessibility Font Scaling */
+.india-gov-page.font-size-small {
   zoom: 0.91;
 }
 
-.landing-content-wrapper.font-size-normal {
+.india-gov-page.font-size-normal {
   zoom: 1;
 }
 
-.landing-content-wrapper.font-size-large {
+.india-gov-page.font-size-large {
   zoom: 1.12;
 }
 
 @supports not (zoom: 1) {
-  .landing-content-wrapper.font-size-small {
+  .india-gov-page.font-size-small {
     font-size: 13.5px;
   }
-  .landing-content-wrapper.font-size-normal {
+  .india-gov-page.font-size-normal {
     font-size: 15px;
   }
-  .landing-content-wrapper.font-size-large {
+  .india-gov-page.font-size-large {
     font-size: 17px;
-  }
-}
-
-/* Accessibility: Disable Ken Burns if user requests reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .landing-bg-image {
-    animation: none !important;
-    transform: none !important;
-  }
-}
-
-/* Performance: Mobile reduces blur to 8px under 768px for GPU optimization */
-@media (max-width: 768px) {
-  .india-spotlight-card,
-  .india-topic-card,
-  .india-audit-card,
-  .india-dossier-card,
-  .india-facility-card,
-  .india-standards-box,
-  .india-gov-footer,
-  .india-main-header,
-  .india-accessibility-bar,
-  .india-nav-bar,
-  .india-telemetry-panel {
-    backdrop-filter: blur(8px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(8px) saturate(140%) !important;
-  }
-}
-
-/* Fallback: Solid semi-opaque background when backdrop-filter is unsupported */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .india-spotlight-card,
-  .india-topic-card,
-  .india-audit-card,
-  .india-facility-card,
-  .india-standards-box,
-  .india-main-header,
-  .india-accessibility-bar,
-  .india-nav-bar {
-    background: var(--glass-light-fallback) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .india-dossier-card,
-  .india-telemetry-panel,
-  .india-gov-footer {
-    background: var(--glass-smoke-fallback) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
   }
 }
 
@@ -254,19 +127,17 @@
 .india-top-stripe {
   height: 4.5px;
   width: 100%;
-  background: linear-gradient(90deg, #F97316 33.33%, #ffffff 33.33%, #ffffff 66.66%, #16A34A 66.66%);
+  background: linear-gradient(90deg, #ff9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #128807 66.66%);
 }
 
 /* ==========================================================================
-   2. ACCESSIBILITY & STATUTORY ATTRIBUTION BAR (Light Frosted Glass)
+   2. ACCESSIBILITY & STATUTORY ATTRIBUTION BAR
    ========================================================================== */
 .india-accessibility-bar {
-  background-color: rgba(255, 255, 255, 0.65);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  color: var(--text-muted);
+  background-color: #1B365D;
+  color: #D1D5DB;
   font-size: 11.5px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .india-access-inner {
@@ -275,13 +146,13 @@
   justify-content: space-between;
   padding: 6px 0;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .india-access-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -289,22 +160,24 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .india-access-item strong {
-  color: var(--text-heading);
+  color: #ffffff;
 }
 
 .india-access-pipe {
-  color: rgba(41, 37, 36, 0.25);
+  color: rgba(255, 255, 255, 0.3);
   user-select: none;
 }
 
 .india-access-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   font-size: 11.5px;
+  flex-wrap: wrap;
 }
 
 /* Audio Player Equalizer Controller */
@@ -317,26 +190,27 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(249, 115, 22, 0.12);
-  border: 1px solid rgba(249, 115, 22, 0.35);
-  color: var(--accent-deep);
-  padding: 2px 8px;
+  background: rgba(32, 84, 147, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .india-audio-btn:hover {
-  background: rgba(249, 115, 22, 0.22);
-  color: var(--accent-primary);
+  background: #205493;
+  color: #ffffff;
 }
 
 .india-audio-btn.playing {
-  background: var(--accent-primary);
+  background: #205493;
   color: #ffffff;
-  border-color: var(--accent-primary);
+  border-color: #005EA2;
 }
 
 .india-equalizer-bars {
@@ -363,13 +237,14 @@
 }
 
 .india-skip-link {
-  color: var(--text-muted);
+  color: #D1D5DB;
   text-decoration: none;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .india-skip-link:hover {
-  color: var(--accent-deep);
+  color: #ffffff;
   text-decoration: underline;
 }
 
@@ -377,50 +252,83 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
   padding: 2px 4px;
   border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .india-font-btn {
   background: none;
   border: 1px solid transparent;
-  color: var(--text-body);
+  color: #D1D5DB;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 3px;
   transition: all 0.15s ease;
   line-height: 1.3;
 }
 
 .india-font-btn:hover {
-  color: var(--accent-deep);
-  background: rgba(249, 115, 22, 0.12);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .india-font-btn.active {
   color: #ffffff;
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 1px 3px rgba(234, 88, 12, 0.3);
+  background: #205493;
+  border-color: #005EA2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .india-access-lang {
-  color: var(--text-heading);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Accessibility Bar Mobile Responsiveness */
+@media (max-width: 767px) {
+  .india-access-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 7px 0;
+  }
+
+  .india-access-left {
+    width: 100%;
+    font-size: 10.5px;
+    gap: 6px;
+  }
+
+  .india-access-right {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 10.5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 6px;
+  }
+}
+
+@media (max-width: 440px) {
+  .india-access-left .india-access-pipe:nth-of-type(2),
+  .india-access-left .india-access-item:nth-of-type(3) {
+    display: none;
+  }
+
+  .india-skip-link {
+    display: none;
+  }
 }
 
 /* ==========================================================================
-   3. OFFICIAL MAIN HEADER & SEARCH (Light Frosted Glass)
-   ========================================================================== */
+   3. OFFICIAL MAIN HEADER & SEARCH
+   ========================================================================= */
 .india-main-header {
-  background-color: var(--glass-light-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.05);
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #D1D5DB;
   padding: 16px 0;
 }
 
@@ -429,26 +337,28 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16px;
 }
 
 .india-emblem-group {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   cursor: pointer;
+  min-width: 0;
 }
 
 .india-emblem-box {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1.5px solid rgba(249, 115, 22, 0.35);
+  background: #F1F3F5;
+  border: 1px solid #D1D5DB;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 .india-emblem-circle {
@@ -459,13 +369,13 @@
 }
 
 .india-lion-icon {
-  font-size: 20px;
+  font-size: 19px;
 }
 
 .india-satyameva {
   font-size: 6.5px;
   font-weight: 700;
-  color: var(--accent-deep);
+  color: #1B365D;
   margin-top: 1px;
   letter-spacing: 0.02em;
 }
@@ -473,63 +383,73 @@
 .india-portal-titles {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .india-portal-hindi {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  color: var(--accent-deep);
+  color: #8C510A;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .india-portal-english {
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 800;
-  color: var(--text-heading);
+  color: #1B365D;
   margin: 0;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .india-portal-sub {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #4B5563;
 }
 
 .india-portal-psu {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: #4B5563;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Official Search Bar with Category Filter */
 .india-header-search {
   flex: 1;
   max-width: 540px;
+  min-width: 0;
   position: relative;
 }
 
 .india-search-box {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1.5px solid rgba(249, 115, 22, 0.4);
+  background: #FFFFFF;
+  border: 1.5px solid #1B365D;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
+  box-shadow: 0 2px 6px rgba(27, 54, 93, 0.08);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
 }
 
 .india-search-box:focus-within {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
+  border-color: #005EA2;
+  box-shadow: 0 0 0 3px rgba(0, 94, 162, 0.2);
 }
 
 .india-search-icon {
-  color: var(--text-muted);
+  color: #4B5563;
   margin-left: 10px;
   flex-shrink: 0;
 }
@@ -539,21 +459,21 @@
   border: none;
   padding: 9px 10px;
   font-size: 0.85rem;
-  color: var(--text-heading);
+  color: #111827;
   outline: none;
   background: transparent;
   min-width: 0;
 }
 
 .india-search-input::placeholder {
-  color: var(--text-muted);
+  color: #4B5563;
   font-size: 0.82rem;
 }
 
 .india-search-clear {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: #4B5563;
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -562,43 +482,131 @@
   border-radius: 50%;
   margin-right: 4px;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .india-search-clear:hover {
-  color: var(--text-heading);
-  background-color: rgba(0, 0, 0, 0.06);
+  color: #111827;
+  background-color: #F1F3F5;
 }
 
 .india-search-category {
   border: none;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  border-left: 1px solid #D1D5DB;
   padding: 8px 10px;
   font-size: 0.78rem;
-  color: var(--text-body);
-  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
+  background: #F1F3F5;
   outline: none;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .india-search-category:focus {
-  background: #ffffff;
+  background: #FFFFFF;
 }
 
 .india-search-btn {
-  background-color: var(--accent-primary);
-  color: #ffffff;
+  background-color: #205493;
+  color: #FFFFFF;
   border: none;
   padding: 10px 18px;
   font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .india-search-btn:hover {
-  background-color: var(--accent-deep);
+  background-color: #005EA2;
+  color: #FFFFFF;
+}
+
+/* Header & Search Bar Mobile Responsiveness */
+@media (max-width: 767px) {
+  .india-main-header {
+    padding: 12px 0;
+  }
+
+  .india-header-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .india-emblem-box {
+    width: 44px;
+    height: 44px;
+  }
+
+  .india-lion-icon {
+    font-size: 17px;
+  }
+
+  .india-portal-hindi {
+    font-size: 0.68rem;
+  }
+
+  .india-portal-english {
+    font-size: 1.15rem;
+    gap: 6px;
+  }
+
+  .india-portal-sub {
+    font-size: 0.72rem;
+  }
+
+  .india-portal-psu {
+    font-size: 0.68rem;
+  }
+
+  .india-header-search {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .india-search-icon {
+    margin-left: 8px;
+  }
+
+  .india-search-input {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+  }
+
+  .india-search-input::placeholder {
+    font-size: 0.76rem;
+  }
+
+  .india-search-category {
+    max-width: 95px;
+    padding: 8px 4px;
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+  }
+
+  .india-search-btn {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .india-search-category {
+    max-width: 76px;
+    font-size: 0.66rem;
+    padding: 8px 3px;
+  }
+
+  .india-search-btn {
+    padding: 8px 10px;
+    font-size: 0.74rem;
+  }
 }
 
 /* Search Dropdown Results Overlay */
@@ -607,15 +615,13 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
   border-radius: 8px;
-  box-shadow: 0 12px 36px rgba(234, 88, 12, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 25px -5px rgba(27, 54, 93, 0.18), 0 8px 10px -6px rgba(27, 54, 93, 0.1);
   z-index: 1000;
   overflow: hidden;
-  max-height: 420px;
+  max-height: 400px;
   display: flex;
   flex-direction: column;
   animation: searchFadeIn 0.15s ease-out;
@@ -637,22 +643,22 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  background: rgba(254, 243, 199, 0.65);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: #F1F3F5;
+  border-bottom: 1px solid #D1D5DB;
   font-size: 0.74rem;
-  color: var(--text-body);
+  color: #4B5563;
   font-weight: 600;
 }
 
 .india-search-dropdown-hint {
   font-size: 0.68rem;
-  color: var(--text-muted);
+  color: #4B5563;
   font-weight: 400;
 }
 
 .india-search-results-list {
   overflow-y: auto;
-  max-height: 360px;
+  max-height: 340px;
 }
 
 .india-search-result-item {
@@ -660,7 +666,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #F1F3F5;
   cursor: pointer;
   transition: background-color 0.15s ease;
   text-align: left;
@@ -671,7 +677,7 @@
 }
 
 .india-search-result-item:hover {
-  background-color: rgba(249, 115, 22, 0.10);
+  background-color: #F1F3F5;
 }
 
 .india-search-result-left {
@@ -697,14 +703,14 @@
   margin: 0;
   font-size: 0.84rem;
   font-weight: 600;
-  color: var(--text-heading);
+  color: #111827;
   line-height: 1.3;
 }
 
 .india-search-result-sub {
   margin: 2px 0 0 0;
   font-size: 0.73rem;
-  color: var(--text-muted);
+  color: #4B5563;
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
@@ -712,8 +718,14 @@
   max-width: 380px;
 }
 
+@media (max-width: 600px) {
+  .india-search-result-sub {
+    max-width: 220px;
+  }
+}
+
 .india-search-jump-icon {
-  color: var(--text-muted);
+  color: #4B5563;
   flex-shrink: 0;
   margin-left: 8px;
   display: flex;
@@ -722,7 +734,7 @@
 }
 
 .india-search-result-item:hover .india-search-jump-icon {
-  color: var(--accent-primary);
+  color: #005EA2;
   transform: translateX(3px);
 }
 
@@ -731,20 +743,20 @@
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  color: var(--text-body);
+  color: #4B5563;
 }
 
 .india-search-no-results strong {
   display: block;
   font-size: 0.82rem;
-  color: var(--text-heading);
+  color: #111827;
   margin-bottom: 4px;
 }
 
 .india-search-no-results p {
   margin: 0;
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: #4B5563;
 }
 
 /* Active Search Filter Banner above Precursor Feed */
@@ -752,34 +764,36 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(254, 243, 199, 0.75);
-  border: 1px solid rgba(249, 115, 22, 0.35);
+  background: #FFF9E6;
+  border: 1px solid #D97706;
   border-radius: 6px;
   padding: 8px 16px;
   margin-bottom: 16px;
   font-size: 0.82rem;
-  color: #78350F;
+  color: #8C510A;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .india-clear-filter-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(249, 115, 22, 0.4);
-  color: var(--accent-deep);
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  color: #005EA2;
   padding: 3px 10px;
   border-radius: 4px;
   font-size: 0.74rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .india-clear-filter-btn:hover {
-  background: var(--accent-primary);
-  color: #ffffff;
-  border-color: var(--accent-primary);
+  background: #F1F3F5;
+  color: #205493;
 }
 
 /* Accessibility Toast Feedback */
@@ -787,10 +801,9 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: rgba(45, 35, 30, 0.95);
-  backdrop-filter: var(--glass-blur);
-  color: #ffffff;
-  border: 1px solid var(--accent-primary);
+  background: #1B365D;
+  color: #FFFFFF;
+  border: 1px solid #205493;
   padding: 10px 18px;
   border-radius: 6px;
   font-size: 0.82rem;
@@ -801,6 +814,17 @@
   align-items: center;
   gap: 8px;
   animation: toastFade 0.2s ease-out;
+}
+
+@media (max-width: 600px) {
+  .india-a11y-toast {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    justify-content: center;
+    font-size: 0.76rem;
+    padding: 8px 14px;
+  }
 }
 
 @keyframes toastFade {
@@ -815,8 +839,8 @@
 
 @keyframes sectionPulse {
   0% {
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.6);
-    background-color: rgba(249, 115, 22, 0.12);
+    box-shadow: 0 0 0 4px rgba(32, 84, 147, 0.5);
+    background-color: rgba(32, 84, 147, 0.08);
   }
   100% {
     box-shadow: 0 0 0 0 transparent;
@@ -825,20 +849,28 @@
 }
 
 /* ==========================================================================
-   4. PRIMARY NAVIGATION BAR (Light Warm Glass with Orange Bottom Border)
-   ========================================================================== */
+   4. PRIMARY NAVIGATION BAR (Desktop & Mobile Drawer)
+   ========================================================================= */
 .india-nav-bar {
-  background-color: rgba(255, 255, 255, 0.72);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 2px solid var(--accent-primary);
-  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.06);
+  background-color: #1B365D;
+  border-bottom: 2px solid #205493;
+  position: sticky;
+  top: 0;
+  z-index: 500;
 }
 
 .india-nav-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.india-nav-mobile-bar {
+  display: none;
+}
+
+.india-nav-mobile-login {
+  display: none;
 }
 
 .india-nav-list {
@@ -855,7 +887,7 @@
   padding: 12px 16px;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--text-body);
+  color: #FFFFFF;
   text-decoration: none;
   transition: all 0.15s ease;
   border-bottom: 3px solid transparent;
@@ -863,39 +895,142 @@
 
 .india-nav-link:hover,
 .india-nav-link.active {
-  background-color: rgba(249, 115, 22, 0.10);
-  color: var(--accent-deep);
-  border-bottom-color: var(--accent-primary);
+  background-color: #205493;
+  color: #FFFFFF;
+  border-bottom-color: #005EA2;
 }
 
 .india-officer-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: var(--accent-primary);
-  color: #ffffff;
-  border: none;
+  background-color: #205493;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   padding: 7px 14px;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .india-officer-btn:hover {
-  background-color: var(--accent-deep);
-  color: #ffffff;
+  background-color: #005EA2;
+  color: #FFFFFF;
+}
+
+/* Mobile Navigation Toggle & Drawer for Tablets and Phones (<960px) */
+@media (max-width: 959px) {
+  .india-nav-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .india-nav-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    width: 100%;
+  }
+
+  .india-nav-mobile-title {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: 0.06em;
+  }
+
+  .india-mobile-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #FFFFFF;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .india-mobile-menu-toggle:hover {
+    background: #205493;
+    border-color: #005EA2;
+  }
+
+  .india-nav-list {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    padding: 6px 0 14px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    animation: mobileNavFade 0.2s ease-out;
+  }
+
+  .india-nav-list.mobile-open {
+    display: flex;
+  }
+
+  .india-nav-link {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    border-radius: 4px;
+  }
+
+  .india-nav-link:hover,
+  .india-nav-link.active {
+    background-color: #205493;
+    border-left-color: #FFFFFF;
+    border-bottom-color: transparent;
+  }
+
+  .india-nav-mobile-login {
+    display: block;
+    width: 100%;
+    padding-top: 10px;
+    margin-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .india-officer-btn.mobile-full {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 0.86rem;
+  }
+
+  .india-nav-right.desktop-only {
+    display: none;
+  }
+}
+
+@keyframes mobileNavFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ==========================================================================
-   5. STATUTORY NOTICE TICKER (Warm Amber Tint)
-   ========================================================================== */
+   5. STATUTORY NOTICE TICKER
+   ========================================================================= */
 .india-notice-ticker {
-  background-color: rgba(255, 247, 237, 0.75);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid rgba(249, 115, 22, 0.25);
+  background-color: #FFF9E6;
+  border-bottom: 1px solid #D97706;
   padding: 8px 0;
   font-size: 0.82rem;
 }
@@ -910,8 +1045,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: var(--status-red);
-  color: #ffffff;
+  background-color: #B50909;
+  color: #FFFFFF;
   padding: 3px 8px;
   border-radius: 3px;
   font-size: 0.72rem;
@@ -925,39 +1060,61 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .india-ticker-content p {
   margin: 0;
-  color: #78350F;
+  color: #8C510A;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .india-ticker-date {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #8C510A;
   flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .india-notice-ticker {
+    font-size: 0.76rem;
+    padding: 6px 0;
+  }
+
+  .india-ticker-inner {
+    gap: 8px;
+  }
+
+  .india-ticker-badge {
+    padding: 2px 6px;
+    font-size: 0.66rem;
+  }
+
+  .india-ticker-date {
+    display: none;
+  }
 }
 
 /* ==========================================================================
    6. HERO / SPOTLIGHT BANNER
-   - Spotlight Card: Light Frosted Glass (dominant)
-   - Telemetry Panel: Warm Smoke Glass (contrast band)
-   ========================================================================== */
+   ========================================================================= */
 .india-spotlight-section {
-  padding: 40px 0 36px 0;
-  background: transparent !important;
-  border-bottom: none !important;
+  padding: 36px 0;
+  background: #F1F3F5;
+  border-bottom: 1px solid #D1D5DB;
 }
 
 .india-spotlight-card {
-  background: var(--glass-light-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-light-border);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-light-shadow);
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-top: 4px solid #1B365D;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(27, 54, 93, 0.06);
   padding: 36px;
   display: grid;
   grid-template-columns: 1fr;
@@ -972,38 +1129,81 @@
   }
 }
 
+@media (max-width: 959px) {
+  .india-spotlight-section {
+    padding: 24px 0;
+  }
+
+  .india-spotlight-card {
+    padding: 24px 20px;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .india-spotlight-section {
+    padding: 16px 0;
+  }
+
+  .india-spotlight-card {
+    padding: 18px 14px;
+    gap: 22px;
+    border-radius: 6px;
+  }
+}
+
 .india-mandate-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: rgba(249, 115, 22, 0.12);
-  border: 1px solid rgba(249, 115, 22, 0.35);
-  color: var(--accent-deep);
+  background-color: #E6F4EA;
+  border: 1px solid #A7F3D0;
+  color: #137752;
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+@media (max-width: 600px) {
+  .india-mandate-badge {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    margin-bottom: 12px;
+  }
 }
 
 .india-spotlight-title {
-  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
   font-weight: 800;
-  color: var(--text-heading);
+  color: #111827;
   line-height: 1.22;
   margin: 0 0 16px 0;
+}
+
+@media (max-width: 640px) {
+  .india-spotlight-title {
+    font-size: 1.35rem;
+    margin-bottom: 12px;
+  }
 }
 
 .india-spotlight-text {
   font-size: 0.95rem;
   line-height: 1.65;
-  color: var(--text-body);
+  color: #4B5563;
   margin: 0 0 24px 0;
 }
 
-.india-spotlight-text strong {
-  color: var(--text-heading);
+@media (max-width: 640px) {
+  .india-spotlight-text {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
 }
 
 .india-spotlight-actions {
@@ -1014,13 +1214,31 @@
   margin-bottom: 32px;
 }
 
+@media (max-width: 540px) {
+  .india-spotlight-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .india-btn-primary,
+  .india-btn-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 0.86rem;
+  }
+}
+
 .india-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: var(--accent-primary);
-  color: #ffffff;
-  border: 1px solid var(--accent-deep);
+  background-color: #205493;
+  color: #FFFFFF;
+  border: 1px solid #1B365D;
   border-radius: 5px;
   padding: 10px 20px;
   font-size: 0.9rem;
@@ -1028,12 +1246,13 @@
   cursor: pointer;
   text-decoration: none;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .india-btn-primary:hover {
-  background-color: var(--accent-deep);
-  color: #ffffff;
-  border-color: var(--accent-deep);
+  background-color: #005EA2;
+  color: #FFFFFF;
+  border-color: #005EA2;
 }
 
 .india-btn-primary.small {
@@ -1051,9 +1270,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: rgba(255, 255, 255, 0.70);
-  color: var(--text-heading);
-  border: 1.5px solid rgba(249, 115, 22, 0.35);
+  background-color: #F1F3F5;
+  color: #1B365D;
+  border: 1px solid #D1D5DB;
   border-radius: 5px;
   padding: 10px 18px;
   font-size: 0.9rem;
@@ -1061,12 +1280,13 @@
   cursor: pointer;
   text-decoration: none;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .india-btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-color: var(--accent-primary);
-  color: var(--accent-deep);
+  background-color: #FFFFFF;
+  border-color: #205493;
+  color: #005EA2;
 }
 
 /* Stats Strip */
@@ -1075,7 +1295,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   padding-top: 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #D1D5DB;
 }
 
 @media (min-width: 600px) {
@@ -1084,35 +1304,56 @@
   }
 }
 
+@media (max-width: 480px) {
+  .india-stats-grid {
+    gap: 10px;
+    padding-top: 14px;
+  }
+}
+
 .india-stat-item {
   display: flex;
   flex-direction: column;
-  border-left: 2.5px solid var(--accent-primary);
-  padding-left: 12px;
 }
 
 .india-stat-num {
   font-size: 1.3rem;
   font-weight: 800;
-  color: var(--text-heading);
+  color: #1B365D;
+}
+
+@media (max-width: 480px) {
+  .india-stat-num {
+    font-size: 1.12rem;
+  }
 }
 
 .india-stat-label {
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: #4B5563;
   font-weight: 500;
 }
 
-/* Right Column: Telemetry Dossier Panel (Warm Smoke Glass Variant) */
+@media (max-width: 480px) {
+  .india-stat-label {
+    font-size: 0.68rem;
+  }
+}
+
+/* Right Column: Real-time Telemetry Dossier Panel */
 .india-telemetry-panel {
-  background: var(--glass-smoke-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-smoke-border);
-  border-top: 4px solid var(--accent-primary);
-  border-radius: var(--glass-radius);
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-top: 4px solid #1B365D;
+  border-radius: 8px;
   padding: 22px;
-  box-shadow: var(--glass-smoke-shadow);
+  box-shadow: 0 4px 16px rgba(27, 54, 93, 0.05);
+}
+
+@media (max-width: 640px) {
+  .india-telemetry-panel {
+    padding: 16px 14px;
+  }
 }
 
 .india-panel-head {
@@ -1120,8 +1361,10 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #D1D5DB;
   padding-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .india-panel-status {
@@ -1131,21 +1374,22 @@
   font-family: monospace;
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-light);
+  color: #1B365D;
 }
 
 .india-panel-pulse {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: var(--status-green);
-  box-shadow: 0 0 6px var(--status-green);
+  background-color: #137752;
+  box-shadow: 0 0 6px #137752;
+  flex-shrink: 0;
 }
 
 .india-panel-latency {
   font-family: monospace;
   font-size: 0.7rem;
-  color: var(--accent-highlight);
+  color: #4B5563;
   font-weight: 600;
 }
 
@@ -1153,29 +1397,49 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(220, 38, 38, 0.25);
-  border: 1px solid rgba(220, 38, 38, 0.45);
+  background: #FDF2F2;
+  border: 1px solid #B50909;
   border-radius: 6px;
   padding: 10px 14px;
   margin-bottom: 16px;
 }
 
+@media (max-width: 480px) {
+  .india-panel-alert {
+    padding: 8px 10px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+}
+
 .india-panel-alert-icon {
-  color: #F87171;
+  color: #B50909;
   flex-shrink: 0;
 }
 
 .india-panel-alert-title {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #B50909;
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  .india-panel-alert-title {
+    font-size: 0.82rem;
+  }
 }
 
 .india-panel-alert-desc {
   font-size: 0.75rem;
-  color: #FECACA;
+  color: #4B5563;
   margin: 2px 0 0 0;
+}
+
+@media (max-width: 480px) {
+  .india-panel-alert-desc {
+    font-size: 0.7rem;
+  }
 }
 
 .india-panel-sev {
@@ -1183,10 +1447,11 @@
   font-family: monospace;
   font-size: 0.68rem;
   font-weight: 800;
-  color: #ffffff;
-  background-color: var(--status-red);
+  color: #FFFFFF;
+  background-color: #B50909;
   padding: 2px 6px;
   border-radius: 3px;
+  flex-shrink: 0;
 }
 
 .india-panel-barriers {
@@ -1200,7 +1465,7 @@
   font-family: monospace;
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text-light-muted);
+  color: #4B5563;
   letter-spacing: 0.04em;
 }
 
@@ -1215,16 +1480,17 @@
   align-items: center;
   justify-content: space-between;
   font-size: 0.76rem;
-  color: var(--text-light);
+  color: #111827;
+  gap: 8px;
 }
 
-.text-danger { color: #F87171; }
-.text-success { color: #34D399; }
-.text-warning { color: #FBBF24; }
+.text-danger { color: #B50909; }
+.text-success { color: #137752; }
+.text-warning { color: #8C510A; }
 
 .india-barrier-bar-track {
   height: 6px;
-  background: rgba(255, 255, 255, 0.15);
+  background: #D1D5DB;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -1234,13 +1500,12 @@
   border-radius: 3px;
 }
 
-.bg-danger { background-color: var(--status-red); }
-.bg-success { background-color: var(--status-green); }
-.bg-warning { background-color: var(--status-amber); }
+.bg-danger { background-color: #B50909; }
+.bg-success { background-color: #137752; }
+.bg-warning { background-color: #D97706; }
 
 .india-panel-action {
-  background: rgba(25, 20, 18, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #1B365D;
   border-radius: 5px;
   padding: 10px 12px;
   margin-bottom: 16px;
@@ -1252,15 +1517,16 @@
 .india-action-tag {
   font-family: monospace;
   font-size: 0.65rem;
-  color: var(--accent-highlight);
+  color: #D97706;
   font-weight: 700;
 }
 
 .india-panel-action code {
   font-family: monospace;
   font-size: 0.74rem;
-  color: #FED7AA;
+  color: #ffffff;
   word-break: break-all;
+  line-height: 1.4;
 }
 
 .india-panel-btn {
@@ -1268,9 +1534,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  background: #ffffff;
+  border: 1px solid #205493;
+  color: #205493;
   border-radius: 5px;
   padding: 8px 14px;
   font-size: 0.82rem;
@@ -1280,22 +1546,27 @@
 }
 
 .india-panel-btn:hover {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background: #205493;
   color: #ffffff;
 }
 
 /* ==========================================================================
    7. SECTIONS & COMMON COMPONENT STYLING
-   ========================================================================== */
+   ========================================================================= */
 .india-section {
   padding: 48px 0;
-  background-color: transparent !important;
-  border-bottom: none !important;
+  background-color: #ffffff;
+  border-bottom: 1px solid #D1D5DB;
 }
 
 .india-section.bg-alt {
-  background-color: transparent !important;
+  background-color: #F1F3F5;
+}
+
+@media (max-width: 767px) {
+  .india-section {
+    padding: 32px 0;
+  }
 }
 
 .india-section-header {
@@ -1307,11 +1578,20 @@
   gap: 16px;
 }
 
+@media (max-width: 600px) {
+  .india-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+}
+
 .india-section-category {
   display: block;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--accent-deep);
+  color: #8C510A;
   letter-spacing: 0.06em;
   margin-bottom: 4px;
 }
@@ -1319,9 +1599,15 @@
 .india-section-title {
   font-size: 1.45rem;
   font-weight: 800;
-  color: var(--text-heading);
+  color: #111827;
   margin: 0;
   letter-spacing: -0.015em;
+}
+
+@media (max-width: 600px) {
+  .india-section-title {
+    font-size: 1.25rem;
+  }
 }
 
 .india-view-all-link {
@@ -1330,50 +1616,58 @@
   gap: 4px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--accent-deep);
+  color: #005EA2;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .india-view-all-link:hover {
-  color: var(--accent-primary);
+  color: #205493;
 }
 
-/* Safety Topics Grid (Light Frosted Glass Cards) */
+/* Safety Topics Grid (Cards) */
 .india-topics-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 
 @media (min-width: 640px) {
   .india-topics-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
   }
 }
 
 @media (min-width: 1024px) {
   .india-topics-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
   }
 }
 
 .india-topic-card {
-  background: var(--glass-light-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-light-border);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-light-shadow);
+  background: #ffffff;
+  border: 1px solid #D1D5DB;
+  border-top: 3.5px solid #1B365D;
+  border-radius: 6px;
   padding: 22px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  /* Restraint: NO hover scale/translate */
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .india-topic-card {
+    padding: 18px 16px;
+  }
 }
 
 .india-topic-card:hover {
-  border-color: var(--glass-light-hover-border);
-  background-color: var(--glass-light-hover-bg);
+  border-top-color: #205493;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(27, 54, 93, 0.08);
 }
 
 .india-topic-card-top {
@@ -1381,17 +1675,19 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
+  gap: 10px;
 }
 
 .india-topic-icon-wrap {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: rgba(249, 115, 22, 0.12);
-  color: var(--accent-deep);
+  background-color: #F1F3F5;
+  color: #1B365D;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .india-topic-badge {
@@ -1400,19 +1696,20 @@
   padding: 2px 8px;
   border-radius: 3px;
   border: 1px solid;
+  white-space: nowrap;
 }
 
 .india-topic-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-heading);
+  color: #111827;
   margin: 0 0 4px 0;
 }
 
 .india-topic-code {
   font-size: 0.72rem;
   font-family: monospace;
-  color: var(--text-muted);
+  color: #4B5563;
   font-weight: 600;
   margin-bottom: 10px;
 }
@@ -1420,13 +1717,13 @@
 .india-topic-desc {
   font-size: 0.85rem;
   line-height: 1.5;
-  color: var(--text-body);
+  color: #4B5563;
   margin: 0 0 16px 0;
   flex: 1;
 }
 
 .india-topic-footer {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #D1D5DB;
   padding-top: 12px;
 }
 
@@ -1436,7 +1733,7 @@
   gap: 6px;
   background: none;
   border: none;
-  color: var(--accent-deep);
+  color: #005EA2;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -1445,40 +1742,45 @@
 }
 
 .india-topic-action-btn:hover {
-  color: var(--accent-primary);
+  color: #205493;
 }
 
 /* ==========================================================================
    8. PRECURSOR AUDIT STREAM & REGULATORY DOSSIER
-   - Audit List Cards: Light Frosted Glass
-   - Compliance Dossier: Warm Smoke Glass (contrast band)
-   ========================================================================== */
+   ========================================================================= */
 .india-tabs-group {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .india-tabs-group {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
 }
 
 .india-tab-btn {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border: 1px solid #D1D5DB;
   padding: 6px 14px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-body);
+  color: #4B5563;
   border-radius: 4px;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 
-.india-tab-btn:hover {
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--accent-deep);
-}
-
 .india-tab-btn.active {
-  background: var(--accent-primary);
+  background: #205493;
   color: #ffffff;
-  border-color: var(--accent-primary);
+  border-color: #205493;
 }
 
 .india-audit-layout {
@@ -1502,27 +1804,29 @@
 }
 
 .india-audit-card {
-  background: var(--glass-light-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-light-border);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-light-shadow);
+  background: #ffffff;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
   padding: 16px;
   cursor: pointer;
-  /* Restraint: NO hover scale/translate */
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: all 0.15s ease;
+}
+
+@media (max-width: 600px) {
+  .india-audit-card {
+    padding: 14px 12px;
+  }
 }
 
 .india-audit-card:hover {
-  border-color: var(--glass-light-hover-border);
-  background-color: var(--glass-light-hover-bg);
+  border-color: #205493;
+  box-shadow: 0 4px 12px rgba(27, 54, 93, 0.05);
 }
 
 .india-audit-card.selected {
-  border-left: 4px solid var(--accent-primary);
-  border-color: var(--accent-primary);
-  background-color: rgba(255, 255, 255, 0.85);
+  border-left: 4px solid #205493;
+  border-color: #205493;
+  background-color: #F1F3F5;
 }
 
 .india-audit-card-head {
@@ -1530,13 +1834,14 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  gap: 8px;
 }
 
 .india-audit-id {
   font-family: monospace;
   font-size: 0.74rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #4B5563;
 }
 
 .india-sif-pill {
@@ -1545,49 +1850,51 @@
   padding: 2px 8px;
   border-radius: 3px;
   border: 1px solid;
+  white-space: nowrap;
 }
 
 .india-audit-card-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--text-heading);
+  color: #111827;
   margin: 0 0 4px 0;
 }
 
 .india-audit-card-asset {
   font-size: 0.78rem;
-  color: var(--text-body);
+  color: #4B5563;
   margin: 0 0 8px 0;
 }
 
 .india-audit-card-meta {
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: #4B5563;
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
-.india-audit-card-meta strong {
-  color: var(--accent-deep);
-}
-
-/* Dossier Card on the right (Warm Smoke Glass Variant for Terminal/Log Contrast) */
+/* Dossier Card on the right */
 .india-dossier-card {
-  background: var(--glass-smoke-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-smoke-border);
-  border-top: 4px solid var(--accent-primary);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-smoke-shadow);
+  background: #ffffff;
+  border: 1px solid #D1D5DB;
+  border-top: 4px solid #B50909;
+  border-radius: 6px;
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 .india-dossier-header {
   padding: 20px 24px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #F1F3F5;
+  border-bottom: 1px solid #D1D5DB;
+}
+
+@media (max-width: 600px) {
+  .india-dossier-header {
+    padding: 14px 16px;
+  }
 }
 
 .india-dossier-header-top {
@@ -1595,27 +1902,35 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+  gap: 8px;
 }
 
 .india-dossier-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--accent-highlight);
+  color: #B50909;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .india-dossier-id {
   font-family: monospace;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--text-light-muted);
+  color: #4B5563;
 }
 
 .india-dossier-title {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #111827;
   margin: 0 0 8px 0;
+}
+
+@media (max-width: 600px) {
+  .india-dossier-title {
+    font-size: 1.02rem;
+  }
 }
 
 .india-dossier-asset-bar {
@@ -1623,7 +1938,8 @@
   align-items: center;
   gap: 6px;
   font-size: 0.78rem;
-  color: var(--text-light-muted);
+  color: #4B5563;
+  flex-wrap: wrap;
 }
 
 .india-dossier-body {
@@ -1633,11 +1949,18 @@
   gap: 18px;
 }
 
+@media (max-width: 600px) {
+  .india-dossier-body {
+    padding: 16px 14px;
+    gap: 14px;
+  }
+}
+
 .india-dossier-label {
   display: block;
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--text-light-muted);
+  color: #4B5563;
   letter-spacing: 0.04em;
   margin-bottom: 6px;
 }
@@ -1645,9 +1968,9 @@
 .india-dossier-text {
   font-size: 0.88rem;
   line-height: 1.6;
-  color: #F5F5F4;
-  background: rgba(25, 20, 18, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #111827;
+  background: #F1F3F5;
+  border: 1px solid #D1D5DB;
   border-radius: 4px;
   padding: 12px;
   margin: 0;
@@ -1660,9 +1983,16 @@
   gap: 14px;
 }
 
+@media (max-width: 520px) {
+  .india-dossier-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
 .india-dossier-cell {
-  background: rgba(25, 20, 18, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #F1F3F5;
+  border: 1px solid #D1D5DB;
   border-radius: 4px;
   padding: 10px 14px;
 }
@@ -1671,23 +2001,23 @@
   display: block;
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text-light-muted);
+  color: #4B5563;
   margin-bottom: 2px;
 }
 
 .india-cell-val {
   font-size: 0.84rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #111827;
 }
 
 .india-barrier-alert {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(220, 38, 38, 0.25);
-  border: 1px solid rgba(220, 38, 38, 0.45);
-  color: #FEE2E2;
+  background: #FDF2F2;
+  border: 1px solid #B50909;
+  color: #B50909;
   border-radius: 4px;
   padding: 10px 14px;
   font-size: 0.85rem;
@@ -1695,79 +2025,90 @@
 }
 
 .india-action-box {
-  background: rgba(25, 20, 18, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #1B365D;
   border-radius: 4px;
   padding: 10px 14px;
-  color: #FED7AA;
+  color: #FFFFFF;
   font-size: 0.78rem;
+}
+
+.india-action-box code {
+  word-break: break-all;
+  line-height: 1.4;
 }
 
 .india-dossier-footer {
   padding: 16px 24px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #F1F3F5;
+  border-top: 1px solid #D1D5DB;
+}
+
+@media (max-width: 600px) {
+  .india-dossier-footer {
+    padding: 12px 16px;
+  }
 }
 
 /* ==========================================================================
-   9. MONITORED FACILITIES (Light Frosted Glass Cards)
-   ========================================================================== */
+   9. MONITORED FACILITIES
+   ========================================================================= */
 .india-status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: rgba(22, 163, 74, 0.15);
-  color: #15803D;
-  border: 1px solid rgba(22, 163, 74, 0.3);
+  background-color: #E6F4EA;
+  color: #137752;
+  border: 1px solid #A7F3D0;
   border-radius: 100px;
   padding: 4px 10px;
   font-size: 0.78rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .india-dot.pulse {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: var(--status-green);
-  box-shadow: 0 0 6px var(--status-green);
+  background-color: #137752;
+  box-shadow: 0 0 6px #137752;
+  flex-shrink: 0;
 }
 
 .india-facilities-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 
 @media (min-width: 640px) {
   .india-facilities-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
   }
 }
 
 @media (min-width: 1024px) {
   .india-facilities-grid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
   }
 }
 
 .india-facility-card {
-  background: var(--glass-light-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-light-border);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-light-shadow);
+  background: #ffffff;
+  border: 1px solid #D1D5DB;
+  border-top: 3.5px solid #1B365D;
+  border-radius: 6px;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  /* Restraint: NO hover scale/translate */
-  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.india-facility-card:hover {
-  border-color: var(--glass-light-hover-border);
-  background-color: var(--glass-light-hover-bg);
+@media (max-width: 640px) {
+  .india-facility-card {
+    padding: 16px 14px;
+  }
 }
 
 .india-facility-head {
@@ -1782,15 +2123,21 @@
   font-family: monospace;
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #4B5563;
 }
 
 .india-facility-name {
   font-size: 0.98rem;
   font-weight: 700;
-  color: var(--text-heading);
+  color: #111827;
   margin: 2px 0 0 0;
   line-height: 1.25;
+}
+
+@media (max-width: 640px) {
+  .india-facility-name {
+    font-size: 0.92rem;
+  }
 }
 
 .india-asset-status {
@@ -1799,18 +2146,19 @@
   padding: 2px 6px;
   border-radius: 3px;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .india-asset-status.normal {
-  background: rgba(22, 163, 74, 0.15);
-  color: #15803D;
-  border: 1px solid rgba(22, 163, 74, 0.3);
+  background: #E6F4EA;
+  color: #137752;
+  border: 1px solid #A7F3D0;
 }
 
 .india-asset-status.watch {
-  background: rgba(217, 119, 6, 0.15);
-  color: #9A3412;
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  background: #FFF9E6;
+  color: #8C510A;
+  border: 1px solid #D97706;
 }
 
 .india-facility-loc {
@@ -1818,13 +2166,13 @@
   align-items: center;
   gap: 5px;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #4B5563;
   margin-bottom: 8px;
 }
 
 .india-facility-type {
   font-size: 0.8rem;
-  color: var(--text-body);
+  color: #4B5563;
   margin: 0 0 16px 0;
   flex: 1;
 }
@@ -1840,23 +2188,31 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #F1F3F5;
+  border: 1px solid #D1D5DB;
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 0.7rem;
-  color: var(--text-body);
+  color: #111827;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .india-spec-chip {
+    font-size: 0.66rem;
+    padding: 2px 5px;
+  }
 }
 
 .india-facility-btn {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(249, 115, 22, 0.35);
+  background: #F1F3F5;
+  border: 1px solid #D1D5DB;
   border-radius: 4px;
   padding: 8px 12px;
-  color: var(--accent-deep);
+  color: #005EA2;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -1864,25 +2220,18 @@
 }
 
 .india-facility-btn:hover {
-  background: var(--accent-primary);
+  background: #205493;
   color: #ffffff;
-  border-color: var(--accent-primary);
+  border-color: #205493;
 }
 
 /* ==========================================================================
-   10. STATUTORY STANDARDS & COMPLIANCE (Light Frosted Glass Container)
-   ========================================================================== */
+   10. STATUTORY STANDARDS & COMPLIANCE
+   ========================================================================= */
 .india-standards-box {
-  background: var(--glass-light-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-light-border);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-light-shadow);
-  padding: 36px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 36px;
+  gap: 28px;
   align-items: center;
 }
 
@@ -1896,7 +2245,7 @@
 .india-standards-p {
   font-size: 0.92rem;
   line-height: 1.6;
-  color: var(--text-body);
+  color: #4B5563;
   margin: 12px 0 0 0;
 }
 
@@ -1907,14 +2256,33 @@
 }
 
 .india-std-item {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-left: 3.5px solid var(--accent-primary);
+  background: #ffffff;
+  border: 1px solid #D1D5DB;
+  border-left: 3.5px solid #1B365D;
   border-radius: 4px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .india-std-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .india-std-icon {
+    font-size: 18px;
+  }
+
+  .india-std-item strong {
+    font-size: 0.86rem;
+  }
+
+  .india-std-item span {
+    font-size: 0.74rem;
+  }
 }
 
 .india-std-icon {
@@ -1925,39 +2293,44 @@
 .india-std-item strong {
   display: block;
   font-size: 0.92rem;
-  color: var(--text-heading);
+  color: #111827;
 }
 
 .india-std-item span {
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: #4B5563;
 }
 
 /* ==========================================================================
-   11. NATIONAL PORTAL FOOTER (Warm Smoke Glass Footer)
-   ========================================================================== */
+   11. NATIONAL PORTAL FOOTER (india.gov.in standard)
+   ========================================================================= */
 .india-gov-footer {
-  background-color: rgba(45, 35, 30, 0.88);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  color: var(--text-light-muted);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: #1B365D;
+  color: #D1D5DB;
+  border-top: 1px solid #205493;
 }
 
 .india-footer-content {
   padding: 48px 0 24px 0;
 }
 
+@media (max-width: 767px) {
+  .india-footer-content {
+    padding: 32px 0 20px 0;
+  }
+}
+
 .india-footer-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 36px;
-  margin-bottom: 40px;
+  gap: 28px;
+  margin-bottom: 36px;
 }
 
 @media (min-width: 640px) {
   .india-footer-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
   }
 }
 
@@ -1977,6 +2350,7 @@
 
 .india-footer-emblem {
   font-size: 28px;
+  flex-shrink: 0;
 }
 
 .india-footer-title {
@@ -1988,14 +2362,14 @@
 
 .india-footer-sub {
   font-size: 0.75rem;
-  color: var(--accent-highlight);
+  color: #D1D5DB;
   margin: 0;
 }
 
 .india-footer-desc {
   font-size: 0.84rem;
   line-height: 1.55;
-  color: #D6D3D1;
+  color: #D1D5DB;
   margin: 0 0 16px 0;
 }
 
@@ -2004,7 +2378,7 @@
   font-weight: 700;
   color: #ffffff;
   margin: 0 0 14px 0;
-  border-bottom: 2px solid var(--accent-primary);
+  border-bottom: 2px solid #205493;
   display: inline-block;
   padding-bottom: 4px;
 }
@@ -2020,13 +2394,14 @@
 
 .india-footer-links a {
   font-size: 0.82rem;
-  color: #D6D3D1;
+  color: #D1D5DB;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .india-footer-links a:hover {
-  color: var(--accent-highlight);
+  color: #ffffff;
+  text-decoration: underline;
 }
 
 .india-footer-bottom {
@@ -2034,11 +2409,20 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 14px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
   font-size: 0.78rem;
-  color: var(--text-light-muted);
+  color: #D1D5DB;
+}
+
+@media (max-width: 767px) {
+  .india-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-top: 16px;
+  }
 }
 
 .india-footer-copy p {
@@ -2049,13 +2433,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .india-credit-badge {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.72rem;
   color: #ffffff;
+  white-space: nowrap;
 }

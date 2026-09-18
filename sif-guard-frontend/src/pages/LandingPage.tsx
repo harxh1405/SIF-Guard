@@ -20,6 +20,7 @@ import {
   Layers,
   MapPin,
   X,
+  Menu,
 } from 'lucide-react';
 import './LandingPage.css';
 
@@ -42,7 +43,7 @@ const AUDIT_RECORDS = [
     rule: 'LSR-01 // ENERGY ISOLATION',
     barrier: 'Physical Lockout / Tagout (LOTO) Verification',
     hardwareAction: 'TRIP COMMAND DISPATCHED TO MOTOR CONTROL CENTER (MCC-04)',
-    color: '#dc2626',
+    color: '#B50909',
     category: 'critical',
   },
   {
@@ -56,7 +57,7 @@ const AUDIT_RECORDS = [
     rule: 'LSR-03 // CONFINED SPACE ENTRY',
     barrier: 'Continuous Multi-Gas Atmospheric Monitoring & Ventilation',
     hardwareAction: 'ACCESS GATE INTERLOCK ARMED // AUDIBLE HORN TRIGGERED',
-    color: '#ea580c',
+    color: '#B50909',
     category: 'critical',
   },
   {
@@ -70,7 +71,7 @@ const AUDIT_RECORDS = [
     rule: 'LSR-02 // HOT WORK PERMIT',
     barrier: 'LEL Gas Sniffing & 15m Combustible Clearance Protocol',
     hardwareAction: 'EMERGENCY ISOLATION VALVE ESV-102 DE-ENERGIZED',
-    color: '#dc2626',
+    color: '#B50909',
     category: 'critical',
   },
   {
@@ -84,7 +85,7 @@ const AUDIT_RECORDS = [
     rule: 'LSR-04 // WORKING AT HEIGHT',
     barrier: '100% Fall Arrest Tie-Off & Certified Anchor Point',
     hardwareAction: 'FLAGGED IN SAFETY CONTROLLER // RIG SUPERVISOR NOTIFIED',
-    color: '#d97706',
+    color: '#8C510A',
     category: 'circulars',
   },
 ];
@@ -142,7 +143,7 @@ const SAFETY_TOPICS = [
     code: 'LSR-01 / OISD-156',
     desc: 'Physical zero-energy lockout and padlock verification before maintenance on high-pressure circuits.',
     badge: 'Statutory Mandate',
-    badgeColor: '#b45309',
+    badgeColor: '#8C510A',
   },
   {
     id: 'hotwork',
@@ -151,7 +152,7 @@ const SAFETY_TOPICS = [
     code: 'LSR-02 / DGMS Circular',
     desc: 'Continuous atmospheric LEL sniffing within 15 meters of cutting, welding, and torch operations.',
     badge: 'Critical Defense',
-    badgeColor: '#b91c1c',
+    badgeColor: '#B50909',
   },
   {
     id: 'confined',
@@ -160,7 +161,7 @@ const SAFETY_TOPICS = [
     code: 'LSR-03 / OSHA 1910',
     desc: 'Certified 4-gas atmospheric tests, standby rescue officer, and positive pressure ventilation.',
     badge: 'Mandatory Watch',
-    badgeColor: '#003366',
+    badgeColor: '#1B365D',
   },
   {
     id: 'heights',
@@ -169,7 +170,7 @@ const SAFETY_TOPICS = [
     code: 'LSR-04 / OISD-GDN-166',
     desc: 'Dual-lanyard 100% tie-off, certified anchor points, and scaffolding tag integrity inspections.',
     badge: 'Fall Protection',
-    badgeColor: '#15803d',
+    badgeColor: '#137752',
   },
   {
     id: 'barriers',
@@ -178,7 +179,7 @@ const SAFETY_TOPICS = [
     code: 'James Reason Methodology',
     desc: 'Real-time telemetry tracking of passive, active, and administrative safety barrier holes.',
     badge: 'Predictive Model',
-    badgeColor: '#6b21a8',
+    badgeColor: '#205493',
   },
   {
     id: 'ocr',
@@ -187,7 +188,7 @@ const SAFETY_TOPICS = [
     code: 'AI Digitization Core',
     desc: 'OCR extraction of scanned handwritten permits to work (PTW) with sub-second hazard categorization.',
     badge: 'Automated Ingestion',
-    badgeColor: '#0369a1',
+    badgeColor: '#005EA2',
   },
 ];
 
@@ -214,7 +215,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     targetId: 'precursor-feed',
     recordId: 'OIL/HSE/2026/041',
     badge: '96.8% Confidence',
-    badgeColor: '#dc2626',
+    badgeColor: '#B50909',
   },
   {
     id: 'sif-058',
@@ -225,7 +226,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     targetId: 'precursor-feed',
     recordId: 'OIL/HSE/2026/058',
     badge: '98.4% Confidence',
-    badgeColor: '#ea580c',
+    badgeColor: '#B50909',
   },
   {
     id: 'sif-072',
@@ -236,7 +237,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     targetId: 'precursor-feed',
     recordId: 'OIL/HSE/2026/072',
     badge: '99.1% Confidence',
-    badgeColor: '#dc2626',
+    badgeColor: '#B50909',
   },
   {
     id: 'sif-089',
@@ -247,7 +248,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     targetId: 'precursor-feed',
     recordId: 'OIL/HSE/2026/089',
     badge: '93.5% Confidence',
-    badgeColor: '#d97706',
+    badgeColor: '#8C510A',
   },
   // OISD Standards
   {
@@ -258,7 +259,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Fire Protection and Safety Management in Refineries & Processing Units',
     targetId: 'statutory',
     badge: 'Statutory Code',
-    badgeColor: '#003366',
+    badgeColor: '#1B365D',
   },
   {
     id: 'oisd-105',
@@ -268,7 +269,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Work Permit System for Hydrocarbon Processing Units',
     targetId: 'statutory',
     badge: 'Standard',
-    badgeColor: '#003366',
+    badgeColor: '#1B365D',
   },
   {
     id: 'oisd-166',
@@ -278,7 +279,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Guidelines for Safety in Working at Heights and Scaffolding Inspection',
     targetId: 'statutory',
     badge: 'Guideline',
-    badgeColor: '#003366',
+    badgeColor: '#1B365D',
   },
   // DGMS Directives
   {
@@ -289,7 +290,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Statutory Directives for Hydrocarbon Extraction & Mechanical Ventilation',
     targetId: 'statutory',
     badge: 'Statutory',
-    badgeColor: '#b45309',
+    badgeColor: '#8C510A',
   },
   {
     id: 'dgms-02',
@@ -299,7 +300,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Mandatory continuous gas testing within 15m radius before hot work',
     targetId: 'safety-topics',
     badge: 'Circular',
-    badgeColor: '#b45309',
+    badgeColor: '#8C510A',
   },
   // Work Permits (PTW) & LSRs
   {
@@ -310,7 +311,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Physical zero-energy lockout and padlock verification before maintenance',
     targetId: 'safety-topics',
     badge: 'Life-Saving Rule',
-    badgeColor: '#b45309',
+    badgeColor: '#8C510A',
   },
   {
     id: 'ptw-sniff',
@@ -320,7 +321,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Continuous atmospheric LEL sniffing within 15 meters of cutting & welding',
     targetId: 'safety-topics',
     badge: 'Life-Saving Rule',
-    badgeColor: '#dc2626',
+    badgeColor: '#B50909',
   },
   {
     id: 'ptw-confined',
@@ -330,7 +331,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Certified 4-gas atmospheric tests, standby rescue officer, and ventilation',
     targetId: 'safety-topics',
     badge: 'Life-Saving Rule',
-    badgeColor: '#003366',
+    badgeColor: '#1B365D',
   },
   {
     id: 'ptw-heights',
@@ -340,7 +341,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Dual-lanyard 100% tie-off, certified anchor points, and scaffolding tags',
     targetId: 'safety-topics',
     badge: 'Life-Saving Rule',
-    badgeColor: '#15803d',
+    badgeColor: '#137752',
   },
   {
     id: 'ptw-swiss',
@@ -350,7 +351,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Real-time telemetry tracking of passive, active, and administrative barriers',
     targetId: 'safety-topics',
     badge: 'Predictive Model',
-    badgeColor: '#6b21a8',
+    badgeColor: '#205493',
   },
   {
     id: 'ptw-ocr',
@@ -360,7 +361,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'OCR extraction of scanned handwritten permits to work with hazard categorization',
     targetId: 'safety-topics',
     badge: 'AI Core',
-    badgeColor: '#0369a1',
+    badgeColor: '#005EA2',
   },
   // Monitored Facilities
   {
@@ -371,7 +372,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Dibrugarh District, Assam — Crude Oil & Gas Dehydration Hub',
     targetId: 'facilities',
     badge: 'OIL-CPF-01',
-    badgeColor: '#15803d',
+    badgeColor: '#137752',
   },
   {
     id: 'fac-digboi',
@@ -381,7 +382,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Tinsukia District, Assam — Historic Production Wells & Distribution',
     targetId: 'facilities',
     badge: 'OIL-DGB-02',
-    badgeColor: '#15803d',
+    badgeColor: '#137752',
   },
   {
     id: 'fac-sivasagar',
@@ -391,7 +392,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Sivasagar District, Assam — Deep Extraction Manifolds & Flaring Unit',
     targetId: 'facilities',
     badge: 'OIL-SVS-03',
-    badgeColor: '#d97706',
+    badgeColor: '#8C510A',
   },
   {
     id: 'fac-jaisalmer',
@@ -401,7 +402,7 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
     subtitle: 'Jaisalmer Basin, Rajasthan — High-Sulfur Gas Compression & Processing',
     targetId: 'facilities',
     badge: 'OIL-RAJ-04',
-    badgeColor: '#15803d',
+    badgeColor: '#137752',
   },
 ];
 
@@ -415,6 +416,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSearchFilter, setActiveSearchFilter] = useState<{ query: string; category: string } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -787,9 +789,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           <span
                             className="india-search-badge"
                             style={{
-                              borderColor: item.badgeColor ? `${item.badgeColor}40` : '#cbd5e1',
-                              color: item.badgeColor || '#003366',
-                              backgroundColor: item.badgeColor ? `${item.badgeColor}12` : '#f1f5f9',
+                              borderColor: item.badgeColor ? `${item.badgeColor}40` : '#D1D5DB',
+                              color: item.badgeColor || '#1B365D',
+                              backgroundColor: item.badgeColor ? `${item.badgeColor}12` : '#F1F3F5',
                             }}
                           >
                             {item.categoryLabel}
@@ -807,7 +809,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 ) : (
                   <div className="india-search-no-results">
-                    <AlertTriangle size={18} color="#d97706" style={{ flexShrink: 0 }} />
+                    <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0 }} />
                     <div>
                       <strong>No matching directives or records found.</strong>
                       <p>Try searching for "LOTO", "OISD", "sniffing", "Digboi", or "Assam".</p>
@@ -825,16 +827,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ========================================================================= */}
       <nav className="india-nav-bar" aria-label="Primary Navigation">
         <div className="india-gov-wrap india-nav-inner">
-          <ul className="india-nav-list">
-            <li><a href="#main-content" className="india-nav-link active">Home</a></li>
-            <li><a href="#safety-topics" className="india-nav-link">Topics &amp; LSRs</a></li>
-            <li><a href="#precursor-feed" className="india-nav-link">Precursor Audits</a></li>
-            <li><a href="#facilities" className="india-nav-link">Monitored Facilities</a></li>
-            <li><a href="#statutory" className="india-nav-link">Statutory Standards</a></li>
-            <li><a href="#about-oil" className="india-nav-link">About Oil India Ltd</a></li>
+          <div className="india-nav-mobile-bar">
+            <span className="india-nav-mobile-title">PORTAL NAVIGATION</span>
+            <button
+              type="button"
+              className="india-mobile-menu-toggle"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
+              <span>{isMobileMenuOpen ? 'Close' : 'Menu'}</span>
+            </button>
+          </div>
+
+          <ul className={`india-nav-list ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+            <li><a href="#main-content" className="india-nav-link active" onClick={() => setIsMobileMenuOpen(false)}>Home</a></li>
+            <li><a href="#safety-topics" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Topics &amp; LSRs</a></li>
+            <li><a href="#precursor-feed" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Precursor Audits</a></li>
+            <li><a href="#facilities" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Monitored Facilities</a></li>
+            <li><a href="#statutory" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Statutory Standards</a></li>
+            <li><a href="#about-oil" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>About Oil India Ltd</a></li>
+            <li className="india-nav-mobile-login">
+              <button
+                type="button"
+                className="india-officer-btn mobile-full"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onEnterPlatform();
+                }}
+              >
+                <span>Officer Portal Login</span>
+                <ArrowRight size={14} />
+              </button>
+            </li>
           </ul>
 
-          <div className="india-nav-right">
+          <div className="india-nav-right desktop-only">
             <button
               type="button"
               className="india-officer-btn"
@@ -1111,9 +1140,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Left list of records */}
             <div className="india-audit-list">
               {filteredRecords.length === 0 ? (
-                <div style={{ padding: '24px', background: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#64748b' }}>
-                  <AlertTriangle size={20} color="#d97706" style={{ marginBottom: '8px' }} />
-                  <h4 style={{ margin: '0 0 4px', color: '#0f172a', fontSize: '0.9rem' }}>No records matched "{activeSearchFilter?.query}"</h4>
+                <div style={{ padding: '24px', background: '#FFFFFF', borderRadius: '6px', border: '1px solid #D1D5DB', color: '#4B5563' }}>
+                  <AlertTriangle size={20} color="#D97706" style={{ marginBottom: '8px' }} />
+                  <h4 style={{ margin: '0 0 4px', color: '#111827', fontSize: '0.9rem' }}>No records matched "{activeSearchFilter?.query}"</h4>
                   <p style={{ margin: '0 0 12px', fontSize: '0.78rem' }}>Try searching for "LOTO", "sniffing", "Digboi", or clear the filter.</p>
                   <button type="button" className="india-clear-filter-btn" onClick={handleClearSearch}>
                     Show All Records
@@ -1401,7 +1430,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Accessibility Toast Feedback */}
       {toastMessage && (
         <div className="india-a11y-toast" role="status" aria-live="polite">
-          <Activity size={16} color="#ff9933" />
+          <Activity size={16} color="#FFFFFF" />
           <span>{toastMessage}</span>
         </div>
       )}
