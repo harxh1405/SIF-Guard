@@ -24,6 +24,7 @@ import {
   ShieldAlert,
   RotateCcw,
 } from 'lucide-react';
+import { CameraCaptureModal } from '../components/common/CameraCaptureModal';
 import type { TabId } from '../components/layout/Navigation';
 
 interface Props {
@@ -35,6 +36,7 @@ export type ReportInputSource = 'manual_narrative' | 'pdf' | 'image' | 'camera' 
 export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
   const [source, setSource] = useState<ReportInputSource>('pdf');
   const [pastedText, setPastedText] = useState<string>('');
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
 
   // OCR Workflow Steps: 1: Capture, 2: Processing, 3: Verify, 4: Analyzed
   const [step, setStep] = useState<number>(1);
@@ -351,7 +353,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
           gap: '12px',
           backgroundColor: 'var(--surface, #FFFFFF)',
           border: '1px solid var(--border, #CBD5E1)',
@@ -575,7 +577,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 gap: '8px',
               }}
             >
-              <Camera size={16} /> Camera Capture
+              <Camera size={16} /> Live Camera Capture
             </button>
 
             <button
@@ -991,14 +993,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           </div>
 
           {/* Main 2-Column Responsive Workspace */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(320px, 1fr) minmax(450px, 1.4fr)',
-              gap: '24px',
-            }}
-            className="workspace-grid"
-          >
+          <div className="responsive-grid-sidebar workspace-grid">
             {/* Left Column: ORIGINAL REPORT */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div
@@ -1271,6 +1266,20 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           </div>
         </div>
       )}
+
+      {/* Live Camera Capture Modal */}
+      <CameraCaptureModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        onCapture={(file) => {
+          setSelectedFile(file);
+          setSource('camera');
+          processOCR(file);
+        }}
+        onFallbackFileUpload={() => {
+          cameraInputRef.current?.click();
+        }}
+      />
     </motion.div>
   );
 };

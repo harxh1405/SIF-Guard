@@ -38,9 +38,12 @@ Thumbs.db
 
 # Environment Variables
 .env
+.env.*
+env
 !.env.example
 
 # Tooling & Local Assets
 .opencode/
 .reticle/
+screenshots/
 Dashboard Screen.png

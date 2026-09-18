@@ -19,8 +19,7 @@ export type TabId =
   | 'clusters'
   | 'analytics'
   | 'knowledge'
-  | 'review'
-  | 'design-system';
+  | 'review';
 
 interface Props {
   activeTab: TabId;
@@ -52,14 +51,11 @@ export const Navigation: React.FC<Props> = ({ activeTab, onTabChange }) => {
       title: 'DATA & SYSTEM',
       items: [
         { id: 'ingestion' as TabId, label: 'Capture & OCR', icon: UploadCloud },
-        { id: 'design-system' as TabId, label: 'Design System', icon: Boxes },
       ],
     },
   ];
 
-  const allItems = sections
-    .flatMap((section) => section.items)
-    .filter((tab) => tab.id !== 'design-system');
+  const allItems = sections.flatMap((section) => section.items);
 
   return (
     <motion.nav

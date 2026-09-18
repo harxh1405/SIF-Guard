@@ -5,27 +5,26 @@ interface ParallaxCardProps {
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
-  theme?: 'dark' | 'light';
-  glowColor?: string;
   maxTilt?: number;
+  glowColor?: string;
+  theme?: 'light' | 'dark';
 }
 
 /**
  * High-performance specular 3D tilt card with ZERO React re-renders during mouse tracking.
- * Manipulates transform and radial gradient directly on DOM nodes for pure 120fps performance.
+ * Manipulates transform and radial gradient directly on the DOM nodes for pure 120fps performance.
  */
 export const ParallaxCard: React.FC<ParallaxCardProps> = ({
   children,
   className = '',
   style = {},
   onClick,
-  theme = 'dark',
-  glowColor,
   maxTilt = 5,
+  glowColor,
+  theme = 'dark',
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
-
   const isLight = theme === 'light';
   const defaultGlow = isLight
     ? 'rgba(255, 115, 0, 0.08)'

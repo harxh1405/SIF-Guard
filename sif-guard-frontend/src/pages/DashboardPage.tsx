@@ -17,11 +17,12 @@ import { useFilterStore } from '../store/useFilterStore';
 import type { TabId } from '../components/layout/Navigation';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowRight, GitBranch, Filter } from 'lucide-react';
 
 interface Props {
   onNavigate: (tab: TabId) => void;
+  theme?: 'dark' | 'light';
 }
 
 export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
@@ -82,7 +83,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
   if (loading) {
     return (
       <div style={{ padding: '8px 0' }}>
-        <h2 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 16px 0' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-primary)', margin: '0 0 16px 0' }}>
           COMMAND CENTER — HSE BRIEFING
         </h2>
         <LoadingSkeleton rows={6} />
@@ -93,7 +94,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
   if (error) {
     return (
       <div style={{ padding: '8px 0' }}>
-        <h2 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 16px 0' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-primary)', margin: '0 0 16px 0' }}>
           COMMAND CENTER — HSE BRIEFING
         </h2>
         <ErrorBanner message={error} onRetry={fetchDashboardData} />
@@ -230,7 +231,8 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       />
 
       {/* Row 1: Safety Signal Trend & SIF Risk Distribution */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      {/* Row 1: Safety Signal Trend & SIF Risk Distribution */}
+      <div className="responsive-grid-2-1">
         <SafetyTrendChart
           data={trends}
           onSelectPeriod={() => onNavigate('explorer')}
@@ -244,7 +246,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Row 2: Failed Barrier Intelligence & Barrier Health */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="responsive-grid-1-1">
         <BarrierFailureChart
           data={summary?.top_barrier_failures || []}
           onSelectBarrier={handleBarrierSelect}
@@ -254,7 +256,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Row 3: Emerging Precursor Patterns & Activity Feed */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div className="responsive-grid-1-1">
         {/* Emerging Precursor Patterns Section */}
         <div
           style={{

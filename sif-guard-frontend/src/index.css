@@ -78,6 +78,17 @@
   --accent-uncertain-amber: #D97706;
   --accent-uncertain-bg: #FFFBEB;
 
+  /* Informational & Scope Colors (Cyan / Blue) */
+  --info: #38BDF8;
+  --info-bright: #60A5FA;
+  --info-bg: rgba(56, 189, 248, 0.12);
+  --info-border: rgba(56, 189, 248, 0.25);
+
+  /* Auxiliary Accent */
+  --accent-purple: #D95B0B;
+  --accent-purple-bg: rgba(217, 91, 11, 0.12);
+  --accent-purple-border: rgba(217, 91, 11, 0.25);
+
   /* Typography Colors */
   --text-primary: #111827;
   --text-secondary: #4B5563;
@@ -255,8 +266,31 @@ h1, h2, h3, h4, h5, h6 {
 
 .glass-card:hover,
 .card:hover {
-  background: var(--surface);
+  background: var(--surface-elevated);
   border-color: var(--border-hover);
+  box-shadow: var(--shadow-glass-elevated);
+}
+
+[data-theme="light"] .glass-card:hover,
+[data-theme="light"] .card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.08);
+}
+
+.card-interactive {
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15), 0 0 16px rgba(255, 115, 0, 0.12);
+}
+
+.card-selected {
+  border-color: var(--primary) !important;
+  background: var(--surface-elevated) !important;
+  box-shadow: 0 0 0 1px var(--primary), 0 12px 30px rgba(0, 0, 0, 0.18);
 }
 
 .glass-panel {
@@ -326,28 +360,73 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
 }
 
-.badge-sif {
+.badge-sif,
+.badge-critical {
   background: #FEF2F2;
   color: #DC2626;
   border: 1px solid #FCA5A5;
 }
 
-.badge-nonsif {
+.badge-nonsif,
+.badge-nominal {
   background: #ECFDF5;
   color: #065F46;
   border: 1px solid #6EE7B7;
 }
 
-.badge-uncertain {
+.badge-uncertain,
+.badge-elevated {
   background: #FFFBEB;
   color: #92400E;
   border: 1px solid #FCD34D;
+}
+
+[data-theme="dark"] .badge-sif,
+[data-theme="dark"] .badge-critical {
+  background: rgba(232, 93, 93, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(232, 93, 93, 0.3);
+}
+
+[data-theme="dark"] .badge-nonsif,
+[data-theme="dark"] .badge-nominal {
+  background: rgba(32, 217, 151, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(32, 217, 151, 0.3);
+}
+
+[data-theme="dark"] .badge-uncertain,
+[data-theme="dark"] .badge-elevated {
+  background: rgba(255, 179, 71, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(255, 179, 71, 0.3);
+}
+
+.badge-info {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--info);
+  border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
 .badge-inactive {
   background: #F3F4F6;
   color: #4B5563;
   border: 1px solid #D1D5DB;
+}
+
+.sample-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  background: rgba(255, 179, 71, 0.12);
+  color: var(--warning);
+  border: 1px solid rgba(255, 179, 71, 0.25);
+  letter-spacing: 0.02em;
 }
 
 /* ==========================================================================
@@ -383,4 +462,727 @@ h1, h2, h3, h4, h5, h6 {
 
 .data-table tbody tr:hover {
   background: #F8FAFC;
+}
+
+.interactive-row:hover {
+  border-color: var(--border-hover) !important;
+  background: var(--surface-elevated) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   MODAL & OVERLAYS
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.70);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+}
+
+/* ==========================================================================
+   CHARTS & SCROLLBAR
+   ========================================================================== */
+
+.chart-container-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: #33251C;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ==========================================================================
+   DETAIL DRAWER & SLIDE-OVER
+   ========================================================================== */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer-content {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  width: 100%;
+  max-width: 680px;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  transition: all 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--primary);
+  background: var(--surface-hover);
+}
+
+.filter-chip-remove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  padding: 0;
+  margin-left: 2px;
+}
+
+.filter-chip-remove:hover {
+  color: var(--danger);
+}
+
+@keyframes loading-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes beacon-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 115, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 115, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 115, 0, 0);
+  }
+}
+
+@media (max-width: 960px) {
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .desktop-nav {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   CINEMATIC INDUSTRIAL LANDING PAGE UTILITIES
+   ========================================================================== */
+
+.bg-micro-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+[data-theme="light"] .bg-micro-grid {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+}
+
+.telemetry-hud-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  width: min(1200px, 88vw);
+  min-height: 48px;
+  padding: 8px 24px;
+  border-radius: 8px;
+  background: rgba(18, 16, 14, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .telemetry-hud-container {
+  border-radius: 8px;
+  background: rgba(250, 248, 245, 0.85);
+  border: 1px solid rgba(195, 182, 168, 0.45);
+  box-shadow: 0 2px 12px rgba(40, 30, 20, 0.04);
+}
+
+.telemetry-hud-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 115, 0, 0.08), transparent);
+  animation: telemetry-sweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes telemetry-sweep {
+  0% {
+    left: -60%;
+  }
+  50%, 100% {
+    left: 140%;
+  }
+}
+
+.ghost-watermark-text {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.025);
+}
+
+[data-theme="light"] .ghost-watermark-text {
+  color: rgba(0, 0, 0, 0.03);
+}
+
+.conduit-stream-line {
+  position: relative;
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(255, 115, 0, 0.45) 0%, rgba(255, 115, 0, 0.1) 80%, transparent 100%);
+  margin: 0 auto;
+}
+
+.conduit-stream-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #FF7300;
+  box-shadow: 0 0 8px #FF7300;
+  animation: conduit-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes conduit-pulse {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Pipeline Animated Flow Conduits */
+.pipeline-track-connector {
+  position: relative;
+  height: 2px;
+  background: rgba(255, 115, 0, 0.15);
+  overflow: hidden;
+}
+
+.pipeline-track-connector::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #FF7300, transparent);
+  animation: pipeline-flow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pipeline-flow {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+
+/* Nav Link Hover Underline */
+.nav-link-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-link-btn:hover {
+  transform: translateY(-1px);
+}
+
+.nav-link-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #FF7300;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 1px;
+}
+
+.nav-link-btn:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Sticky Operational Indicator for Section 4 */
+.pinned-story-nav {
+  position: sticky;
+  top: 120px;
+  align-self: flex-start;
+}
+
+/* Dual Column Responsive Showcase Grids */
+.analysis-showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 28px;
+}
+
+.radial-gauge-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 36px;
+  align-items: center;
+}
+
+.landing-section {
+  padding: clamp(56px, 7vw, 100px) clamp(16px, 4vw, 48px);
+}
+
+.landing-section-hero {
+  padding: clamp(36px, 5vw, 64px) clamp(16px, 4vw, 48px) clamp(48px, 6vw, 80px) clamp(16px, 4vw, 48px);
+}
+
+@media (max-width: 960px) {
+  .pinned-story-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .pinned-story-nav {
+    position: relative !important;
+    top: 0 !important;
+    margin-bottom: 24px;
+  }
+  .analysis-showcase-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .radial-gauge-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .telemetry-hud-container {
+    padding: 10px 14px;
+    gap: 8px 14px;
+    font-size: 0.68rem;
+  }
+  .telemetry-divider {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   NATIONAL PORTAL UTILITIES & CARDS
+   ========================================================================== */
+.gov-tricolor-strip {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #ff9933 0%,
+    #ff9933 33.33%,
+    #ffffff 33.33%,
+    #ffffff 66.66%,
+    #128807 66.66%,
+    #128807 100%
+  );
+  flex-shrink: 0;
+}
+
+.gov-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.gov-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 51, 102, 0.09);
+  border-color: #94a3b8;
+}
+
+.gov-card-amber {
+  border-top-color: #ff9933;
+}
+
+.gov-card-red {
+  border-top-color: #dc2626;
+}
+
+.gov-card-green {
+  border-top-color: #16a34a;
+}
+
+.gov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gov-badge-navy {
+  background-color: #e6f0fa;
+  color: #003366;
+  border: 1px solid #bfdbfe;
+}
+
+.gov-badge-saffron {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.gov-badge-green {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.gov-badge-red {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.gov-btn-primary {
+  background-color: #003366;
+  color: #ffffff;
+  border: 1px solid #002244;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.gov-btn-primary:hover {
+  background-color: #002244;
+  box-shadow: 0 2px 6px rgba(0, 51, 102, 0.25);
+}
+
+.gov-btn-secondary {
+  background-color: #ffffff;
+  color: #003366;
+  border: 1px solid #cbd5e1;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.gov-btn-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT & SCALING UTILITIES
+   Ensures seamless responsive scaling, flex/grid adaptation across all zoom
+   levels and display resolutions (mobile -> ultrawide / 4K).
+   ========================================================================== */
+
+.app-main-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1280px) {
+  .app-main-content {
+    padding: 20px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-main-content {
+    padding: 16px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main-content {
+    padding: 12px 10px;
+  }
+}
+
+/* Responsive Grid 2:1 for Dashboard / Analytics */
+.responsive-grid-2-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1120px) {
+  .responsive-grid-2-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid 1:1 for Dual Cards / Charts */
+.responsive-grid-1-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-1-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Facility Twin (3D Canvas + Intel Pane) */
+.responsive-grid-twin {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1.2fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .responsive-grid-twin {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Review Queue */
+.responsive-grid-review {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-review {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Ingestion Page Workspace */
+.responsive-grid-ingestion {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(340px, 1.35fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-ingestion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid 4-column HUD */
+.responsive-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .responsive-grid-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Landing Hero Split */
+.responsive-grid-hero-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 32px;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-hero-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.app-header {
+  padding: 12px 24px;
+  background: var(--bg-header);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 12px;
+  flex-wrap: wrap;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 10px 14px;
+  }
+}
+
+.app-header-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .app-header-subtitle {
+    display: none;
+  }
+}
+
+.app-header-badge-text {
+  display: inline;
+}
+
+@media (max-width: 680px) {
+  .app-header-badge-text {
+    display: none;
+  }
+}
+
+/* Safe Flex & Chart Wrappers to prevent flex/grid overflow */
+.chart-container-fluid {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.responsive-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }

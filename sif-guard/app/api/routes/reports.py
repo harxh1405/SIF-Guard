@@ -35,6 +35,11 @@ async def import_reports(
             lines = contents.decode("utf-8", errors="ignore").strip().split("\n")
             if len(lines) == 1 or filename.endswith(".json"):
                 data = json.loads(contents)
+                if isinstance(data, dict):
+                    for k in ["reports", "data", "records", "items", "incidents"]:
+                        if k in data and isinstance(data[k], list):
+                            data = data[k]
+                            break
                 df = pd.DataFrame(data if isinstance(data, list) else [data])
             else:
                 data = [json.loads(line) for line in lines if line.strip()]
@@ -112,6 +117,7 @@ async def import_reports(
         db.refresh(r)
         imported_ids.append(r.id)
         imported_count += 1
+        newly_added.append(r)
 
         # Run automated analysis pipeline on imported report
         try:
@@ -154,6 +160,12 @@ def list_reports(
                 run_single_report_analysis(db, r)
             except Exception as e:
                 logger.error(f"Error auto-analyzing report {r.id} on list: {e}")
+        # Re-fetch updated objects
+        query = db.query(SafetyReport)
+        if source:
+            query = query.filter(SafetyReport.source_dataset == source)
+        if sif_potential:
+            query = query.filter(SafetyReport.sif_potential == sif_potential)
         reports = query.order_by(SafetyReport.created_at.desc()).offset(skip).limit(limit).all()
 
     return reports
