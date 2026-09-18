@@ -1,11 +1,12 @@
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class SafetyReportBase(BaseModel):
     source_dataset: str
     source_record_id: str
+    data_origin: Optional[str] = "oil_hsse"
     report_type: Optional[str] = "incident"
     report_text: str
     report_summary: Optional[str] = None
@@ -69,8 +70,7 @@ class SafetyReportRead(SafetyReportBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ImportSummary(BaseModel):
@@ -79,3 +79,5 @@ class ImportSummary(BaseModel):
     duplicates: int
     invalid: int
     source: str
+    imported_ids: List[str] = Field(default_factory=list)
+    first_imported_id: Optional[str] = None

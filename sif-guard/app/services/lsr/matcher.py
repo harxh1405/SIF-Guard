@@ -28,7 +28,7 @@ IOGP_LSR_DEFINITIONS = [
         "code": "ENERGY_ISOLATION",
         "name": "Energy Isolation",
         "description": "Verify isolation and zero energy state before work begins. Apply Lockout Tagout (LOTO).",
-        "keywords": ["energy isolation", "loto", "lockout", "tagout", "zero energy", "electrical isolation", "de-energize", "valves"]
+        "keywords": ["energy isolation", "loto", "lockout", "tagout", "locked out", "tagged out", "zero energy", "electrical isolation", "pressure isolation", "depressurize", "de-energize", "valves"]
     },
     {
         "code": "HOT_WORK",

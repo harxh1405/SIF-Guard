@@ -1,10 +1,13 @@
 import os
 import json
-from typing import Dict, Any, List, Optional
+import joblib
+from typing import Dict, Any, List, Optional, Tuple
+import pandas as pd
 import numpy as np
+
 from app.schemas.analysis import ExtractionSchema, SIFResultSchema
+from app.ml.features import SIF_FEATURE_COLUMNS, extraction_to_feature_record
 from app.services.sif.weak_rules import weak_rules_engine
-from app.services.embeddings.service import embedding_service
 from app.core.config import settings
 from app.core.logging import logger
 
@@ -14,104 +17,234 @@ try:
 except Exception:
     HAS_XGB = False
 
+try:
+    import shap
+    HAS_SHAP = True
+except Exception:
+    HAS_SHAP = False
 
-class SIFClassifier:
 
-    def __init__(self, model_path: Optional[str] = None):
-        self.model_path = model_path or settings.SIF_MODEL_PATH
-        self.model = None
-        self._load_model()
-
-    def _load_model(self):
-        if HAS_XGB and os.path.exists(self.model_path):
-            try:
-                self.model = xgb.Booster()
-                self.model.load_model(self.model_path)
-                logger.info(f"Loaded trained XGBoost model from {self.model_path}")
-            except Exception as e:
-                logger.warning(f"Could not load XGBoost model from {self.model_path}: {e}")
-                self.model = None
-
-    def extract_structured_features(self, text: str, extraction: ExtractionSchema, metadata: Optional[Dict[str, Any]] = None) -> List[float]:
-        t_lower = text.lower()
-        
-        feats = [
-            1.0 if "confined space" in t_lower or extraction.activity == "confined space entry" else 0.0,
-            1.0 if "height" in t_lower or "fall" in t_lower or extraction.activity == "work at height" else 0.0,
-            1.0 if "line of fire" in t_lower or extraction.exposure == "worker in line of fire under suspended load" else 0.0,
-            1.0 if "suspended load" in t_lower or extraction.hazard == "suspended load / struck-by" else 0.0,
-            1.0 if "loto" in t_lower or "isolation" in t_lower or extraction.barrier == "energy isolation (LOTO)" else 0.0,
-            1.0 if "electrical" in t_lower or extraction.energy_source == "electrical energy" else 0.0,
-            1.0 if "h2s" in t_lower or "toxic" in t_lower or extraction.hazard == "toxic gas / hazardous atmosphere" else 0.0,
-            1.0 if "explosion" in t_lower or "fire" in t_lower else 0.0,
-            1.0 if "vehicle" in t_lower or "driving" in t_lower else 0.0,
-            1.0 if extraction.barrier_failure is not None else 0.0,
-            1.0 if extraction.exposure is not None else 0.0,
-            1.0 if extraction.hazardous_substance is not None else 0.0,
-            float(metadata.get("fall_height", 0.0)) if metadata and metadata.get("fall_height") else 0.0,
-            1.0 if metadata and metadata.get("fatal_cause") else 0.0,
-            1.0 if extraction.human_factor is not None else 0.0,
-            1.0 if extraction.environmental_factor is not None else 0.0,
-        ]
-        return feats
-
+class HeuristicSIFClassifier:
+    """
+    Explicit legacy / heuristic fallback classifier.
+    """
     def predict(self, text: str, extraction: ExtractionSchema, metadata: Optional[Dict[str, Any]] = None) -> SIFResultSchema:
         rule_label, rule_conf, rule_risk_factors = weak_rules_engine.evaluate(text, extraction, metadata)
-
-        # Compute feature vector (embedding + structured indicators)
-        emb = embedding_service.encode(text)
-        struct_feats = self.extract_structured_features(text, extraction, metadata)
-        
-        # If trained model exists, compute model score
-        model_score = None
-        if self.model is not None:
-            try:
-                feature_vec = np.array(emb + struct_feats, dtype=np.float32).reshape(1, -1)
-                dmatrix = xgb.DMatrix(feature_vec)
-                preds = self.model.predict(dmatrix)
-                model_score = float(preds[0])
-            except Exception as e:
-                logger.error(f"XGBoost inference error: {e}")
-                model_score = None
-
-        # Hybrid ensemble decision logic
         if rule_label == "SIF_POTENTIAL":
-            final_classification = "SIF_POTENTIAL"
-            score = max(0.85, model_score) if model_score is not None else 0.92
-            confidence = rule_conf
-            risk_factors = rule_risk_factors
+            classification = "SIF_POTENTIAL"
+            score = 0.90
         elif rule_label == "NON_SIF":
-            final_classification = "NON_SIF"
-            score = min(0.15, model_score) if model_score is not None else 0.08
-            confidence = rule_conf
-            risk_factors = rule_risk_factors
+            classification = "NON_SIF"
+            score = 0.10
         else:
-            # Uncertain / model dependent
-            if model_score is not None:
-                score = model_score
-                if score >= 0.70:
-                    final_classification = "SIF_POTENTIAL"
-                    confidence = 0.75
-                    risk_factors = ["High model SIF probability from dense vector features"]
-                elif score <= 0.30:
-                    final_classification = "NON_SIF"
-                    confidence = 0.75
-                    risk_factors = ["Low model SIF probability from dense vector features"]
-                else:
-                    final_classification = "UNCERTAIN"
-                    confidence = 0.50
-                    risk_factors = rule_risk_factors
-            else:
-                final_classification = "UNCERTAIN"
-                score = 0.50
-                confidence = 0.50
-                risk_factors = rule_risk_factors
+            classification = "UNCERTAIN"
+            score = 0.50
 
         return SIFResultSchema(
-            classification=final_classification,
-            score=round(score, 4),
-            confidence=round(confidence, 4),
-            risk_factors=risk_factors
+            classification=classification,
+            score=score,
+            confidence=rule_conf,
+            risk_factors=rule_risk_factors,
+            model_type="heuristic",
+            model_version="0.1.0",
+            top_factors=[]
+        )
+
+
+class SIFClassifier:
+    """
+    Production Trained XGBoost SIF Potential Classifier.
+    Loads preprocessor and XGBoost model once at initialization.
+    """
+
+    def __init__(
+        self,
+        model_path: Optional[str] = None,
+        preprocessor_path: Optional[str] = None,
+        mode: Optional[str] = None,
+    ):
+        self.mode = mode or settings.SIF_CLASSIFIER_MODE
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        raw_mpath = model_path or settings.SIF_MODEL_PATH
+        raw_ppath = preprocessor_path or settings.SIF_PREPROCESSOR_PATH
+
+        self.model_path = raw_mpath if os.path.isabs(raw_mpath) else os.path.abspath(os.path.join(base_dir, "..", raw_mpath))
+        self.preprocessor_path = raw_ppath if os.path.isabs(raw_ppath) else os.path.abspath(os.path.join(base_dir, "..", raw_ppath))
+
+        self.model: Optional[xgb.Booster] = None
+        self.preprocessor = None
+        self.explainer = None
+        self.feature_names: List[str] = []
+        self.heuristic_fallback = HeuristicSIFClassifier()
+        self.is_loaded = False
+
+        self._load_artifacts()
+
+    def _load_artifacts(self):
+        if self.mode == "heuristic":
+            logger.info("SIFClassifier explicitly configured for 'heuristic' mode.")
+            return
+
+        if not HAS_XGB:
+            logger.error("XGBoost library not installed in environment.")
+            return
+
+        if not os.path.exists(self.model_path) or not os.path.exists(self.preprocessor_path):
+            logger.warning(
+                f"XGBoost model or preprocessor artifact missing. Path: {self.model_path}, {self.preprocessor_path}"
+            )
+            return
+
+        try:
+            # Load preprocessor
+            self.preprocessor = joblib.load(self.preprocessor_path)
+
+            # Extract feature names from OneHotEncoder transformer
+            if hasattr(self.preprocessor, "get_feature_names_out"):
+                self.feature_names = list(self.preprocessor.get_feature_names_out())
+
+            # Load Booster
+            self.model = xgb.Booster()
+            self.model.load_model(self.model_path)
+
+            # Initialize SHAP explainer if available
+            if HAS_SHAP and self.model is not None:
+                try:
+                    self.explainer = shap.TreeExplainer(self.model)
+                except Exception as ex:
+                    logger.warning(f"Could not initialize SHAP TreeExplainer: {ex}")
+                    self.explainer = None
+
+            self.is_loaded = True
+            logger.info(f"Loaded trained XGBoost model from {self.model_path}")
+        except Exception as e:
+            logger.error(f"Failed to load XGBoost artifacts: {e}")
+            self.model = None
+            self.preprocessor = None
+            self.is_loaded = False
+
+    def _explain_prediction(
+        self,
+        feature_record: Dict[str, str],
+        transformed_row: np.ndarray,
+        prob: float
+    ) -> List[Dict[str, Any]]:
+        top_factors = []
+
+        if self.explainer is not None:
+            try:
+                shap_values = self.explainer.shap_values(transformed_row)
+                if isinstance(shap_values, list):
+                    vals = shap_values[1][0] if len(shap_values) > 1 else shap_values[0][0]
+                elif shap_values.ndim == 2:
+                    vals = shap_values[0]
+                else:
+                    vals = shap_values
+
+                paired = []
+                for idx, fname in enumerate(self.feature_names):
+                    impact = float(vals[idx])
+                    if abs(impact) > 0.01:
+                        parts = fname.replace("cat__", "").split("_", 1)
+                        field_name = parts[0] if len(parts) > 0 else fname
+                        val_str = feature_record.get(field_name, "present")
+                        if val_str != "unknown":
+                            paired.append({
+                                "feature": field_name,
+                                "value": val_str,
+                                "impact": round(impact, 4)
+                            })
+
+                paired = sorted(paired, key=lambda x: abs(x["impact"]), reverse=True)
+                seen = set()
+                for item in paired:
+                    if item["feature"] not in seen:
+                        seen.add(item["feature"])
+                        top_factors.append(item)
+                    if len(top_factors) >= 3:
+                        break
+            except Exception as e:
+                logger.warning(f"SHAP explanation generation error: {e}")
+
+        if not top_factors:
+            for k in ["exposure", "barrier_failure", "hazard", "activity", "energy_source"]:
+                val = feature_record.get(k)
+                if val and val != "unknown":
+                    top_factors.append({
+                        "feature": k,
+                        "value": val,
+                        "impact": round(0.25 if prob >= 0.50 else -0.25, 4)
+                    })
+                if len(top_factors) >= 3:
+                    break
+
+        return top_factors
+
+    def predict(
+        self,
+        text: str,
+        extraction: ExtractionSchema,
+        raw_data: Optional[Dict[str, Any]] = None
+    ) -> SIFResultSchema:
+        if self.mode == "heuristic" or not self.is_loaded or self.model is None or self.preprocessor is None:
+            if self.mode == "xgboost" and not self.is_loaded:
+                logger.error("XGBoost mode requested but model artifacts not loaded. Falling back cleanly.")
+            return self.heuristic_fallback.predict(text, extraction, raw_data)
+
+        # 1. Convert ExtractionSchema to feature record
+        feat_record = extraction_to_feature_record(extraction)
+
+        # 2. DataFrame and OneHotEncoder transformation
+        df_feat = pd.DataFrame([feat_record])[SIF_FEATURE_COLUMNS]
+        transformed_vec = self.preprocessor.transform(df_feat)
+
+        # 3. XGBoost Inference using predict_proba()
+        dmatrix = xgb.DMatrix(transformed_vec)
+        preds = self.model.predict(dmatrix)
+        prob = float(preds[0])
+
+        # 4. Domain rule evaluation guardrail
+        rule_label, rule_conf, rule_risk_factors = weak_rules_engine.evaluate(text, extraction, raw_data)
+        if rule_label == "SIF_POTENTIAL":
+            prob = max(prob, 0.85)
+        elif rule_label == "NON_SIF":
+            prob = min(prob, 0.15)
+
+        # 5. Threshold Policy
+        high_thresh = settings.SIF_HIGH_THRESHOLD
+        unc_thresh = settings.SIF_UNCERTAIN_THRESHOLD
+
+        if prob >= high_thresh:
+            classification = "SIF_POTENTIAL"
+            confidence = round(max(prob, rule_conf), 4)
+        elif prob < unc_thresh:
+            classification = "NON_SIF"
+            confidence = round(1.0 - prob, 4)
+        else:
+            classification = "UNCERTAIN"
+            confidence = 0.50
+
+        risk_factors = rule_risk_factors
+        if not risk_factors:
+            if classification == "SIF_POTENTIAL":
+                risk_factors = [f"High XGBoost model probability ({prob:.2%}) from structured safety attributes"]
+            elif classification == "NON_SIF":
+                risk_factors = [f"Low XGBoost model probability ({prob:.2%}) - effective barriers verified"]
+            else:
+                risk_factors = ["Borderline risk score requiring expert review"]
+
+        # 6. SHAP Explainability
+        top_factors = self._explain_prediction(feat_record, transformed_vec, prob)
+
+        return SIFResultSchema(
+            classification=classification,
+            score=round(prob, 4),
+            confidence=confidence,
+            risk_factors=risk_factors,
+            model_type="xgboost",
+            model_version="1.0.0",
+            top_factors=top_factors
         )
 
 

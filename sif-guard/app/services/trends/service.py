@@ -7,8 +7,11 @@ from app.schemas.analytics import TrendData
 
 class TrendService:
 
-    def calculate_trends(self, db: Session, grouping: str = "month") -> List[TrendData]:
-        reports = db.query(SafetyReport).all()
+    def calculate_trends(self, db: Session, grouping: str = "month", include_synthetic: bool = False) -> List[TrendData]:
+        query = db.query(SafetyReport)
+        if not include_synthetic:
+            query = query.filter(SafetyReport.data_origin != "synthetic")
+        reports = query.all()
         if not reports:
             return []
 

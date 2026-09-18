@@ -108,17 +108,19 @@ class RuleBasedExtractor:
                 barrier_category="energy isolation (LOTO)",
                 recognition_patterns=[
                     r"\bloto\b", r"\blockout\b", r"\blockout/tagout\b", r"\bisolation\b",
-                    r"\bisolated\b", r"\benergy isolation\b", r"\belectrical isolation\b"
+                    r"\bisolated\b", r"\benergy isolation\b", r"\belectrical isolation\b",
+                    r"\bpressure isolation\b", r"\bdepressurization\b", r"\bdepressurize\b"
                 ],
                 failure_patterns=[
                     r"without (?:applying )?lockout", r"without (?:applying )?loto",
                     r"not locked", r"not (?:electrically )?isolated",
                     r"isolation (?:bypassed|missing|not confirmed|not verified)", r"bypassed isolation",
-                    r"without isolation"
+                    r"without isolation", r"failed to depressurize", r"was not locked out",
+                    r"not locked out or tagged out", r"not locked out", r"not tagged out"
                 ],
                 failure_message="energy isolation bypassed, missing, or not verified",
                 priority=85,
-                exclude_context=[r"zero pressure", r"process line", r"depressuriz"]
+                exclude_context=[]
             ),
             # 6. Machine Guarding (Priority 80)
             BarrierRule(
@@ -126,33 +128,39 @@ class RuleBasedExtractor:
                 barrier_category="machine guarding",
                 recognition_patterns=[
                     r"\bmachine guard\b", r"\bequipment guard\b", r"\bsafety guard\b",
-                    r"\bcoupling guard\b", r"\bguarding\b", r"\bguard installed\b", r"\bguard\b"
+                    r"\bcoupling guard\b", r"\bguarding\b", r"\bguard installed\b"
                 ],
                 failure_patterns=[
-                    r"guard (?:had been )?removed", r"guard missing", r"without (?:the )?guard",
-                    r"no guard", r"unguarded", r"guard bypassed", r"protection removed",
-                    r"operat(?:e|ed|ing) without (?:the )?guard", r"removing the coupling guard"
+                    r"guard (?:had been |was )?(?:still )?removed", r"guard missing", r"without (?:the )?guard",
+                    r"unguarded", r"guard bypassed", r"protection removed",
+                    r"operat(?:e|ed|ing) without (?:the )?guard", r"remov(?:e|ed|ing) the (?:protective |coupling )?guard",
+                    r"no machine guarding", r"no guard"
                 ],
-                failure_message="machine guard removed, missing, or bypassed",
-                priority=80
+                failure_message="machine guard removed, missing, or not in place",
+                priority=80,
+                exclude_context=[r"guardrail", r"handrail", r"platform", r"height", r"fall", r"harness", r"lifeline"]
             ),
-            # 7. Fall Protection (Priority 80)
+            # 7. Fall Protection (Priority 90)
             BarrierRule(
                 name="fall_protection",
                 barrier_category="fall protection system",
                 recognition_patterns=[
                     r"\bfall protection\b", r"\bharness\b", r"\bsafety harness\b",
                     r"\blifeline\b", r"\blanyard\b", r"\bguardrail\b", r"\bfall arrest\b",
-                    r"\bunprotected edge\b", r"\bhandrail\b", r"\btoe-board\b"
+                    r"\bunprotected edge\b", r"\bhandrail\b", r"\btoe-board\b", r"\belevated platform\b"
                 ],
                 failure_patterns=[
                     r"without fall protection", r"no (?:safety )?harness", r"harness (?:not|was not) provided",
-                    r"harness (?:not|was not) used", r"lifeline (?:missing|not provided|was provided)",
-                    r"no lifeline", r"unprotected edge", r"guardrail missing", r"missing top handrail",
-                    r"not tied off", r"fall protection (?:not|was not) provided"
+                    r"harness (?:not|was not) used", r"not wearing (?:a |safety )?harness",
+                    r"lifeline (?:missing|not provided|was provided)", r"no lifeline",
+                    r"no lifeline (?:had been |was )?connected", r"unprotected edge",
+                    r"no guardrail", r"guardrail (?:missing|was not installed)", r"missing top handrail",
+                    r"not tied off", r"fall protection (?:not|was not) provided",
+                    r"fall protection (?:controls |system )?(?:had |was )?not (?:been )?established",
+                    r"required fall protection"
                 ],
                 failure_message="fall protection missing or not used",
-                priority=80
+                priority=90
             ),
             # 8. Exclusion Zone / Barricading (Priority 75)
             BarrierRule(
@@ -307,8 +315,8 @@ class RuleBasedExtractor:
             activity = "excavation work"
         elif "vehicle" in t_lower and ("pedestrian" in t_lower or "operating zone" in t_lower or "traffic" in t_lower):
             activity = "vehicle / pedestrian interaction"
-        elif "grinding" in t_lower or "grinder" in t_lower:
-            activity = "machinery operation / grinding"
+        elif "pump" in t_lower or "coupling" in t_lower or "rotating" in t_lower or "machine guard" in t_lower or "grinding" in t_lower or "grinder" in t_lower:
+            activity = "machinery maintenance" if ("maintenance" in t_lower or "pump" in t_lower or "coupling" in t_lower) else "machinery operation / grinding"
         elif "pressur" in t_lower or "flange" in t_lower or "process line" in t_lower:
             activity = "pressurized system maintenance"
         elif "welding" in t_lower or "cutting" in t_lower or "hot work" in t_lower or "torch" in t_lower:
@@ -328,7 +336,7 @@ class RuleBasedExtractor:
             hazard = "excavation collapse / cave-in"
         elif "vehicle" in t_lower and ("pedestrian" in t_lower or "operating zone" in t_lower):
             hazard = "vehicle-pedestrian interaction / struck-by"
-        elif "grinding" in t_lower or "machine guard" in t_lower or "coupling guard" in t_lower or "rotating" in t_lower or "pinch" in t_lower or "caught in" in t_lower:
+        elif "grinding" in t_lower or "machine guard" in t_lower or "coupling guard" in t_lower or "rotating" in t_lower or "pinch" in t_lower or "caught in" in t_lower or "pump" in t_lower:
             hazard = "rotating machinery / caught-in"
         elif "process line" in t_lower or "flange" in t_lower or "residual pressure" in t_lower or "depressuriz" in t_lower:
             hazard = "pressure release"
@@ -362,14 +370,14 @@ class RuleBasedExtractor:
             exposure = "worker exposed to excavation collapse"
         elif "vehicle" in t_lower and ("pedestrian" in t_lower or "operating zone" in t_lower):
             exposure = "pedestrian exposed to moving vehicle"
+        elif "grinding" in t_lower or "machine guard" in t_lower or "coupling guard" in t_lower or "rotating" in t_lower or "pump" in t_lower:
+            exposure = "worker exposed to unguarded rotating machinery"
         elif "underneath" in t_lower or "line of fire" in t_lower or "suspended load" in t_lower:
             exposure = "worker in line of fire under suspended load"
         elif "without fall protection" in t_lower or "unprotected edge" in t_lower or "above ground" in t_lower or "height" in t_lower:
             exposure = "worker exposed to unprotected fall hazard"
         elif "without atmospheric testing" in t_lower or "entered vessel" in t_lower or "entered a storage tank" in t_lower or "toxic gas" in t_lower:
             exposure = "worker exposed to toxic gas / oxygen deficiency"
-        elif "grinding" in t_lower or "machine guard" in t_lower or "coupling guard" in t_lower:
-            exposure = "worker exposed to unguarded rotating machinery"
         elif "pressurized" in t_lower or "flange" in t_lower or "residual pressure" in t_lower:
             exposure = "worker exposed to hazardous pressure release"
         elif "office" in t_lower or "chair" in t_lower:
@@ -377,7 +385,9 @@ class RuleBasedExtractor:
 
         # 5. Energy Source
         energy_source = None
-        if "excavation" in t_lower or "trench" in t_lower:
+        if "rotating" in t_lower or "coupling" in t_lower or "pump" in t_lower or "machinery" in t_lower or "grinding" in t_lower:
+            energy_source = "mechanical / rotational energy"
+        elif "excavation" in t_lower or "trench" in t_lower:
             energy_source = "potential kinetic / soil mass energy"
         elif "vehicle" in t_lower:
             energy_source = "vehicle kinetic energy"
@@ -406,14 +416,14 @@ class RuleBasedExtractor:
             equipment = "scaffold / elevated platform / ladder"
         elif "electrical panel" in t_lower or "breaker" in t_lower:
             equipment = "electrical panel"
-        elif "chair" in t_lower:
+        elif "chair" in t_lower or "desk" in t_lower or "drawer" in t_lower or "office" in t_lower:
             equipment = "office furniture"
 
         # 7. Human & Environmental Factors
         human_factor = None
         if report_metadata and report_metadata.get("human_factor"):
             human_factor = str(report_metadata["human_factor"])
-        elif any(k in t_lower for k in ["procedure", "bypassed", "ignored", "distraction", "without", "removed", "no "]):
+        elif any(re.search(p, t_lower) for p in [r"\bprocedure bypassed\b", r"\bnon-compliance\b", r"\bignored safety\b", r"\bdistraction\b", r"\binappropriate positioning\b", r"\bline of fire\b", r"\bloto bypassed\b"]):
             human_factor = "inappropriate positioning / procedure non-compliance"
 
         env_factor = None

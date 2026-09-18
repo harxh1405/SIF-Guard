@@ -11,8 +11,14 @@ from app.services.trends.service import trend_service
 
 class AnalyticsService:
 
-    def get_site_rankings(self, db: Session, limit: int = 10) -> List[SiteRanking]:
-        reports = db.query(SafetyReport).all()
+    def _get_reports_query(self, db: Session, include_synthetic: bool = False):
+        query = db.query(SafetyReport)
+        if not include_synthetic:
+            query = query.filter(SafetyReport.data_origin != "synthetic")
+        return query.all()
+
+    def get_site_rankings(self, db: Session, limit: int = 10, include_synthetic: bool = False) -> List[SiteRanking]:
+        reports = self._get_reports_query(db, include_synthetic)
         site_totals = defaultdict(int)
         site_sif = defaultdict(int)
 
@@ -31,8 +37,8 @@ class AnalyticsService:
         rankings.sort(key=lambda x: (x.sif_density, x.sif_count), reverse=True)
         return rankings[:limit]
 
-    def get_activity_rankings(self, db: Session, limit: int = 10) -> List[ActivityRanking]:
-        reports = db.query(SafetyReport).all()
+    def get_activity_rankings(self, db: Session, limit: int = 10, include_synthetic: bool = False) -> List[ActivityRanking]:
+        reports = self._get_reports_query(db, include_synthetic)
         act_totals = defaultdict(int)
         act_sif = defaultdict(int)
 
@@ -51,8 +57,8 @@ class AnalyticsService:
         rankings.sort(key=lambda x: (x.sif_density, x.sif_count), reverse=True)
         return rankings[:limit]
 
-    def get_hazard_rankings(self, db: Session, limit: int = 10) -> List[HazardRanking]:
-        reports = db.query(SafetyReport).all()
+    def get_hazard_rankings(self, db: Session, limit: int = 10, include_synthetic: bool = False) -> List[HazardRanking]:
+        reports = self._get_reports_query(db, include_synthetic)
         haz_totals = defaultdict(int)
         haz_sif = defaultdict(int)
 
@@ -71,8 +77,8 @@ class AnalyticsService:
         rankings.sort(key=lambda x: (x.sif_density, x.sif_count), reverse=True)
         return rankings[:limit]
 
-    def get_barrier_rankings(self, db: Session, limit: int = 10) -> List[BarrierRanking]:
-        reports = db.query(SafetyReport).all()
+    def get_barrier_rankings(self, db: Session, limit: int = 10, include_synthetic: bool = False) -> List[BarrierRanking]:
+        reports = self._get_reports_query(db, include_synthetic)
         barr_totals = defaultdict(int)
         barr_sif = defaultdict(int)
 
@@ -91,8 +97,8 @@ class AnalyticsService:
         rankings.sort(key=lambda x: (x.sif_density, x.sif_count), reverse=True)
         return rankings[:limit]
 
-    def get_lsr_rankings(self, db: Session, limit: int = 10) -> List[LSRRanking]:
-        reports = db.query(SafetyReport).all()
+    def get_lsr_rankings(self, db: Session, limit: int = 10, include_synthetic: bool = False) -> List[LSRRanking]:
+        reports = self._get_reports_query(db, include_synthetic)
         lsr_counts = Counter()
         total_lsr_instances = 0
 
@@ -111,8 +117,8 @@ class AnalyticsService:
 
         return rankings
 
-    def get_dashboard_summary(self, db: Session) -> DashboardSummary:
-        reports = db.query(SafetyReport).all()
+    def get_dashboard_summary(self, db: Session, include_synthetic: bool = False) -> DashboardSummary:
+        reports = self._get_reports_query(db, include_synthetic)
         total_reports = len(reports)
         sif_count = sum(1 for r in reports if r.sif_potential == "SIF_POTENTIAL")
         sif_density = round(sif_count / total_reports if total_reports > 0 else 0.0, 4)
@@ -120,9 +126,9 @@ class AnalyticsService:
         sites_count = len(set(r.site or r.employer for r in reports if r.site or r.employer))
         activities_count = len(set(r.activity for r in reports if r.activity))
 
-        top_lsr = self.get_lsr_rankings(db, limit=5)
-        top_hazards = self.get_hazard_rankings(db, limit=5)
-        top_barriers = self.get_barrier_rankings(db, limit=5)
+        top_lsr = self.get_lsr_rankings(db, limit=5, include_synthetic=include_synthetic)
+        top_hazards = self.get_hazard_rankings(db, limit=5, include_synthetic=include_synthetic)
+        top_barriers = self.get_barrier_rankings(db, limit=5, include_synthetic=include_synthetic)
 
         clusters = db.query(PrecursorCluster).order_by(PrecursorCluster.sif_density.desc()).limit(5).all()
         emerging_patterns = [{

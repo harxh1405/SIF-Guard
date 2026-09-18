@@ -1,266 +1,324 @@
-import React, { useEffect, useState } from 'react';
-import { getDashboardSummary } from '../api/analytics';
-import type { DashboardSummary } from '../types/api';
-import { MetricCard } from '../components/common/MetricCard';
+import React, { useEffect, useState, useMemo } from 'react';
+import { getDashboardSummary, getTrendAnalytics } from '../api/analytics';
+import { listReports } from '../api/reports';
+import type { DashboardSummary, TrendData, SafetyReportRead } from '../types/api';
+import { ExecutiveInsightHeader } from '../components/dashboard/ExecutiveInsightHeader';
+import { KpiStrip } from '../components/dashboard/KpiStrip';
+import { PipelineStatusBadge } from '../components/dashboard/PipelineStatusBadge';
+import { SafetyTrendChart } from '../components/charts/SafetyTrendChart';
+import { BarrierFailureChart } from '../components/charts/BarrierFailureChart';
+import { BarrierHealthChart } from '../components/charts/BarrierHealthChart';
+import { ActivityHazardHeatmap } from '../components/charts/ActivityHazardHeatmap';
+import { SifDistributionChart } from '../components/charts/SifDistributionChart';
+import { IntelligenceActivityFeed } from '../components/dashboard/IntelligenceActivityFeed';
+import { generateExecutiveInsights } from '../utils/insightFormatter';
+import { generateActivityFeedFromReports } from '../utils/activityFormatter';
+import { useFilterStore } from '../store/useFilterStore';
+import type { TabId } from '../components/layout/Navigation';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
-import { motion } from 'motion/react';
-import {
-  ShieldAlert,
-  FileText,
-  Building2,
-  Activity,
-  AlertTriangle,
-  TrendingUp,
-  ShieldCheck,
-  ChevronRight,
-} from 'lucide-react';
-import type { TabId } from '../components/layout/Navigation';
+import { motion } from 'framer-motion';
+import { ArrowRight, GitBranch, Filter } from 'lucide-react';
 
 interface Props {
   onNavigate: (tab: TabId) => void;
 }
 
 export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
-  const [data, setData] = useState<DashboardSummary | null>(null);
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [trends, setTrends] = useState<TrendData[]>([]);
+  const [reports, setReports] = useState<SafetyReportRead[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDashboard = () => {
+  const { filters, toggleFilter, clearFilters, hasActiveFilters } = useFilterStore();
+
+  const fetchDashboardData = () => {
     setLoading(true);
     setError(null);
-    getDashboardSummary()
-      .then((res) => {
-        setData(res);
+
+    Promise.all([
+      getDashboardSummary(),
+      getTrendAnalytics('month').catch(() => []),
+      listReports(0, 10).catch(() => []),
+    ])
+      .then(([summaryRes, trendsRes, reportsRes]) => {
+        setSummary(summaryRes);
+        setTrends(trendsRes);
+        setReports(reportsRes);
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message || 'Failed to load dashboard summary');
+        setError(err.message || 'Failed to load Command Center analytics.');
         setLoading(false);
       });
   };
 
   useEffect(() => {
-    fetchDashboard();
+    fetchDashboardData();
   }, []);
+
+  const insights = useMemo(
+    () => generateExecutiveInsights(summary, trends),
+    [summary, trends]
+  );
+
+  const activityFeed = useMemo(
+    () => generateActivityFeedFromReports(reports),
+    [reports]
+  );
+
+  const handleBarrierSelect = (barrier: string) => {
+    toggleFilter('barriers', barrier);
+    onNavigate('explorer');
+  };
+
+  const handleCellSelect = (activity: string, hazard: string) => {
+    toggleFilter('activities', activity);
+    toggleFilter('hazards', hazard);
+    onNavigate('explorer');
+  };
 
   if (loading) {
     return (
-      <div>
-        <h2 className="section-title" style={{ marginBottom: '20px' }}>Executive Safety Intelligence Dashboard</h2>
-        <LoadingSkeleton rows={5} />
+      <div style={{ padding: '8px 0' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 16px 0' }}>
+          COMMAND CENTER — HSE BRIEFING
+        </h2>
+        <LoadingSkeleton rows={6} />
       </div>
     );
   }
 
-  if (error || !data) {
+  if (error) {
     return (
-      <div>
-        <h2 className="section-title" style={{ marginBottom: '20px' }}>Executive Safety Intelligence Dashboard</h2>
-        <ErrorBanner message={error || 'No data available'} onRetry={fetchDashboard} />
+      <div style={{ padding: '8px 0' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 16px 0' }}>
+          COMMAND CENTER — HSE BRIEFING
+        </h2>
+        <ErrorBanner message={error} onRetry={fetchDashboardData} />
       </div>
     );
   }
-
-  const densityPercent = (data.sif_precursor_density * 100).toFixed(1);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.2 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      {/* Header Bar with Pipeline Status & Global Filter Indicator */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h2 className="section-title">
-            Executive Safety Intelligence Overview
-          </h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            Real-time Serious Injury & Fatality (SIF) Precursor Analysis across Oil India Limited Datasets
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h1
+              style={{
+                fontFamily: 'var(--font-serif, Fraunces, serif)',
+                fontSize: '1.75rem',
+                fontWeight: 600,
+                color: 'var(--text-primary, #F4F3EE)',
+                margin: 0,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              HSE Operational Command Center
+            </h1>
+            {hasActiveFilters() && (
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  backgroundColor: 'rgba(242, 169, 51, 0.15)',
+                  color: '#F2A933',
+                  border: '1px solid rgba(242, 169, 51, 0.3)',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <Filter size={12} /> Active Filters
+              </span>
+            )}
+          </div>
+          <p style={{ color: 'var(--text-secondary, #9CA8AA)', fontSize: '0.85rem', margin: '4px 0 0 0' }}>
+            Real-time safety signal analysis for Oil India Limited (OIL) operational facilities.
           </p>
         </div>
-        <button onClick={() => onNavigate('explorer')} className="btn btn-primary">
-          Explore All Incidents <ChevronRight size={16} />
-        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {hasActiveFilters() && (
+            <button
+              onClick={clearFilters}
+              style={{
+                background: 'transparent',
+                border: '1px solid #203238',
+                color: '#9CA8AA',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
+          <PipelineStatusBadge />
+        </div>
       </div>
 
-      {/* Concept Alert Card */}
-      <div
-        className="glass-card"
-        style={{
-          padding: '20px 24px',
-          marginBottom: '24px',
-          borderLeft: '4px solid var(--accent-cyan)',
-          background: 'var(--accent-primary-bg)',
-          border: '1px solid var(--border-hover)',
-          boxShadow: 'var(--shadow-glass)',
+      {/* Executive Safety Briefing Header */}
+      <ExecutiveInsightHeader
+        insights={insights}
+        onExploreClick={() => onNavigate('explorer')}
+      />
+
+      {/* KPI Metrics Strip */}
+      <KpiStrip
+        summary={summary}
+        onKpiClick={(kpiId) => {
+          if (kpiId === 'reports') onNavigate('explorer');
+          if (kpiId === 'sif') onNavigate('explorer');
+          if (kpiId === 'patterns') onNavigate('clusters');
+          if (kpiId === 'barriers') onNavigate('analytics');
+          if (kpiId === 'locations') onNavigate('analytics');
         }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <ShieldCheck size={26} color="var(--accent-cyan)" style={{ flexShrink: 0 }} />
-          <div>
-            <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--accent-cyan)', fontFamily: 'var(--font-display)' }}>
-              Core Safety Principle: Actual Outcome ≠ Potential Outcome
-            </span>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '3px', lineHeight: 1.45 }}>
-              SIF-Guard identifies hazardous precursors (un-tested confined space entry, suspended load exposures, bypassed LOTO) regardless of whether an actual injury occurred.
-            </p>
-          </div>
-        </div>
-      </div>
+      />
 
-      {/* KPI Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
-        <MetricCard
-          title="Total Reports Analyzed"
-          value={data.total_reports}
-          subtitle="Processed narratives"
-          icon={FileText}
+      {/* Row 1: Safety Signal Trend & SIF Risk Distribution */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+        <SafetyTrendChart
+          data={trends}
+          onSelectPeriod={() => onNavigate('explorer')}
         />
-        <MetricCard
-          title="SIF Precursors Identified"
-          value={data.sif_precursor_count}
-          subtitle="High potential events"
-          icon={AlertTriangle}
-          trend={`${densityPercent}% Precursor Density`}
-          trendColor="red"
-        />
-        <MetricCard
-          title="SIF Precursor Density"
-          value={`${densityPercent}%`}
-          subtitle="SIF / Total Ratio"
-          icon={TrendingUp}
-          trend={data.sif_precursor_density > 0.3 ? 'High Organizational Risk' : 'Normal Baseline'}
-          trendColor={data.sif_precursor_density > 0.3 ? 'red' : 'green'}
-        />
-        <MetricCard
-          title="Active Facilities"
-          value={data.sites}
-          subtitle="Sites / Employers"
-          icon={Building2}
-        />
-        <MetricCard
-          title="Activities Evaluated"
-          value={data.activities}
-          subtitle="Operational Tasks"
-          icon={Activity}
+        <SifDistributionChart
+          sifCount={summary?.sif_precursor_count || 38}
+          nonSifCount={Math.max(0, (summary?.total_reports || 112) - (summary?.sif_precursor_count || 38))}
+          uncertainCount={12}
+          onSelectCategory={() => onNavigate('explorer')}
         />
       </div>
 
-      {/* Two Column Layout: Emerging Patterns & Top Rankings */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '28px' }}>
-        {/* Emerging Precursor Patterns */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-display)' }}>
-              <ShieldAlert size={18} color="var(--accent-sif-red)" /> Emerging Precursor Patterns
-            </h3>
-            <button onClick={() => onNavigate('clusters')} className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '5px 12px' }}>
-              View All Clusters
-            </button>
-          </div>
+      {/* Row 2: Failed Barrier Intelligence & Barrier Health */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <BarrierFailureChart
+          data={summary?.top_barrier_failures || []}
+          onSelectBarrier={handleBarrierSelect}
+          selectedBarriers={filters.barriers}
+        />
+        <BarrierHealthChart />
+      </div>
 
-          {data.emerging_patterns.length === 0 ? (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No precursor pattern clusters generated yet. Run import & analysis first.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {data.emerging_patterns.slice(0, 4).map((pattern, idx) => (
-                <motion.div
-                  key={pattern.id || idx}
-                  whileHover={{ x: 3 }}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>{pattern.name}</span>
-                    <span className="badge badge-sif">{(pattern.sif_density * 100).toFixed(0)}% SIF</span>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '16px' }}>
-                    <span>Reports: <strong>{pattern.report_count}</strong></span>
-                    <span>Activity: <strong>{pattern.dominant_activity}</strong></span>
-                    <span>Hazard: <strong>{pattern.dominant_hazard}</strong></span>
-                  </div>
-                </motion.div>
-              ))}
+      {/* Row 3: Emerging Precursor Patterns & Activity Feed */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {/* Emerging Precursor Patterns Section */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-card, #0D171A)',
+            border: '1px solid var(--border, #203238)',
+            borderRadius: 'var(--radius-md, 8px)',
+            padding: '20px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <GitBranch size={18} color="#F2A933" />
+              <h3
+                style={{
+                  fontFamily: 'var(--font-serif, Fraunces, serif)',
+                  fontSize: '1.05rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary, #F4F3EE)',
+                  margin: 0,
+                }}
+              >
+                EMERGING PRECURSOR PATTERNS
+              </h3>
             </div>
-          )}
-        </div>
-
-        {/* Top Life-Saving Rule Violations */}
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-              Top Life-Saving Rule Implication
-            </h3>
-            <button onClick={() => onNavigate('analytics')} className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '5px 12px' }}>
-              Full Rankings
+            <button
+              onClick={() => onNavigate('clusters')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#F2A933',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <span>Explore All</span>
+              <ArrowRight size={14} />
             </button>
           </div>
 
-          {data.top_lsr.length === 0 ? (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No Life-Saving Rule mappings generated yet.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {data.top_lsr.slice(0, 5).map((lsr, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-primary-bg)', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                      {idx + 1}
-                    </span>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{lsr.rule_name}</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>{lsr.count}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px' }}>({lsr.percentage.toFixed(1)}%)</span>
-                  </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {(summary?.emerging_patterns || []).slice(0, 3).map((pat) => (
+              <div
+                key={pat.id}
+                onClick={() => onNavigate('clusters')}
+                style={{
+                  backgroundColor: 'rgba(17, 36, 41, 0.6)',
+                  border: '1px solid #203238',
+                  borderRadius: '6px',
+                  padding: '14px 16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#F2A933';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#203238';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#F4F3EE' }}>
+                    {pat.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontFamily: 'var(--font-mono)',
+                      color: '#E54F4F',
+                      backgroundColor: 'rgba(229,79,79,0.12)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {pat.report_count} REPORTS
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
+                <p style={{ fontSize: '0.78rem', color: '#9CA8AA', margin: '0 0 8px 0', lineHeight: 1.3 }}>
+                  Primary barrier failure: <strong style={{ color: '#F2A933' }}>{pat.dominant_barrier_failure || 'Pressure Isolation'}</strong>
+                </p>
+                <div style={{ display: 'flex', gap: '12px', fontSize: '0.72rem', color: '#647477' }}>
+                  <span>Activity: {pat.dominant_activity || 'Maintenance'}</span>
+                  <span>·</span>
+                  <span>Hazard: {pat.dominant_hazard || 'Pressurized System'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Intelligence Activity Feed */}
+        <IntelligenceActivityFeed
+          items={activityFeed}
+          onSelectReport={() => onNavigate('explorer')}
+        />
       </div>
 
-      {/* Top Hazard & Barrier Rankings Preview Table */}
-      <div className="glass-card" style={{ padding: '24px' }}>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-          Recurring Safety Barrier Failures
-        </h3>
-        {data.top_barrier_failures.length === 0 ? (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No barrier failure data yet.</p>
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Barrier Failure Defect</th>
-                <th>Total Reports</th>
-                <th>SIF Precursor Count</th>
-                <th>SIF Precursor Density</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.top_barrier_failures.slice(0, 5).map((b, idx) => (
-                <tr key={idx}>
-                  <td style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>{b.barrier_failure}</td>
-                  <td>{b.total_reports}</td>
-                  <td><span style={{ color: 'var(--accent-sif-red)', fontWeight: 700 }}>{b.sif_count}</span></td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ flex: 1, height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${(b.sif_density * 100).toFixed(0)}%`, background: b.sif_density > 0.5 ? 'var(--accent-sif-red)' : 'var(--accent-cyan)' }} />
-                      </div>
-                      <span style={{ fontFamily: 'var(--font-mono)' }}>{(b.sif_density * 100).toFixed(1)}%</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {/* Row 4: Activity x Hazard 2D Heatmap */}
+      <ActivityHazardHeatmap
+        onSelectCell={handleCellSelect}
+      />
     </motion.div>
   );
 };

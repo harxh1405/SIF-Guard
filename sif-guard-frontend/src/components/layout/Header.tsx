@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldAlert, Server, CheckCircle2, XCircle, Sun, Moon } from 'lucide-react';
+import { ShieldAlert, Server, CheckCircle2, XCircle, Keyboard, User, LogOut } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
 import { motion } from 'motion/react';
+import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  onOpenShortcuts?: () => void;
 }
 
-export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
+export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts }) => {
+  const { user, profile, signOut } = useAuth();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [error, setError] = useState<boolean>(false);
 
@@ -27,11 +31,11 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
   return (
     <header
       style={{
-        padding: '16px 32px',
+        padding: '14px 28px',
         background: 'var(--bg-header)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border-color)',
+        borderBottom: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -43,29 +47,29 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <motion.div
-          whileHover={{ scale: 1.05, rotate: 2 }}
+          whileHover={{ scale: 1.04 }}
           style={{
-            width: '42px',
-            height: '42px',
+            width: '40px',
+            height: '40px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, var(--accent-blue) 0%, #0369a1 100%)',
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff',
-            boxShadow: 'var(--shadow-glow-cyan)',
-            border: '1px solid var(--border-hover)',
+            color: '#FFFFFF',
+            boxShadow: '0 4px 16px rgba(255, 106, 0, 0.25)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
           }}
         >
-          <ShieldAlert size={24} />
+          <ShieldAlert size={22} />
         </motion.div>
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span
               style={{
-                fontSize: '1.35rem',
-                fontWeight: 800,
+                fontSize: '1.25rem',
+                fontWeight: 700,
                 letterSpacing: '-0.02em',
                 color: 'var(--text-primary)',
                 fontFamily: 'var(--font-display)',
@@ -78,11 +82,11 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
                 fontSize: '0.65rem',
                 padding: '3px 8px',
                 borderRadius: '6px',
-                background: 'var(--accent-primary-bg)',
-                color: 'var(--accent-cyan)',
+                background: 'rgba(255, 106, 0, 0.10)',
+                color: 'var(--primary-bright)',
                 fontWeight: 700,
-                border: '1px solid var(--border-hover)',
-                letterSpacing: '0.05em',
+                border: '1px solid rgba(255, 106, 0, 0.20)',
+                letterSpacing: '0.06em',
                 fontFamily: 'var(--font-mono)',
               }}
             >
@@ -95,43 +99,43 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {/* Backend Status Badge */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '6px 16px',
-            borderRadius: '20px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            fontSize: '0.8rem',
+            padding: '6px 14px',
+            borderRadius: '12px',
+            background: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
+            fontSize: '0.78rem',
             fontFamily: 'var(--font-mono)',
           }}
         >
-          <Server size={14} color="var(--accent-cyan)" />
+          <Server size={14} color="var(--primary)" />
           <span style={{ color: 'var(--text-secondary)' }}>Backend:</span>
           {!error && health ? (
             <span
               style={{
-                color: 'var(--accent-nonsif-green)',
-                fontWeight: 700,
+                color: 'var(--success)',
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
               }}
             >
-              <CheckCircle2 size={12} /> Live ({health.embedding_model.split('/')[1] || health.embedding_model})
+              <CheckCircle2 size={12} /> Live {health.embedding_model ? `(${health.embedding_model.split('/')[1] || health.embedding_model})` : ''}
             </span>
           ) : (
             <span
               style={{
-                color: 'var(--accent-sif-red)',
-                fontWeight: 700,
+                color: 'var(--danger)',
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
               }}
             >
               <XCircle size={12} /> Disconnected
@@ -139,42 +143,106 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme }) => {
           )}
         </div>
 
-        {/* Theme Switcher Toggle */}
-        <motion.button
-          onClick={onToggleTheme}
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.94 }}
-          style={{
-            padding: '8px 14px',
-            borderRadius: '20px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            boxShadow: 'var(--shadow-glass)',
-            transition: 'all 0.2s ease',
-          }}
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun size={15} color="#f2a93b" />
-              <span>Light Mode</span>
-            </>
-          ) : (
-            <>
-              <Moon size={15} color="#00c8ff" />
-              <span>Dark Mode</span>
-            </>
-          )}
-        </motion.button>
+        {/* Keyboard Shortcuts Helper Button */}
+        {onOpenShortcuts && (
+          <motion.button
+            onClick={onOpenShortcuts}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              padding: '7px 12px',
+              borderRadius: '12px',
+              background: 'var(--surface-elevated)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              boxShadow: 'var(--shadow-card)',
+              transition: 'all 0.15s ease-out',
+            }}
+            title="Keyboard Shortcuts (Press '?')"
+          >
+            <Keyboard size={14} color="var(--primary)" />
+            <span>Shortcuts</span>
+            <kbd
+              style={{
+                background: 'var(--surface-hover)',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                fontSize: '0.68rem',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              ?
+            </kbd>
+          </motion.button>
+        )}
+
+        {/* Theme Toggle Switch */}
+        <ThemeToggleSwitch theme={theme} onToggle={onToggleTheme} />
+
+        {/* User Info & Logout */}
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '7px',
+                padding: '6px 12px',
+                borderRadius: '12px',
+                background: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
+                fontSize: '0.78rem',
+                color: 'var(--text-primary)',
+              }}
+            >
+              <User size={14} color="var(--primary)" />
+              <span
+                style={{
+                  fontWeight: 600,
+                  maxWidth: '140px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {profile?.full_name || user.email}
+              </span>
+            </div>
+
+            <motion.button
+              onClick={signOut}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '7px 12px',
+                borderRadius: '12px',
+                background: 'rgba(232, 93, 93, 0.10)',
+                border: '1px solid rgba(232, 93, 93, 0.25)',
+                color: 'var(--danger, #E85D5D)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                boxShadow: 'var(--shadow-card)',
+                transition: 'all 0.15s ease-out',
+              }}
+              title="Sign Out"
+            >
+              <LogOut size={14} />
+              <span>Sign Out</span>
+            </motion.button>
+          </div>
+        )}
       </div>
     </header>
   );
 };
-

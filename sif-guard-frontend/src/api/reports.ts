@@ -8,7 +8,7 @@ import type {
 
 export async function importReports(
   file: File,
-  source: string = 'osha_severe'
+  source: string = 'oil_hsse'
 ): Promise<ImportSummary> {
   const formData = new FormData();
   formData.append('file', file);
