@@ -333,16 +333,9 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
       <FacilityMetricsHUD summary={summary} activeZoneCount={summary.zones.length} />
 
       {/* Main Viewport Grid: 3D Twin / 2D Map on Left, Zone Intelligence on Right */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.85fr) minmax(340px, 1.15fr)',
-          gap: '20px',
-          alignItems: 'start',
-        }}
-      >
+      <div className="responsive-grid-twin" style={{ alignItems: 'start' }}>
         {/* Left: 3D Digital Twin Viewport OR 2D Vector Schematic */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0 }}>
           {viewMode === '3d' ? (
             <RefineryCanvas
               zones={summary.zones}

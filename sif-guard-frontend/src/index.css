@@ -1046,5 +1046,205 @@ textarea::placeholder {
   }
 }
 
+/* ==========================================================================
+   RESPONSIVE LAYOUT & SCALING UTILITIES
+   Ensures seamless responsive scaling, flex/grid adaptation across all zoom
+   levels and display resolutions (mobile -> ultrawide / 4K).
+   ========================================================================== */
+
+.app-main-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1280px) {
+  .app-main-content {
+    padding: 20px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-main-content {
+    padding: 16px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main-content {
+    padding: 12px 10px;
+  }
+}
+
+/* Responsive Grid 2:1 for Dashboard / Analytics */
+.responsive-grid-2-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1120px) {
+  .responsive-grid-2-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid 1:1 for Dual Cards / Charts */
+.responsive-grid-1-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-1-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Facility Twin (3D Canvas + Intel Pane) */
+.responsive-grid-twin {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1.2fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .responsive-grid-twin {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Review Queue */
+.responsive-grid-review {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-review {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Ingestion Page Workspace */
+.responsive-grid-ingestion {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(340px, 1.35fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-ingestion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid 4-column HUD */
+.responsive-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .responsive-grid-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Responsive Grid for Landing Hero Split */
+.responsive-grid-hero-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 32px;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-hero-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.app-header {
+  padding: 12px 24px;
+  background: var(--bg-header);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 12px;
+  flex-wrap: wrap;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 10px 14px;
+  }
+}
+
+.app-header-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .app-header-subtitle {
+    display: none;
+  }
+}
+
+.app-header-badge-text {
+  display: inline;
+}
+
+@media (max-width: 680px) {
+  .app-header-badge-text {
+    display: none;
+  }
+}
+
+/* Safe Flex & Chart Wrappers to prevent flex/grid overflow */
+.chart-container-fluid {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.responsive-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
 
 

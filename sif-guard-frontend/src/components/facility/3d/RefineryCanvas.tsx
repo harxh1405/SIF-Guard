@@ -21,6 +21,24 @@ import {
 } from 'lucide-react';
 
 
+// Utility to recursively dispose Three.js meshes and materials
+const disposeHierarchy = (obj: THREE.Object3D) => {
+  obj.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach((m) => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    }
+  });
+};
+
 interface RefineryCanvasProps {
   zones: FacilityZone[];
   selectedZoneId: string | null;
@@ -105,7 +123,6 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   const selectedZoneIdRef = useRef<string | null>(selectedZoneId);
   const hoveredZoneIdRef = useRef<string | null>(hoveredZoneId);
   const isDraggingRef = useRef<boolean>(false);
-  const isVisibleRef = useRef<boolean>(true);
   const dragStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const pointerPosRef = useRef<{ clientX: number; clientY: number } | null>(null);
   const rafHoverIdRef = useRef<number | null>(null);
@@ -328,10 +345,6 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-
-      // Skip GPU render passes when offscreen or document is backgrounded
-      if (!isVisibleRef.current || document.hidden) return;
-
       const elapsedTime = (performance.now() - startRenderTime) * 0.001;
 
       // Programmatic Camera Lerp (Used ONLY during Reset View or preset selection)
@@ -386,44 +399,53 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         });
       });
 
+
       controls.update();
       renderer.render(scene, camera);
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !animationFrameId) {
+        animate();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     animate();
 
-    // 9. Intersection Observer to Pause Loop when offscreen
-    const viewportObserver = new IntersectionObserver(
-      ([entry]) => {
-        isVisibleRef.current = entry.isIntersecting;
-      },
-      { threshold: 0.05 }
-    );
-    if (containerRef.current) {
-      viewportObserver.observe(containerRef.current);
-    }
-
-    // 10. Handle Window Resize
+    // 9. Handle Window & Container Resize
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = containerRef.current.clientWidth;
       const h = containerRef.current.clientHeight;
+      if (w === 0 || h === 0) return;
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
 
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
     window.addEventListener('resize', handleResize);
 
     return () => {
+      if (resizeObserver) resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
-      viewportObserver.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
       if (rafHoverIdRef.current !== null) {
         cancelAnimationFrame(rafHoverIdRef.current);
       }
       controls.dispose();
       renderer.dispose();
+      if (sceneRef.current) {
+        disposeHierarchy(sceneRef.current);
+      }
     };
   }, []);
 
@@ -465,7 +487,10 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     // Rebuild structures with updated theme materials
     const oldRefinery = scene.getObjectByName('REFINERY_STRUCTURES');
-    if (oldRefinery) scene.remove(oldRefinery);
+    if (oldRefinery) {
+      scene.remove(oldRefinery);
+      disposeHierarchy(oldRefinery);
+    }
 
     const materials = createRefineryMaterials(theme);
     const refineryGroup = new THREE.Group();

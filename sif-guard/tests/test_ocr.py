@@ -44,3 +44,19 @@ def test_ocr_api_endpoint_unsupported_format():
     )
     assert response.status_code == 400
     assert "Unsupported file format" in response.json()["detail"]
+
+
+def test_ocr_image_extraction_valid_image():
+    from PIL import Image, ImageDraw
+    img = Image.new("RGB", (400, 100), color=(255, 255, 255))
+    d = ImageDraw.Draw(img)
+    d.text((20, 30), "SAFETY INCIDENT REPORT", fill=(0, 0, 0))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    img_bytes = buf.getvalue()
+
+    res = ocr_service.extract(img_bytes, "incident_photo.png")
+    assert isinstance(res, OCRResultSchema)
+    assert res.confidence > 0.0
+    assert "SAFETY" in res.text or "INCIDENT" in res.text or "REPORT" in res.text
+

@@ -13,16 +13,23 @@ class OILHSSEAdapter(DataSourceAdapter):
     """
 
     def validate(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, int]:
-        possible_text_cols = ["description", "narrative", "observation", "report_text"]
+        possible_text_cols = [
+            "report_text", "description", "narrative", "observation",
+            "incident_description", "event_description", "details", "summary", "text", "report"
+        ]
         found = any(col in df.columns for col in possible_text_cols)
         if not found:
-            raise ValueError("Missing narrative column in OIL HSSE dataset")
+            raise ValueError("Missing narrative column in safety report dataset")
         valid_df = df.dropna(subset=[col for col in possible_text_cols if col in df.columns][:1]).copy()
         return valid_df, len(df) - len(valid_df)
 
     def normalize(self, record: Dict[str, Any]) -> SafetyReport:
         rec_id = str(record.get("source_record_id", record.get("id", record.get("report_no", uuid.uuid4().hex))))
-        text_col = next((k for k in ["description", "narrative", "observation", "report_text"] if k in record and pd.notna(record[k])), "")
+        possible_cols = [
+            "report_text", "description", "narrative", "observation",
+            "incident_description", "event_description", "details", "summary", "text", "report"
+        ]
+        text_col = next((k for k in possible_cols if k in record and pd.notna(record[k])), "")
         
         data_origin = record.get("data_origin")
         if not data_origin:

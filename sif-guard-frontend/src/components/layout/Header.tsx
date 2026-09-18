@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { ShieldAlert, Keyboard, User, LogOut, ChevronDown } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ShieldAlert, Server, CheckCircle2, XCircle, Keyboard, User, LogOut } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
-import { StatusBadge } from '../common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 
 interface Props {
@@ -17,8 +16,6 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
   const { user, profile, signOut } = useAuth();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [error, setError] = useState<boolean>(false);
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getHealth()
@@ -31,37 +28,8 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
       });
   }, []);
 
-  // Close profile dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const userName = profile?.full_name || user?.email || 'Safety Officer';
-
   return (
-    <header
-      style={{
-        padding: '14px 28px',
-        background: 'var(--bg-header)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        transition: 'background-color 0.3s ease, border-color 0.3s ease',
-      }}
-    >
-      {/* Brand & Logo */}
+    <header className="app-header">
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <motion.div
           whileHover={{ scale: 1.04 }}
@@ -76,262 +44,190 @@ export const Header: React.FC<Props> = ({ theme, onToggleTheme, onOpenShortcuts 
             color: '#FFFFFF',
             boxShadow: '0 4px 16px rgba(255, 106, 0, 0.25)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
+            flexShrink: 0,
           }}
         >
           <ShieldAlert size={20} />
         </motion.div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              color: 'var(--text-primary)',
-              fontFamily: 'var(--font-display)',
-            }}
-          >
-            SIF-GUARD
-          </span>
-          <span
-            style={{
-              fontSize: '0.65rem',
-              padding: '3px 8px',
-              borderRadius: '6px',
-              background: 'rgba(255, 106, 0, 0.10)',
-              color: 'var(--primary-bright)',
-              fontWeight: 700,
-              border: '1px solid rgba(255, 106, 0, 0.20)',
-              letterSpacing: '0.06em',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            OIL INDIA LIMITED
-          </span>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span
+              style={{
+                fontSize: '1.15rem',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-display)',
+              }}
+            >
+              SIF-GUARD
+            </span>
+            <span
+              style={{
+                fontSize: '0.62rem',
+                padding: '2px 6px',
+                borderRadius: '5px',
+                background: 'rgba(255, 106, 0, 0.10)',
+                color: 'var(--primary-bright)',
+                fontWeight: 700,
+                border: '1px solid rgba(255, 106, 0, 0.20)',
+                letterSpacing: '0.06em',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              OIL INDIA LIMITED
+            </span>
+          </div>
+          <p className="app-header-subtitle">
+            Serious Injury & Fatality Precursor Intelligence Platform
+          </p>
         </div>
       </div>
 
-      {/* Controls & Profile Dropdown */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        {/* Condensed Status Indicator */}
-        <StatusBadge
-          dotOnly
-          variant={!error && health ? 'success' : 'danger'}
-          tooltip={
-            health
-              ? `AI Service Live (${health.service}) • Model: ${health.embedding_model}`
-              : 'Backend Service Disconnected'
-          }
+      <div className="responsive-header-actions">
+        {/* Backend Status Badge */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '5px 12px',
+            borderRadius: '10px',
+            background: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
+            fontSize: '0.75rem',
+            fontFamily: 'var(--font-mono)',
+          }}
         >
-          {!error && health ? 'Operational' : 'Disconnected'}
-        </StatusBadge>
+          <Server size={13} color="var(--primary)" />
+          <span className="app-header-badge-text" style={{ color: 'var(--text-secondary)' }}>Backend:</span>
+          {!error && health ? (
+            <span
+              style={{
+                color: 'var(--success)',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <CheckCircle2 size={12} /> Live
+            </span>
+          ) : (
+            <span
+              style={{
+                color: 'var(--danger)',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <XCircle size={12} /> Disconnected
+            </span>
+          )}
+        </div>
 
-        {/* Consolidated Profile Dropdown Menu */}
-        <div ref={menuRef} style={{ position: 'relative' }}>
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+        {/* Keyboard Shortcuts Helper Button */}
+        {onOpenShortcuts && (
+          <motion.button
+            onClick={onOpenShortcuts}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '6px 12px',
+              padding: '7px 12px',
               borderRadius: '12px',
-              background: isMenuOpen ? 'var(--surface-hover)' : 'var(--surface-elevated)',
+              background: 'var(--surface-elevated)',
               border: '1px solid var(--border)',
               color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
               cursor: 'pointer',
               fontSize: '0.78rem',
               fontWeight: 600,
-              transition: 'all 0.15s ease',
+              boxShadow: 'var(--shadow-card)',
+              transition: 'all 0.15s ease-out',
             }}
+            title="Keyboard Shortcuts (Press '?')"
           >
-            <div
+            <Keyboard size={14} color="var(--primary)" />
+            <span>Shortcuts</span>
+            <kbd
               style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: 'rgba(255, 106, 0, 0.15)',
-                color: 'var(--primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <User size={13} />
-            </div>
-            <span
-              style={{
-                maxWidth: '130px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {userName}
-            </span>
-            <ChevronDown
-              size={14}
-              style={{
-                transform: isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
+                background: 'var(--surface-hover)',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                fontSize: '0.68rem',
+                border: '1px solid var(--border-subtle)',
                 color: 'var(--text-secondary)',
               }}
-            />
-          </button>
+            >
+              ?
+            </kbd>
+          </motion.button>
+        )}
 
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.96 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
+        {/* Theme Toggle Switch */}
+        <ThemeToggleSwitch theme={theme} onToggle={onToggleTheme} />
+
+        {/* User Info & Logout */}
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '7px',
+                padding: '6px 12px',
+                borderRadius: '12px',
+                background: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
+                fontSize: '0.78rem',
+                color: 'var(--text-primary)',
+              }}
+            >
+              <User size={14} color="var(--primary)" />
+              <span
                 style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 8px)',
-                  right: 0,
-                  width: '230px',
-                  background: 'var(--surface-elevated, #1a1d24)',
-                  border: '1px solid var(--border, #2a2e39)',
-                  borderRadius: '14px',
-                  padding: '8px',
-                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.35)',
-                  zIndex: 1000,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
+                  fontWeight: 600,
+                  maxWidth: '140px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {/* User Info Header in Menu */}
-                <div
-                  style={{
-                    padding: '8px 10px 10px 10px',
-                    borderBottom: '1px solid var(--border-subtle)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {userName}
-                  </p>
-                  {user?.email && (
-                    <p
-                      style={{
-                        margin: '2px 0 0 0',
-                        fontSize: '0.72rem',
-                        color: 'var(--text-muted)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {user.email}
-                    </p>
-                  )}
-                </div>
+                {profile?.full_name || user.email}
+              </span>
+            </div>
 
-                {/* Keyboard Shortcuts Item */}
-                {onOpenShortcuts && (
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onOpenShortcuts();
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: '8px',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.78rem',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'background 0.12s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-hover)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Keyboard size={14} color="var(--primary)" />
-                      <span>Shortcuts</span>
-                    </div>
-                    <kbd
-                      style={{
-                        background: 'var(--surface-hover)',
-                        padding: '1px 5px',
-                        borderRadius: '4px',
-                        fontSize: '0.68rem',
-                        border: '1px solid var(--border-subtle)',
-                        color: 'var(--text-secondary)',
-                      }}
-                    >
-                      ?
-                    </kbd>
-                  </button>
-                )}
-
-                {/* Theme Toggle Item */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                  }}
-                >
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>Appearance</span>
-                  <ThemeToggleSwitch theme={theme} onToggle={onToggleTheme} />
-                </div>
-
-                {/* Sign Out Button */}
-                {user && (
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      signOut();
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: '8px',
-                      background: 'rgba(232, 93, 93, 0.08)',
-                      border: 'none',
-                      color: 'var(--danger, #E85D5D)',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      marginTop: '4px',
-                      transition: 'background 0.12s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232, 93, 93, 0.16)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(232, 93, 93, 0.08)')}
-                  >
-                    <LogOut size={14} />
-                    <span>Sign Out</span>
-                  </button>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            <motion.button
+              onClick={signOut}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '7px 12px',
+                borderRadius: '12px',
+                background: 'rgba(232, 93, 93, 0.10)',
+                border: '1px solid rgba(232, 93, 93, 0.25)',
+                color: 'var(--danger, #E85D5D)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                boxShadow: 'var(--shadow-card)',
+                transition: 'all 0.15s ease-out',
+              }}
+              title="Sign Out"
+            >
+              <LogOut size={14} />
+              <span>Sign Out</span>
+            </motion.button>
+          </div>
+        )}
       </div>
     </header>
   );
