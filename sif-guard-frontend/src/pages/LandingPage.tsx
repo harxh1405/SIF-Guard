@@ -446,6 +446,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     };
   }, []);
 
+  // Dynamic Root Font Size & Accessibility Scaling Controller (A- / A / A+)
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('font-size-small', 'font-size-normal', 'font-size-large');
+    root.classList.add(`font-size-${fontSize}`);
+
+    if (fontSize === 'small') {
+      root.style.fontSize = '14px'; // 87.5% - clear, readable reduction
+    } else if (fontSize === 'large') {
+      root.style.fontSize = '18.5px'; // 115.6% - clear, high-accessibility enlargement
+    } else {
+      root.style.fontSize = '16px'; // 100% - standard baseline
+    }
+
+    return () => {
+      // Restore standard baseline when navigating away or unmounting
+      root.style.fontSize = '';
+      root.classList.remove('font-size-small', 'font-size-normal', 'font-size-large');
+    };
+  }, [fontSize]);
+
   const handleFontSizeChange = (size: 'small' | 'normal' | 'large') => {
     setFontSize(size);
     try {
@@ -453,9 +474,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     } catch {
       // ignore
     }
-    const label = size === 'small' ? 'Decreased (90%)' : size === 'large' ? 'Increased (112%)' : 'Standard (100%)';
+    const label =
+      size === 'small'
+        ? 'Decreased (A- / 87.5%)'
+        : size === 'large'
+        ? 'Increased (A+ / 115%)'
+        : 'Standard (A / 100%)';
     setToastMessage(`Text Size: ${label}`);
-    setTimeout(() => setToastMessage(null), 2000);
+    setTimeout(() => setToastMessage(null), 2500);
   };
 
   const searchMatches = React.useMemo(() => {
@@ -560,7 +586,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   });
 
   return (
-    <div className="india-gov-page">
+    <div className={`india-gov-page font-size-${fontSize}`}>
       {/* =========================================================================
           FIXED ANIMATED BACKGROUND LAYER (REFINERY.WEBP + SLOW KEN BURNS + SCRIM)
           Stationary behind content, position: fixed, inset: 0, outside any transform/filter
