@@ -3,6 +3,7 @@ import numpy as np
 from sqlalchemy.orm import Session
 from app.db.models.report import SafetyReport
 from app.services.embeddings.service import embedding_service
+from app.core.config import settings
 
 
 class SimilarityService:
@@ -17,11 +18,15 @@ class SimilarityService:
         hazard_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         
+        target_text_norm = (target_report.report_text or "").strip().lower()
         target_emb = target_report.embedding
         if not target_emb:
             target_emb = embedding_service.encode(target_report.report_text)
 
-        query = db.query(SafetyReport).filter(SafetyReport.id != target_report.id)
+        query = db.query(SafetyReport).filter(
+            SafetyReport.id != target_report.id,
+            SafetyReport.source_record_id != target_report.source_record_id
+        )
 
         if site_filter:
             query = query.filter(SafetyReport.site == site_filter)
@@ -37,8 +42,15 @@ class SimilarityService:
         target_vec = np.array(target_emb)
         norm_target = np.linalg.norm(target_vec)
 
+        seen_texts = {target_text_norm}
         scored_candidates = []
+
         for cand in candidates:
+            cand_text_norm = (cand.report_text or "").strip().lower()
+            if cand_text_norm in seen_texts:
+                continue
+            seen_texts.add(cand_text_norm)
+
             cand_emb = cand.embedding
             if not cand_emb:
                 cand_emb = embedding_service.encode(cand.report_text)
@@ -47,11 +59,13 @@ class SimilarityService:
             norm_cand = np.linalg.norm(cand_vec)
 
             sim = np.dot(target_vec, cand_vec) / (norm_target * norm_cand) if norm_target > 0 and norm_cand > 0 else 0.0
+            if sim < settings.SIMILARITY_THRESHOLD:
+                continue
             
             scored_candidates.append({
                 "id": cand.id,
                 "source_record_id": cand.source_record_id,
-                "report_text": cand.report_text[:200] + "...",
+                "report_text": cand.report_text[:200] + ("..." if len(cand.report_text) > 200 else ""),
                 "activity": cand.activity,
                 "hazard": cand.hazard,
                 "barrier_failure": cand.barrier_failure,

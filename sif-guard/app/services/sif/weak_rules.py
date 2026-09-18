@@ -12,9 +12,20 @@ class WeakSupervisionRules:
         t_lower = text.lower()
         risk_factors = []
 
+        # 0. Proactive Controls / Low Risk Detection (e.g., removed from service, office observation, minor repairs)
+        if any(term in t_lower for term in [
+            "removed from service", "tagged out immediately", "chair height", "desk chair",
+            "office ergonomics", "pre-use inspection completed", "green tag in place",
+            "desk drawer", "desk", "drawer", "loose handle", "loose armrest", "administrative office",
+            "taken out of use", "repaired by facilities", "no employee was exposed", "no injury or near miss"
+        ]) or extraction.hazard == "ergonomic / minor office hazard":
+            if "fall" not in t_lower and "explosion" not in t_lower and "h2s" not in t_lower and "fatal" not in t_lower and "rotating" not in t_lower:
+                risk_factors.append("Proactive hazard control or low consequence observation")
+                return "NON_SIF", 0.05, risk_factors
+
         # 1. Confined Space Precursor
         if any(kw in t_lower for kw in ["confined space", "storage tank", "vessel entry", "tank cleaning", "reactor"]) or extraction.activity == "confined space entry":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["without atmospheric testing", "gas test", "h2s", "toxic", "oxygen", "gas"]):
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["without atmospheric testing", "gas test", "h2s", "toxic", "oxygen", "gas", "no gas"]):
                 risk_factors.append("Confined space / tank entry without mandatory atmospheric gas testing")
                 if extraction.potential_consequence:
                     risk_factors.append(f"Potential consequence: {extraction.potential_consequence}")
@@ -22,7 +33,7 @@ class WeakSupervisionRules:
 
         # 2. Energy Isolation (LOTO) & Electrical Precursor
         if any(kw in t_lower for kw in ["loto", "energy isolation", "lockout", "tagout", "electrical work", "energized", "breaker"]) or extraction.barrier == "energy isolation (LOTO)":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["bypassed", "without isolation", "energized", "live", "isolation not verified"]):
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["bypassed", "without isolation", "energized", "live", "isolation not verified", "not electrically isolated", "without applying"]):
                 risk_factors.append("Energy isolation (LOTO) missing, bypassed, or not verified on energized system")
                 return "SIF_POTENTIAL", 0.92, risk_factors
 
@@ -33,37 +44,38 @@ class WeakSupervisionRules:
 
         # 4. Work at Height & Elevated Platform Precursor
         if any(kw in t_lower for kw in ["fall", "height", "roof", "scaffold", "ladder", "elevated", "rig floor", "derrick", "8 meters"]) or (metadata and metadata.get("fall_height") and metadata["fall_height"] > 6):
-            if any(kw in t_lower for kw in ["without fall protection", "unprotected edge", "harness", "lanyard", "scaffolding"]) or extraction.barrier_failure:
+            if any(kw in t_lower for kw in ["without fall protection", "unprotected edge", "harness", "lanyard", "scaffolding"]) or extraction.barrier_failure or (metadata and metadata.get("fall_height") and metadata["fall_height"] > 10):
                 height_str = f" from {metadata['fall_height']} feet" if metadata and metadata.get("fall_height") else ""
                 risk_factors.append(f"Elevated work activity{height_str} performed without required fall protection / harness")
                 return "SIF_POTENTIAL", 0.93, risk_factors
 
         # 5. Pressurized System & Depressurization Precursor
-        if any(kw in t_lower for kw in ["pressurized", "pressure line", "process line", "flange", "depressurized", "zero pressure", "valve"]) or extraction.activity == "pressurized system maintenance":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["without confirming", "residual pressure", "loosening", "un-isolated", "pressure release"]):
+        if any(kw in t_lower for kw in ["pressurized", "pressure line", "process line", "flange", "depressurized", "depressuriz", "zero pressure", "valve"]) or extraction.activity == "pressurized system maintenance" or extraction.barrier == "pressure isolation / depressurization":
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["without confirming", "residual pressure", "loosening", "un-isolated", "pressure release", "not verified", "without depressuriz"]):
                 risk_factors.append("Pressurized system opened or serviced without zero-energy / depressurization verification")
                 return "SIF_POTENTIAL", 0.93, risk_factors
 
         # 6. Machinery Guarding & Rotating Equipment Precursor
-        if any(kw in t_lower for kw in ["grinding", "machine guard", "rotating machinery", "centrifugal pump", "caught-in", "nip point"]) or extraction.hazard == "rotating machinery / caught-in":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["removed", "bypassed", "guard missing", "un-guarded"]):
+        if any(kw in t_lower for kw in ["grinding", "grind", "machine guard", "guard", "rotating machinery", "centrifugal pump", "caught-in", "nip point"]) or extraction.hazard == "rotating machinery / caught-in" or extraction.barrier == "machine guarding":
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["removed", "bypassed", "guard missing", "un-guarded", "without the guard"]):
                 risk_factors.append("Operation of rotating machinery with safety guard removed, missing, or bypassed")
                 return "SIF_POTENTIAL", 0.92, risk_factors
 
         # 7. Excavation & Trenching Precursor
-        if any(kw in t_lower for kw in ["excavation", "trench", "shoring", "cave-in", "digging"]) or extraction.activity == "excavation work":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["without shoring", "unprotected", "unstable", "deep"]):
+        if any(kw in t_lower for kw in ["excavation", "trench", "shoring", "cave-in", "digging"]) or extraction.activity == "excavation work" or extraction.barrier == "excavation protection":
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["without shoring", "unprotected", "unstable", "deep", "no shoring", "instability"]):
                 risk_factors.append("Excavation entry without required shoring or trench cave-in protective system")
                 return "SIF_POTENTIAL", 0.91, risk_factors
 
         # 8. Toxic Gas & Hazardous Atmosphere Exposure
-        if any(kw in t_lower for kw in ["h2s", "toxic gas", "hazardous atmosphere", "methane", "gas leak"]) or extraction.hazard == "toxic gas / hazardous atmosphere":
-            risk_factors.append("Worker exposure to toxic gas (H2S) or hazardous asphyxiating atmosphere")
-            return "SIF_POTENTIAL", 0.95, risk_factors
+        if any(kw in t_lower for kw in ["h2s", "toxic gas", "hazardous atmosphere", "methane", "gas leak", "gas test"]) or extraction.hazard == "toxic gas / hazardous atmosphere" or extraction.barrier == "gas testing":
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["h2s", "toxic", "without gas", "no gas", "required gas test"]):
+                risk_factors.append("Worker exposure to toxic gas (H2S) or hazardous asphyxiating atmosphere")
+                return "SIF_POTENTIAL", 0.95, risk_factors
 
         # 9. Vehicle & Mobile Equipment Interaction Precursor
-        if any(kw in t_lower for kw in ["vehicle", "moving vehicle", "forklift", "truck", "traffic", "pedestrian"]) or extraction.activity == "vehicle / pedestrian interaction":
-            if extraction.barrier_failure or any(kw in t_lower for kw in ["not barricaded", "un-barricaded", "exclusion zone", "struck-by"]):
+        if any(kw in t_lower for kw in ["vehicle", "moving vehicle", "forklift", "truck", "traffic", "pedestrian", "barricad", "exclusion zone"]) or extraction.activity == "vehicle / pedestrian interaction" or extraction.barrier == "exclusion zone / barricading":
+            if extraction.barrier_failure or any(kw in t_lower for kw in ["not barricaded", "un-barricaded", "exclusion zone", "struck-by", "no barricade", "breached", "operating zone"]):
                 risk_factors.append("Work in vehicle pathway without exclusion zone barricades or traffic isolation")
                 return "SIF_POTENTIAL", 0.90, risk_factors
 

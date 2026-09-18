@@ -53,6 +53,7 @@ export interface SimilarReport {
 
 export interface AnalysisResponse {
   report_id: string;
+  trace_id?: string;
   extraction: ExtractionSchema;
   sif: SIFResultSchema;
   life_saving_rules: LSRMatchSchema[];
@@ -115,6 +116,8 @@ export interface ImportSummary {
   duplicates: number;
   invalid: number;
   source: string;
+  imported_ids?: string[];
+  first_imported_id?: string | null;
 }
 
 export interface JobStatus {
