@@ -181,7 +181,7 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
           <div>
             <h4
               style={{
-                fontFamily: 'var(--font-serif, Fraunces, serif)',
+                fontFamily: 'var(--font-display, var(--font-sans))',
                 fontSize: '1.05rem',
                 margin: 0,
                 color: '#F4F3EE',

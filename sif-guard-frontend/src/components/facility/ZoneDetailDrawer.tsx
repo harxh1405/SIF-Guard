@@ -316,7 +316,7 @@ export const ZoneDetailDrawer: React.FC<ZoneDetailDrawerProps> = ({ zone, onClos
                           {inc.severity}
                         </span>
                         {inc.is_demo && (
-                          <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', backgroundColor: 'var(--primary)', color: '#000' }}>
+                          <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', backgroundColor: 'var(--primary)', color: '#ffffff' }}>
                             DEMO
                           </span>
                         )}

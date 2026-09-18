@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ShieldAlert,
   Server,
   CheckCircle2,
   XCircle,
-  Keyboard,
-  User,
   LogOut,
 } from 'lucide-react';
 import { getHealth } from '../../api/review';
 import type { HealthResponse } from '../../types/api';
-import { motion } from 'motion/react';
-import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
 import { useAuth } from '../../context/AuthContext';
 
 interface Props {
@@ -22,12 +17,110 @@ interface Props {
   onToggleAudio?: () => void;
 }
 
-export const Header: React.FC<Props> = ({
-  theme,
-  onToggleTheme,
-  onOpenShortcuts,
-}) => {
-  const { user, profile, signOut } = useAuth();
+/** National Emblem of India (Lion Capital of Ashoka with Satyameva Jayate) */
+const NationalEmblemSvg: React.FC<{ size?: number }> = ({ size = 42 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 100 120"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <title>National Emblem of India (Government of India)</title>
+    {/* Ashoka Pillar Top Base */}
+    <path d="M20 90 L80 90 L75 96 L25 96 Z" fill="#B45309" opacity="0.9" />
+    <rect x="30" y="84" width="40" height="6" rx="1" fill="#D97706" />
+    
+    {/* Ashoka Chakra Center */}
+    <circle cx="50" cy="74" r="9" fill="none" stroke="#0D233A" strokeWidth="2" />
+    <circle cx="50" cy="74" r="2" fill="#0D233A" />
+    {[0, 30, 60, 90, 120, 150].map((deg) => (
+      <line
+        key={deg}
+        x1="50"
+        y1="65"
+        x2="50"
+        y2="83"
+        stroke="#0D233A"
+        strokeWidth="1"
+        transform={`rotate(${deg} 50 74)`}
+      />
+    ))}
+    
+    {/* Lion Heads (3 Lions Representation) */}
+    {/* Center Lion */}
+    <path
+      d="M38 32 C38 20 62 20 62 32 C65 42 62 58 50 64 C38 58 35 42 38 32 Z"
+      fill="#D97706"
+      stroke="#78350F"
+      strokeWidth="1.5"
+    />
+    {/* Crown Mane details */}
+    <path d="M42 26 Q50 18 58 26 Q50 24 42 26 Z" fill="#F59E0B" />
+    <circle cx="45" cy="34" r="1.8" fill="#78350F" />
+    <circle cx="55" cy="34" r="1.8" fill="#78350F" />
+    <path d="M47 42 Q50 45 53 42" stroke="#78350F" strokeWidth="1.5" strokeLinecap="round" />
+    
+    {/* Left Lion Profile */}
+    <path
+      d="M26 38 C22 30 38 24 40 34 C38 46 32 54 26 50 Z"
+      fill="#B45309"
+      stroke="#78350F"
+      strokeWidth="1"
+    />
+    
+    {/* Right Lion Profile */}
+    <path
+      d="M74 38 C78 30 62 24 60 34 C62 46 68 54 74 50 Z"
+      fill="#B45309"
+      stroke="#78350F"
+      strokeWidth="1"
+    />
+
+    {/* Satyameva Jayate Banner Text */}
+    <rect x="15" y="100" width="70" height="14" rx="2" fill="#0D233A" />
+    <text
+      x="50"
+      y="110"
+      textAnchor="middle"
+      fill="#FFFFFF"
+      fontSize="7.5"
+      fontWeight="700"
+      fontFamily="var(--font-sans), sans-serif"
+      letterSpacing="0.8"
+    >
+      सत्यमेव जयते
+    </text>
+  </svg>
+);
+
+/** Oil India Limited Brand Emblem SVG */
+const OilIndiaBadgeSvg: React.FC<{ size?: number }> = ({ size = 38 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0 }}
+  >
+    <title>Oil India Limited (OIL) PSU Brand Mark</title>
+    <rect width="100" height="100" rx="6" fill="#003366" />
+    <path d="M50 15 L80 35 L80 75 L50 90 L20 75 L20 35 Z" fill="none" stroke="#FF9933" strokeWidth="4" />
+    {/* Petroleum Rig / Flame Motif */}
+    <path d="M50 25 L62 70 L38 70 Z" fill="none" stroke="#FFFFFF" strokeWidth="3" />
+    <line x1="42" y1="50" x2="58" y2="50" stroke="#FFFFFF" strokeWidth="2" />
+    <line x1="45" y1="60" x2="55" y2="60" stroke="#FFFFFF" strokeWidth="2" />
+    <circle cx="50" cy="38" r="4" fill="#FF9933" />
+    <text x="50" y="84" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="800" fontFamily="sans-serif">
+      OIL
+    </text>
+  </svg>
+);
+
+export const Header: React.FC<Props> = () => {
+  const { user, signOut } = useAuth();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [error, setError] = useState<boolean>(false);
 
@@ -45,274 +138,176 @@ export const Header: React.FC<Props> = ({
   return (
     <header
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        boxShadow: '0 2px 8px rgba(0, 51, 102, 0.06)',
+        position: 'relative',
+        zIndex: 10,
+        background: '#FFFFFF',
+        borderBottom: '1px solid #D1D5DB',
+        flexShrink: 0,
       }}
     >
-      {/* 1. National Tricolor Strip */}
-      <div className="gov-tricolor-strip" style={{ height: '3.5px' }} />
-
-      {/* 2. National Portal Attribution Top Bar */}
       <div
         style={{
-          backgroundColor: theme === 'dark' ? '#071526' : '#f1f5f9',
-          borderBottom: '1px solid var(--border-subtle)',
-          padding: '4px 28px',
-          fontSize: '0.72rem',
+          padding: '12px 24px',
+          background: '#FFFFFF',
+          minHeight: '70px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          color: 'var(--text-secondary)',
-          fontFamily: 'var(--font-sans)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontWeight: 700, color: 'var(--primary)' }}>
-            NATIONAL SAFETY INITIATIVE
-          </span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span>Ministry of Petroleum &amp; Natural Gas</span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ fontWeight: 600 }}>Oil India Limited</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-            LATENCY: 18ms
-          </span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-            STANDARD: OISD-156
-          </span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>
-            English
-          </span>
-        </div>
-      </div>
-
-      {/* 3. Primary Command Center Header Bar */}
-      <div
-        style={{
-          padding: '10px 28px',
-          background: 'var(--bg-header)',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <motion.div
-            whileHover={{ scale: 1.04 }}
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #003366 0%, #002244 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: '0 2px 8px rgba(0, 51, 102, 0.25)',
-              border: '1px solid rgba(255, 153, 51, 0.3)',
-            }}
-          >
-            <ShieldAlert size={24} color="#ff9933" />
-          </motion.div>
-
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span
-                style={{
-                  fontSize: '1.28rem',
-                  fontWeight: 800,
-                  letterSpacing: '-0.02em',
-                  color: 'var(--primary)',
-                  fontFamily: 'var(--font-sans)',
-                }}
-              >
-                SIF-GUARD
-              </span>
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  background: '#fef3c7',
-                  color: '#b45309',
-                  fontWeight: 800,
-                  border: '1px solid #fde68a',
-                  letterSpacing: '0.06em',
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
-                OIL INDIA LIMITED
-              </span>
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  background: '#e6f0fa',
-                  color: '#003366',
-                  fontWeight: 700,
-                  border: '1px solid #bfdbfe',
-                }}
-              >
-                DGMS &amp; OISD-156
-              </span>
+        <div
+          style={{
+            maxWidth: '1600px',
+            width: '100%',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '20px',
+          }}
+        >
+          {/* Left: National Emblem + Oil India Emblem + Formal Title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
+            {/* Emblems Container */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+              <NationalEmblemSvg size={44} />
+              <div style={{ width: '1px', height: '36px', background: '#D1D5DB' }} />
+              <OilIndiaBadgeSvg size={38} />
             </div>
-            <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: '1px 0 0 0' }}>
-              National Industrial Safety Precursor Surveillance Platform // Command Center
-            </p>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Backend Health Status Pill */}
+            {/* Formal PSU Title Block */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1
+                  style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    color: '#0D233A',
+                    fontFamily: 'var(--font-display)',
+                    letterSpacing: '-0.01em',
+                    margin: 0,
+                    lineHeight: 1.1,
+                  }}
+                >
+                  SIF-GUARD
+                </h1>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: '#205493',
+                    fontFamily: 'var(--font-sans)',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    borderLeft: '2px solid #FF9933',
+                    paddingLeft: '6px',
+                  }}
+                >
+                  Industrial Safety Operations Center
+                </span>
+              </div>
+              <p
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#4B5563',
+                  margin: 0,
+                  fontWeight: 500,
+                  letterSpacing: '0.01em',
+                }}
+              >
+                Oil India Limited — HSE Intelligence &amp; Precursor Surveillance Platform (OISD-156 &amp; DGMS Standards)
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Crisp Bordered Utility Controls & Single Sign Out Button */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              background: 'var(--surface-hover)',
-              border: '1px solid var(--border)',
-              fontSize: '0.76rem',
-              fontFamily: 'var(--font-mono)',
+              gap: '12px',
+              flexShrink: 0,
             }}
           >
-            <Server size={13} color="var(--primary)" />
-            <span style={{ color: 'var(--text-secondary)' }}>Status:</span>
-            {!error && health ? (
-              <span
-                style={{
-                  color: 'var(--success)',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                <CheckCircle2 size={12} />
-                Live {health.embedding_model ? `(${health.embedding_model.split('/')[1] || health.embedding_model})` : ''}
-              </span>
-            ) : (
-              <span
-                style={{
-                  color: 'var(--danger)',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                <XCircle size={12} /> Disconnected
-              </span>
-            )}
-          </div>
-
-          {/* Keyboard Shortcuts Helper Button */}
-          {onOpenShortcuts && (
-            <button
-              type="button"
-              onClick={onOpenShortcuts}
+            {/* Live Server Status Tile */}
+            <div
               style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                cursor: 'pointer',
-                fontSize: '0.76rem',
-                fontWeight: 600,
-                transition: 'all 0.15s ease-out',
+                padding: '6px 12px',
+                borderRadius: '3px',
+                background: '#F8FAFC',
+                border: '1px solid #D1D5DB',
+                fontSize: '0.75rem',
+                fontFamily: 'var(--font-mono)',
+                color: '#374151',
               }}
-              title="Keyboard Shortcuts (Press '?')"
             >
-              <Keyboard size={13} color="var(--primary)" />
-              <span>Shortcuts</span>
-              <kbd
-                style={{
-                  background: 'var(--surface-hover)',
-                  padding: '1px 5px',
-                  borderRadius: '3px',
-                  fontSize: '0.65rem',
-                  border: '1px solid var(--border-subtle)',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                ?
-              </kbd>
-            </button>
-          )}
-
-          {/* Theme Toggle Switch */}
-          <ThemeToggleSwitch theme={theme} onToggle={onToggleTheme} />
-
-          {/* Authenticated Officer & Sign Out */}
-          {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '5px 10px',
-                  borderRadius: '6px',
-                  background: '#e6f0fa',
-                  border: '1px solid #bfdbfe',
-                  fontSize: '0.76rem',
-                  color: '#003366',
-                  fontWeight: 600,
-                }}
-              >
-                <User size={13} color="#003366" />
+              <Server size={13} color="#205493" />
+              <span style={{ fontWeight: 600 }}>Status:</span>
+              {!error && health ? (
                 <span
                   style={{
-                    maxWidth: '130px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    color: '#059669',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  {profile?.full_name || user.email}
+                  <CheckCircle2 size={12} />
+                  LIVE
                 </span>
-              </div>
+              ) : (
+                <span
+                  style={{
+                    color: '#DC2626',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <XCircle size={12} /> DISCONNECTED
+                </span>
+              )}
+            </div>
 
+            {/* Single Sign Out Button */}
+            {user && (
               <button
                 type="button"
                 onClick={signOut}
                 style={{
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  color: '#dc2626',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  cursor: 'pointer',
-                  fontSize: '0.76rem',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '4px',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  color: '#DC2626',
+                  fontSize: '0.78rem',
                   fontWeight: 600,
+                  cursor: 'pointer',
                   transition: 'all 0.15s ease',
+                  fontFamily: 'var(--font-sans)',
                 }}
-                title="Sign Out"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FEE2E2';
+                  e.currentTarget.style.borderColor = '#FCA5A5';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FEF2F2';
+                  e.currentTarget.style.borderColor = '#FECACA';
+                }}
+                title={user.email ? `Sign out (${user.email})` : 'Sign out'}
               >
-                <LogOut size={13} />
+                <LogOut size={13} color="#DC2626" />
                 <span>Sign Out</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>

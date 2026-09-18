@@ -48,8 +48,21 @@ export const AmbientTelemetryCanvas: React.FC<AmbientTelemetryCanvasProps> = ({ 
     if (!ctx) return;
 
     let animId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    const updateCanvasSize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      if (!canvas) return;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    updateCanvasSize();
 
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
@@ -67,9 +80,7 @@ export const AmbientTelemetryCanvas: React.FC<AmbientTelemetryCanvasProps> = ({ 
     };
 
     const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      updateCanvasSize();
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
@@ -215,8 +226,14 @@ export const AmbientTelemetryCanvas: React.FC<AmbientTelemetryCanvasProps> = ({ 
         const pulse = Math.sin(p.pulsePhase) * 0.05;
         const alpha = Math.max(0.12, Math.min(0.45, p.baseAlpha + pulse));
 
-        // Node render
-        ctx.save();
+        // Node render (optimized without expensive canvas context save/restore and shadowBlur)
+        if (!isLight && p.isOrange) {
+          ctx.beginPath();
+          ctx.arc(drawX, drawY, p.radius * 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 125, 10, ${alpha * 0.25})`;
+          ctx.fill();
+        }
+
         ctx.beginPath();
         ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
         if (isLight) {
@@ -224,16 +241,11 @@ export const AmbientTelemetryCanvas: React.FC<AmbientTelemetryCanvasProps> = ({ 
             ? `rgba(230, 95, 0, ${alpha * 0.85})`
             : `rgba(90, 80, 72, ${alpha * 0.55})`;
         } else {
-          if (p.isOrange) {
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = 'rgba(255, 125, 10, 0.45)';
-          }
           ctx.fillStyle = p.isOrange
             ? `rgba(255, 125, 10, ${alpha * 0.95})`
             : `rgba(180, 172, 164, ${alpha * 0.65})`;
         }
         ctx.fill();
-        ctx.restore();
 
         // Connect with nearby particles if distance < 115px (alpha 0.05 - 0.12)
         for (let j = i + 1; j < particles.length; j++) {
@@ -268,12 +280,20 @@ export const AmbientTelemetryCanvas: React.FC<AmbientTelemetryCanvasProps> = ({ 
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !animId) {
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     animId = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 

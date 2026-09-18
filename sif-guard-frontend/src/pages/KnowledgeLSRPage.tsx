@@ -77,7 +77,7 @@ export const KnowledgeLSRPage: React.FC = () => {
       </div>
 
       {/* Two Column Layout: Interactive Mapping Sandbox & Knowledge Base Search */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px', marginBottom: '28px' }}>
+      <div className="responsive-grid-1-1" style={{ marginBottom: '28px' }}>
         {/* LSR Text Mapping Sandbox */}
         <div className="card" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '1.1rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
@@ -179,7 +179,7 @@ export const KnowledgeLSRPage: React.FC = () => {
       {loadingRules ? (
         <LoadingSkeleton rows={4} />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
           {rules.map((r, i) => (
             <motion.div
               key={r.id || r.rule_code}

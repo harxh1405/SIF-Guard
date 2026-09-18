@@ -250,7 +250,7 @@ export const DemoSimulationModal: React.FC<DemoSimulationModalProps> = ({
               borderRadius: '8px',
               backgroundColor: 'var(--primary)',
               border: 'none',
-              color: '#000',
+              color: '#ffffff',
               fontWeight: 700,
               fontSize: '13px',
               cursor: isSubmitting ? 'not-allowed' : 'pointer',

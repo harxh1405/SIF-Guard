@@ -21,10 +21,28 @@ import {
 } from 'lucide-react';
 
 
+// Utility to recursively dispose Three.js meshes and materials
+const disposeHierarchy = (obj: THREE.Object3D) => {
+  obj.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach((m) => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    }
+  });
+};
+
 interface RefineryCanvasProps {
   zones: FacilityZone[];
   selectedZoneId: string | null;
-  onSelectZone: (zoneId: string) => void;
+  onSelectZone: (zoneId: string | null) => void;
   hoveredZoneId: string | null;
   onHoverZone: (zoneId: string | null) => void;
   activeIncidents: ZoneIncident[];
@@ -37,6 +55,7 @@ interface RefineryCanvasProps {
   height?: string | number;
   containerStyle?: React.CSSProperties;
   transparentBg?: boolean;
+  resetSignal?: number;
 }
 
 export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
@@ -55,6 +74,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
   height,
   containerStyle,
   transparentBg = false,
+  resetSignal,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -125,7 +145,15 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     targetLookAt.current.copy(initialTargetRef.current);
     isAnimatingCam.current = true;
     setActivePreset('overview');
-  }, []);
+    onSelectZone(null);
+  }, [onSelectZone]);
+
+  // Respond to programmatic external reset triggers
+  useEffect(() => {
+    if (resetSignal && resetSignal > 0) {
+      handleResetView();
+    }
+  }, [resetSignal, handleResetView]);
 
   // Smooth Camera Preset Transition (For full dashboard mode)
   const triggerCameraTransition = useCallback(
@@ -296,12 +324,13 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.rotateSpeed = 0.9;
-    controls.minDistance = 35;
-    controls.maxDistance = 220;
+    controls.minDistance = 25;
+    controls.maxDistance = 240;
     controls.minPolarAngle = 0.05;
     controls.maxPolarAngle = Math.PI / 2.05; // Prevent camera dipping below ground
     controls.autoRotate = false; // NO auto-rotation fighting user!
-    controls.enableZoom = false; // Mouse wheel belongs to website page scroll!
+    controls.enableZoom = true; // Smooth mouse wheel / scroll zoom enabled
+    controls.zoomSpeed = 0.85;
     controls.enablePan = false;
     renderer.domElement.style.touchAction = 'none';
     controls.update();
@@ -386,28 +415,48 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
       renderer.render(scene, camera);
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !animationFrameId) {
+        animate();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     animate();
 
-    // 9. Handle Window Resize
+    // 9. Handle Window & Container Resize
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = containerRef.current.clientWidth;
       const h = containerRef.current.clientHeight;
+      if (w === 0 || h === 0) return;
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
 
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
     window.addEventListener('resize', handleResize);
 
     return () => {
+      if (resizeObserver) resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
       if (rafHoverIdRef.current !== null) {
         cancelAnimationFrame(rafHoverIdRef.current);
       }
       controls.dispose();
       renderer.dispose();
+      if (sceneRef.current) {
+        disposeHierarchy(sceneRef.current);
+      }
     };
   }, []);
 
@@ -449,7 +498,10 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
 
     // Rebuild structures with updated theme materials
     const oldRefinery = scene.getObjectByName('REFINERY_STRUCTURES');
-    if (oldRefinery) scene.remove(oldRefinery);
+    if (oldRefinery) {
+      scene.remove(oldRefinery);
+      disposeHierarchy(oldRefinery);
+    }
 
     const materials = createRefineryMaterials(theme);
     const refineryGroup = new THREE.Group();
@@ -695,6 +747,8 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     }
   };
 
+  const isLight = theme === 'light';
+
   // WebGL Fallback screen
   if (!webGlSupported) {
     return (
@@ -728,8 +782,8 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             onClick={onFallback2D}
             style={{
               padding: '10px 18px',
-              backgroundColor: 'var(--primary)',
-              color: '#000000',
+              backgroundColor: isLight ? '#003366' : '#FF7300',
+              color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '13px',
               borderRadius: '8px',
@@ -747,15 +801,13 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
     );
   }
 
-  const isLight = theme === 'light';
-
   return (
     <div
       ref={containerRef}
       style={{
         width: '100%',
         height: height || (minimalOverlay ? '100%' : '620px'),
-        minHeight: minimalOverlay ? 'unset' : '620px',
+        minHeight: height ? '100%' : (minimalOverlay ? 'unset' : '620px'),
         position: 'relative',
         backgroundColor: (minimalOverlay || transparentBg)
           ? 'transparent'
@@ -777,6 +829,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
+        onDoubleClick={handleResetView}
         style={{
           width: '100%',
           height: '100%',
@@ -926,7 +979,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             flexShrink: 0,
           }}
         >
-          <Compass size={14} color="var(--primary)" /> Focus:
+          <Compass size={14} color={isLight ? '#003366' : 'var(--primary)'} /> Focus:
         </span>
         {CAMERA_PRESETS.map((preset) => {
           const isActive = activePreset === preset.id;
@@ -945,12 +998,31 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
                 borderRadius: '6px',
                 border: 'none',
                 fontWeight: isActive ? 700 : 500,
-                backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                color: isActive ? '#000000' : 'var(--text-secondary)',
+                backgroundColor: isActive
+                  ? (isLight ? '#003366' : '#FF7300')
+                  : 'transparent',
+                color: isActive
+                  ? '#FFFFFF'
+                  : (isLight ? '#334155' : 'var(--text-secondary)'),
+                boxShadow: isActive
+                  ? (isLight ? '0 1px 4px rgba(0, 51, 102, 0.25)' : '0 2px 8px rgba(255, 115, 0, 0.35)')
+                  : 'none',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
                 transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = isLight ? '#e2e8f0' : 'rgba(255, 255, 255, 0.08)';
+                  e.currentTarget.style.color = isLight ? '#0f172a' : '#FFFFFF';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = isLight ? '#334155' : 'var(--text-secondary)';
+                }
               }}
             >
               {preset.label}
@@ -1089,7 +1161,7 @@ export const RefineryCanvas: React.FC<RefineryCanvasProps> = ({
             </button>
 
             <button
-              onClick={() => triggerCameraTransition([0, 68, 68], [0, 0, 2], 'overview')}
+              onClick={handleResetView}
               style={{
                 display: 'flex',
                 alignItems: 'center',

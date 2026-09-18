@@ -1,21 +1,41 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import type { TabId } from './components/layout/Navigation';
-import { DashboardPage } from './pages/DashboardPage';
-import { FacilityTwinPage } from './pages/FacilityTwinPage';
-import { IngestionPage } from './pages/IngestionPage';
-import { ReportsExplorerPage } from './pages/ReportsExplorerPage';
-import { PrecursorClustersPage } from './pages/PrecursorClustersPage';
-import { AnalyticsPage } from './pages/AnalyticsPage';
-import { KnowledgeLSRPage } from './pages/KnowledgeLSRPage';
-import { ReviewQueuePage } from './pages/ReviewQueuePage';
-import { DesignSystemPage } from './pages/DesignSystemPage';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { AuthPage } from './components/auth/AuthPage';
-import { LandingPage } from './pages/LandingPage';
 import { ShieldAlert, Loader2 } from 'lucide-react';
+
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const FacilityTwinPage = lazy(() => import('./pages/FacilityTwinPage').then((m) => ({ default: m.FacilityTwinPage })));
+const IngestionPage = lazy(() => import('./pages/IngestionPage').then((m) => ({ default: m.IngestionPage })));
+const ReportsExplorerPage = lazy(() => import('./pages/ReportsExplorerPage').then((m) => ({ default: m.ReportsExplorerPage })));
+const PrecursorClustersPage = lazy(() => import('./pages/PrecursorClustersPage').then((m) => ({ default: m.PrecursorClustersPage })));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
+const KnowledgeLSRPage = lazy(() => import('./pages/KnowledgeLSRPage').then((m) => ({ default: m.KnowledgeLSRPage })));
+const ReviewQueuePage = lazy(() => import('./pages/ReviewQueuePage').then((m) => ({ default: m.ReviewQueuePage })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
+const AuthPage = lazy(() => import('./components/auth/AuthPage').then((m) => ({ default: m.AuthPage })));
+
+const ModuleLoadingFallback = () => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '360px',
+      width: '100%',
+      gap: '12px',
+      color: 'var(--text-secondary, #A8A099)',
+    }}
+  >
+    <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary, #FF7300)' }} />
+    <span style={{ fontSize: '0.85rem', letterSpacing: '0.04em', fontFamily: 'monospace' }}>
+      LOADING MODULE...
+    </span>
+  </div>
+);
 
 const TAB_ORDER: TabId[] = [
   'dashboard',
@@ -26,7 +46,6 @@ const TAB_ORDER: TabId[] = [
   'analytics',
   'knowledge',
   'review',
-  'design-system',
 ];
 
 function AppContent() {
@@ -44,7 +63,7 @@ function AppContent() {
   const [shortcutsOpen, setShortcutsOpen] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const mainContentRef = useRef<HTMLElement>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
 
   // Background Audio Controller for the entire platform ("Modi hai to Mumkin hai")
   useEffect(() => {
@@ -118,6 +137,18 @@ function AppContent() {
   const toggleCollapse = () => {
     setIsCollapsed((prev) => !prev);
   };
+
+  // Auto-collapse sidebar on smaller screens or high zoom
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1080) {
+        setIsCollapsed(true);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Global Keyboard Shortcuts (Tabs 1-8, '?' for shortcuts modal, 'Esc' to close modal)
   useEffect(() => {
@@ -196,20 +227,36 @@ function AppContent() {
   // Unauthenticated: Show Landing Page by default, or Auth Page when requested
   if (!user) {
     if (showAuth) {
-      return <AuthPage onBack={() => setShowAuth(false)} />;
+      return (
+        <Suspense fallback={<ModuleLoadingFallback />}>
+          <AuthPage onBack={() => setShowAuth(false)} />
+        </Suspense>
+      );
     }
     return (
-      <LandingPage
-        onEnterPlatform={() => setShowAuth(true)}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-      />
+      <Suspense fallback={<ModuleLoadingFallback />}>
+        <LandingPage
+          onEnterPlatform={() => setShowAuth(true)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      </Suspense>
     );
   }
 
   // Authenticated: Show full existing SIF-Guard Application
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)', overflow: 'hidden' }}>
+    <div
+      ref={mainContentRef}
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: 'var(--bg-primary)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+      }}
+    >
       <audio
         ref={audioRef}
         loop
@@ -227,15 +274,25 @@ function AppContent() {
         onToggleAudio={toggleAudio}
       />
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        <Navigation
-          activeTab={activeTab}
-          onTabChange={handleNavigate}
-          isCollapsed={isCollapsed}
-          onToggleCollapse={toggleCollapse}
-        />
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={handleNavigate}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleCollapse}
+      />
 
-        <main ref={mainContentRef} style={{ flex: 1, minWidth: 0, padding: '28px 36px', overflowY: 'auto', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
+      <main
+        className="app-main-content"
+        style={{
+          flex: 1,
+          minWidth: 0,
+          padding: '24px 24px',
+          maxWidth: '1600px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        <Suspense fallback={<ModuleLoadingFallback />}>
           {activeTab === 'dashboard' && <DashboardPage onNavigate={handleNavigate} />}
           {activeTab === 'facility' && <FacilityTwinPage theme={theme} />}
           {activeTab === 'ingestion' && <IngestionPage onNavigate={handleNavigate} />}
@@ -244,9 +301,8 @@ function AppContent() {
           {activeTab === 'analytics' && <AnalyticsPage onNavigate={handleNavigate} />}
           {activeTab === 'knowledge' && <KnowledgeLSRPage />}
           {activeTab === 'review' && <ReviewQueuePage onNavigate={handleNavigate} />}
-          {activeTab === 'design-system' && <DesignSystemPage />}
-        </main>
-      </div>
+        </Suspense>
+      </main>
 
       <KeyboardShortcutsModal
         isOpen={shortcutsOpen}

@@ -17,11 +17,12 @@ import { useFilterStore } from '../store/useFilterStore';
 import type { TabId } from '../components/layout/Navigation';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowRight, GitBranch, Filter } from 'lucide-react';
 
 interface Props {
   onNavigate: (tab: TabId) => void;
+  theme?: 'dark' | 'light';
 }
 
 export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
@@ -82,7 +83,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
   if (loading) {
     return (
       <div style={{ padding: '8px 0' }}>
-        <h2 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 16px 0' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-primary)', margin: '0 0 16px 0' }}>
           COMMAND CENTER — HSE BRIEFING
         </h2>
         <LoadingSkeleton rows={6} />
@@ -93,7 +94,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
   if (error) {
     return (
       <div style={{ padding: '8px 0' }}>
-        <h2 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 16px 0' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-primary)', margin: '0 0 16px 0' }}>
           COMMAND CENTER — HSE BRIEFING
         </h2>
         <ErrorBanner message={error} onRetry={fetchDashboardData} />
@@ -106,45 +107,45 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
     >
-      {/* Statutory Safety Directive Ticker Banner */}
+      {/* Official Gazette Statutory Advisory Banner */}
       <div
         style={{
-          backgroundColor: '#fef3c7',
-          border: '1px solid #fde68a',
-          borderLeft: '4px solid #ff9933',
-          borderRadius: '6px',
-          padding: '8px 14px',
-          fontSize: '0.76rem',
-          color: '#78350f',
+          backgroundColor: '#FFF9E6',
+          border: '1px solid #D97706',
+          borderRadius: '3px',
+          padding: '10px 16px',
+          fontSize: '0.78rem',
+          color: '#92400E',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '12px',
-          boxShadow: 'var(--shadow-card)',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span
             style={{
               fontWeight: 800,
-              backgroundColor: '#ff9933',
-              color: '#ffffff',
-              padding: '2px 7px',
-              borderRadius: '3px',
-              fontSize: '0.65rem',
-              letterSpacing: '0.04em',
+              backgroundColor: '#D97706',
+              color: '#FFFFFF',
+              padding: '3px 8px',
+              borderRadius: '2px',
+              fontSize: '0.68rem',
+              letterSpacing: '0.06em',
+              fontFamily: 'var(--font-mono)',
             }}
           >
-            STATUTORY NOTICE
+            STATUTORY ADVISORY
           </span>
           <span style={{ fontWeight: 600 }}>
             Mandatory real-time precursor surveillance and barrier verification active across Category-I installations pursuant to OISD Standard 156 and DGMS regulations.
           </span>
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-          REF: OIL/HSE/2026-Q3
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', color: '#B45309' }}>
+          GAZETTE REF: OIL/HSE/2026-Q3
         </span>
       </div>
 
@@ -230,7 +231,8 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       />
 
       {/* Row 1: Safety Signal Trend & SIF Risk Distribution */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+      {/* Row 1: Safety Signal Trend & SIF Risk Distribution */}
+      <div className="responsive-grid-2-1">
         <SafetyTrendChart
           data={trends}
           onSelectPeriod={() => onNavigate('explorer')}
@@ -244,7 +246,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Row 2: Failed Barrier Intelligence & Barrier Health */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div className="responsive-grid-1-1">
         <BarrierFailureChart
           data={summary?.top_barrier_failures || []}
           onSelectBarrier={handleBarrierSelect}
@@ -254,7 +256,7 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       </div>
 
       {/* Row 3: Emerging Precursor Patterns & Activity Feed */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+      <div className="responsive-grid-1-1">
         {/* Emerging Precursor Patterns Section */}
         <div
           style={{

@@ -97,7 +97,7 @@ export const PrecursorClustersPage: React.FC<Props> = ({ onNavigate }) => {
           onAction={handleRunClustering}
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
           {clusters.map((c, idx) => {
             const densityPct = (c.sif_density * 100).toFixed(1);
 

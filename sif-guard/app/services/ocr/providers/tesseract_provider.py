@@ -1,7 +1,17 @@
 import io
+import os
+import shutil
 from typing import List
 import pytesseract
 from PIL import Image
+
+# Ensure pytesseract locates the tesseract binary across macOS (Homebrew), Linux, and standard PATH locations
+tesseract_bin = shutil.which("tesseract") or next((p for p in ["/opt/homebrew/bin/tesseract", "/usr/local/bin/tesseract", "/usr/bin/tesseract"] if os.path.exists(p)), None)
+if tesseract_bin:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_bin
+    bin_dir = os.path.dirname(tesseract_bin)
+    if bin_dir not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = f"{bin_dir}:{os.environ.get('PATH', '')}"
 
 from app.services.ocr.base import BaseOCRProvider
 from app.services.ocr.schemas import OCRResultSchema, OCRPageResult, OCRTokenResult, OCRBoundingBox
@@ -37,21 +47,31 @@ class TesseractOCRProvider(BaseOCRProvider):
             raw_text = pytesseract.image_to_string(processed_img)
             norm_text = normalize_ocr_text(raw_text)
 
-            # Calculate mean confidence across non-empty tokens
-            confidences = [
-                float(c) for c in data.get("conf", []) if isinstance(c, (int, float)) and c > 0
-            ]
-            avg_conf = (sum(confidences) / len(confidences) / 100.0) if confidences else 0.85
-
+            # Safely extract confidence values and tokens
+            confidences = []
             tokens = []
-            for i in range(len(data.get("text", []))):
-                word = data["text"][i].strip()
-                conf = float(data["conf"][i]) if data["conf"][i] > 0 else 0.0
+            raw_text_items = data.get("text", [])
+            raw_conf_items = data.get("conf", [])
+
+            for i in range(len(raw_text_items)):
+                word = str(raw_text_items[i]).strip() if raw_text_items[i] else ""
+                raw_c = raw_conf_items[i] if i < len(raw_conf_items) else -1
+                try:
+                    c_float = float(raw_c)
+                except (ValueError, TypeError):
+                    c_float = -1.0
+
                 if word:
+                    if c_float > 0:
+                        confidences.append(c_float)
+                        conf_score = round(c_float / 100.0, 2)
+                    else:
+                        conf_score = 0.0
+
                     tokens.append(
                         OCRTokenResult(
                             text=word,
-                            confidence=round(conf / 100.0, 2),
+                            confidence=conf_score,
                             bbox=OCRBoundingBox(
                                 x1=float(data["left"][i]),
                                 y1=float(data["top"][i]),
@@ -60,6 +80,13 @@ class TesseractOCRProvider(BaseOCRProvider):
                             ),
                         )
                     )
+
+            if confidences:
+                avg_conf = sum(confidences) / len(confidences) / 100.0
+            elif norm_text:
+                avg_conf = 0.85
+            else:
+                avg_conf = 0.0
 
             page_res = OCRPageResult(
                 page_number=1,

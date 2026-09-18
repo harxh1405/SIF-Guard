@@ -21,11 +21,11 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, si
   const getPadding = () => {
     switch (size) {
       case 'sm':
-        return '2px 8px';
+        return '2px 6px';
       case 'lg':
-        return '6px 14px';
+        return '5px 12px';
       default:
-        return '4px 10px';
+        return '3px 8px';
     }
   };
 
@@ -34,13 +34,13 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, si
       case 'sm':
         return '0.68rem';
       case 'lg':
-        return '0.8rem';
+        return '0.78rem';
       default:
         return '0.72rem';
     }
   };
 
-  const iconSize = size === 'sm' ? 12 : size === 'lg' ? 16 : 13;
+  const iconSize = size === 'sm' ? 12 : size === 'lg' ? 15 : 13;
 
   if (status === 'SIF_POTENTIAL') {
     return (
@@ -52,9 +52,13 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, si
           fontSize: getFontSize(),
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '5px',
           fontWeight: 700,
           whiteSpace: 'nowrap',
+          borderRadius: '2px',
+          border: '1px solid #FCA5A5',
+          backgroundColor: '#FEF2F2',
+          color: '#DC2626',
         }}
       >
         <AlertTriangle size={iconSize} />
@@ -78,9 +82,13 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, si
           fontSize: getFontSize(),
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '5px',
           fontWeight: 700,
           whiteSpace: 'nowrap',
+          borderRadius: '2px',
+          border: '1px solid #6EE7B7',
+          backgroundColor: '#ECFDF5',
+          color: '#065F46',
         }}
       >
         <ShieldCheck size={iconSize} />
@@ -103,9 +111,13 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, si
         fontSize: getFontSize(),
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '6px',
+        gap: '5px',
         fontWeight: 700,
         whiteSpace: 'nowrap',
+        borderRadius: '2px',
+        border: '1px solid #FCD34D',
+        backgroundColor: '#FFFBEB',
+        color: '#92400E',
       }}
     >
       <HelpCircle size={iconSize} />
@@ -118,4 +130,3 @@ export const SIFBadge: React.FC<Props> = ({ status, score, showScore = false, si
     </span>
   );
 };
-
