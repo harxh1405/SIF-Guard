@@ -37,59 +37,88 @@ export const PipelineStatusBadge: React.FC = () => {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
-        padding: '8px 16px',
-        backgroundColor: 'var(--bg-dark-surface, #0D171A)',
-        border: '1px solid var(--border, #203238)',
+        gap: '14px',
+        padding: '7px 14px',
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         borderRadius: '6px',
-        fontSize: '0.75rem',
+        fontSize: '0.74rem',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <Cpu size={14} color="#F2A933" />
-        <span style={{ fontWeight: 600, color: '#F4F3EE' }}>PIPELINE STATUS</span>
+        <Cpu size={14} color="#ff9933" />
+        <span style={{ fontWeight: 800, color: 'var(--primary)', letterSpacing: '0.04em' }}>
+          PIPELINE NODES
+        </span>
       </div>
 
-      <div style={{ height: '12px', width: '1px', backgroundColor: '#203238' }} />
+      <div style={{ height: '12px', width: '1px', backgroundColor: 'var(--border)' }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', color: '#9CA8AA' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
           <span>OCR</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
-          <span>XGBoost v1.0.0</span>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
+          <span>XGBoost v1.0</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
           <span>BGE Vector</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
-          <span>LSR Mapping</span>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
+          <span>LSR Rules</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
           <span>HDBSCAN</span>
         </div>
       </div>
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
         {isHealthy ? (
-          <>
-            <CheckCircle2 size={13} color="#4DCEA0" />
-            <span style={{ color: '#4DCEA0', fontWeight: 600 }}>OPERATIONAL</span>
-          </>
+          <span
+            style={{
+              color: '#15803d',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontWeight: 700,
+              fontSize: '0.68rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <CheckCircle2 size={11} color="#16a34a" />
+            <span>OPERATIONAL</span>
+          </span>
         ) : (
-          <>
-            <AlertCircle size={13} color="#E8AA3D" />
-            <span style={{ color: '#E8AA3D', fontWeight: 600 }}>{loading ? 'CHECKING...' : 'ONLINE'}</span>
-          </>
+          <span
+            style={{
+              color: '#b45309',
+              backgroundColor: '#fef3c7',
+              border: '1px solid #fde68a',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontWeight: 700,
+              fontSize: '0.68rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <AlertCircle size={11} color="#b45309" />
+            <span>{loading ? 'CHECKING...' : 'ONLINE'}</span>
+          </span>
         )}
       </div>
     </div>

@@ -23,17 +23,23 @@ export const SifDistributionChart: React.FC<SifDistributionChartProps> = ({
   const option = {
     tooltip: {
       trigger: 'item',
+      backgroundColor: '#ffffff',
+      borderColor: '#cbd5e1',
+      borderWidth: 1,
+      padding: [10, 14],
+      textStyle: { color: '#0f172a', fontSize: 12 },
+      extraCssText: 'box-shadow: 0 6px 20px rgba(0,51,102,0.12); border-radius: 6px;',
       formatter: (params: any) => {
-        return `<div style="font-weight:600;color:#F4F3EE">${params.name}</div>
-          <div style="font-size:12px;color:#9CA8AA">Report Count: <strong style="color:#F4F3EE">${params.value}</strong></div>
-          <div style="font-size:12px;color:#9CA8AA">Share: <strong style="color:${params.color}">${params.percent}%</strong></div>
-          <div style="font-size:11px;color:#4DCEA0;margin-top:4px">Click segment to filter report list</div>`;
+        return `<div style="font-weight:700;color:#003366">${params.name}</div>
+          <div style="font-size:12px;color:#475569;margin-top:2px">Report Count: <strong style="color:#0f172a">${params.value}</strong></div>
+          <div style="font-size:12px;color:#475569">Share: <strong style="color:${params.color}">${params.percent}%</strong></div>
+          <div style="font-size:11px;color:#16a34a;margin-top:4px;font-weight:600">Click segment to filter report list</div>`;
       },
     },
     legend: {
       bottom: '0%',
       left: 'center',
-      textStyle: { color: '#9CA8AA', fontSize: 11 },
+      textStyle: { color: '#475569', fontSize: 11, fontWeight: 600 },
     },
     series: [
       {
@@ -44,7 +50,7 @@ export const SifDistributionChart: React.FC<SifDistributionChartProps> = ({
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 4,
-          borderColor: '#0D171A',
+          borderColor: '#ffffff',
           borderWidth: 3,
         },
         label: {
@@ -54,16 +60,16 @@ export const SifDistributionChart: React.FC<SifDistributionChartProps> = ({
         emphasis: {
           label: {
             show: true,
-            fontSize: '16',
+            fontSize: '15',
             fontWeight: 'bold',
-            color: '#F4F3EE',
+            color: '#003366',
             formatter: '{b}\n{d}%',
           },
         },
         data: [
-          { value: sifCount, name: 'SIF Potential', itemStyle: { color: '#E54F4F' } },
-          { value: nonSifCount, name: 'Non-SIF Precursor', itemStyle: { color: '#4DCEA0' } },
-          { value: uncertainCount, name: 'Uncertain / Review', itemStyle: { color: '#E8AA3D' } },
+          { value: sifCount, name: 'SIF Potential', itemStyle: { color: '#dc2626' } },
+          { value: nonSifCount, name: 'Non-SIF Precursor', itemStyle: { color: '#16a34a' } },
+          { value: uncertainCount, name: 'Uncertain / Review', itemStyle: { color: '#ff9933' } },
         ],
       },
     ],

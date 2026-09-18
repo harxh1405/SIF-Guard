@@ -103,21 +103,61 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+      transition={{ duration: 0.18 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
     >
+      {/* Statutory Safety Directive Ticker Banner */}
+      <div
+        style={{
+          backgroundColor: '#fef3c7',
+          border: '1px solid #fde68a',
+          borderLeft: '4px solid #ff9933',
+          borderRadius: '6px',
+          padding: '8px 14px',
+          fontSize: '0.76rem',
+          color: '#78350f',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          boxShadow: 'var(--shadow-card)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
+            style={{
+              fontWeight: 800,
+              backgroundColor: '#ff9933',
+              color: '#ffffff',
+              padding: '2px 7px',
+              borderRadius: '3px',
+              fontSize: '0.65rem',
+              letterSpacing: '0.04em',
+            }}
+          >
+            STATUTORY NOTICE
+          </span>
+          <span style={{ fontWeight: 600 }}>
+            Mandatory real-time precursor surveillance and barrier verification active across Category-I installations pursuant to OISD Standard 156 and DGMS regulations.
+          </span>
+        </div>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+          REF: OIL/HSE/2026-Q3
+        </span>
+      </div>
+
       {/* Header Bar with Pipeline Status & Global Filter Indicator */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1
               style={{
-                fontFamily: 'var(--font-serif, Fraunces, serif)',
-                fontSize: '1.75rem',
-                fontWeight: 600,
-                color: 'var(--text-primary, #F4F3EE)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '1.65rem',
+                fontWeight: 800,
+                color: 'var(--primary)',
                 margin: 0,
                 letterSpacing: '-0.02em',
               }}
@@ -128,36 +168,39 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
               <span
                 style={{
                   fontSize: '0.72rem',
-                  backgroundColor: 'rgba(242, 169, 51, 0.15)',
-                  color: '#F2A933',
-                  border: '1px solid rgba(242, 169, 51, 0.3)',
+                  backgroundColor: '#fef3c7',
+                  color: '#b45309',
+                  border: '1px solid #fde68a',
                   padding: '2px 8px',
                   borderRadius: '4px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
+                  fontWeight: 700,
                 }}
               >
-                <Filter size={12} /> Active Filters
+                <Filter size={11} /> Active Filters
               </span>
             )}
           </div>
-          <p style={{ color: 'var(--text-secondary, #9CA8AA)', fontSize: '0.85rem', margin: '4px 0 0 0' }}>
-            Real-time safety signal analysis for Oil India Limited (OIL) operational facilities.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '3px 0 0 0' }}>
+            Real-time safety signal analysis for Oil India Limited (OIL) operational facilities under Ministry of Petroleum & Natural Gas.
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {hasActiveFilters() && (
             <button
+              type="button"
               onClick={clearFilters}
               style={{
-                background: 'transparent',
-                border: '1px solid #203238',
-                color: '#9CA8AA',
+                background: '#ffffff',
+                border: '1px solid var(--border)',
+                color: 'var(--text-secondary)',
                 padding: '6px 12px',
                 borderRadius: '6px',
-                fontSize: '0.78rem',
+                fontSize: '0.76rem',
+                fontWeight: 600,
                 cursor: 'pointer',
               }}
             >
@@ -215,37 +258,41 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
         {/* Emerging Precursor Patterns Section */}
         <div
           style={{
-            backgroundColor: 'var(--bg-card, #0D171A)',
-            border: '1px solid var(--border, #203238)',
-            borderRadius: 'var(--radius-md, 8px)',
-            padding: '20px 24px',
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderTop: '3.5px solid #003366',
+            borderRadius: 'var(--radius-md)',
+            padding: '20px 22px',
             display: 'flex',
             flexDirection: 'column',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <GitBranch size={18} color="#F2A933" />
+              <GitBranch size={17} color="#ff9933" />
               <h3
                 style={{
-                  fontFamily: 'var(--font-serif, Fraunces, serif)',
-                  fontSize: '1.05rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary, #F4F3EE)',
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '1rem',
+                  fontWeight: 800,
+                  color: 'var(--primary)',
                   margin: 0,
+                  letterSpacing: '0.02em',
                 }}
               >
                 EMERGING PRECURSOR PATTERNS
               </h3>
             </div>
             <button
+              type="button"
               onClick={() => onNavigate('clusters')}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#F2A933',
-                fontSize: '0.8rem',
-                fontWeight: 600,
+                color: '#003366',
+                fontSize: '0.78rem',
+                fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -253,54 +300,59 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
               }}
             >
               <span>Explore All</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={13} />
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {(summary?.emerging_patterns || []).slice(0, 3).map((pat) => (
               <div
                 key={pat.id}
                 onClick={() => onNavigate('clusters')}
                 style={{
-                  backgroundColor: 'rgba(17, 36, 41, 0.6)',
-                  border: '1px solid #203238',
+                  backgroundColor: 'var(--surface-hover)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '6px',
-                  padding: '14px 16px',
+                  padding: '12px 14px',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#F2A933';
+                  e.currentTarget.style.borderColor = '#003366';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 51, 102, 0.08)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#203238';
+                  e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#F4F3EE' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {pat.name}
                   </span>
                   <span
                     style={{
-                      fontSize: '0.72rem',
+                      fontSize: '0.68rem',
                       fontFamily: 'var(--font-mono)',
-                      color: '#E54F4F',
-                      backgroundColor: 'rgba(229,79,79,0.12)',
-                      padding: '2px 6px',
+                      color: '#dc2626',
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      padding: '1px 6px',
                       borderRadius: '4px',
-                      fontWeight: 700,
+                      fontWeight: 800,
                     }}
                   >
                     {pat.report_count} REPORTS
                   </span>
                 </div>
-                <p style={{ fontSize: '0.78rem', color: '#9CA8AA', margin: '0 0 8px 0', lineHeight: 1.3 }}>
-                  Primary barrier failure: <strong style={{ color: '#F2A933' }}>{pat.dominant_barrier_failure || 'Pressure Isolation'}</strong>
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '0 0 6px 0', lineHeight: 1.35 }}>
+                  Primary barrier failure: <strong style={{ color: '#b45309' }}>{pat.dominant_barrier_failure || 'Pressure Isolation'}</strong>
                 </p>
-                <div style={{ display: 'flex', gap: '12px', fontSize: '0.72rem', color: '#647477' }}>
+                <div style={{ display: 'flex', gap: '10px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   <span>Activity: {pat.dominant_activity || 'Maintenance'}</span>
-                  <span>·</span>
+                  <span>•</span>
                   <span>Hazard: {pat.dominant_hazard || 'Pressurized System'}</span>
                 </div>
               </div>
