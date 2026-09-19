@@ -10,25 +10,25 @@ IOGP_LSR_DEFINITIONS = [
         "code": "CONFINED_SPACE",
         "name": "Confined Space",
         "description": "Obtain authorization before entering a confined space. Verify atmospheric testing and continuous monitoring.",
-        "keywords": ["confined space", "vessel", "tank", "atmospheric testing", "gas testing", "h2s", "oxygen deficiency", "vault"]
+        "keywords": ["confined space", "vessel", "tank", "atmospheric testing", "gas testing", "h2s", "oxygen deficiency", "vault", "underground chamber", "gas test"]
     },
     {
         "code": "LINE_OF_FIRE",
         "name": "Line of Fire",
         "description": "Keep yourself and others out of the line of fire. Position yourself away from moving machinery, suspended loads, and pressure sources.",
-        "keywords": ["line of fire", "suspended load", "underneath load", "moving equipment", "pinch point", "struck by", "falling object"]
+        "keywords": ["line of fire", "suspended load", "underneath load", "moving equipment", "pinch point", "struck by", "falling object", "wrench", "slipped", "directly in front", "exclusion zone", "release point", "beneath the suspended", "overhead", "suspended component", "working beneath"]
     },
     {
         "code": "WORK_AT_HEIGHT",
         "name": "Work at Height",
         "description": "Protect yourself against falling when working at height. Always inspect and use approved fall protection systems.",
-        "keywords": ["work at height", "elevated", "fall protection", "harness", "scaffold", "ladder", "roof", "feet", "unprotected edge"]
+        "keywords": ["work at height", "elevated", "fall protection", "harness", "scaffold", "ladder", "roof", "feet", "unprotected edge", "portable ladder", "guardrail"]
     },
     {
         "code": "ENERGY_ISOLATION",
         "name": "Energy Isolation",
         "description": "Verify isolation and zero energy state before work begins. Apply Lockout Tagout (LOTO).",
-        "keywords": ["energy isolation", "loto", "lockout", "tagout", "locked out", "tagged out", "zero energy", "electrical isolation", "pressure isolation", "depressurize", "de-energize", "valves"]
+        "keywords": ["energy isolation", "loto", "lockout", "tagout", "locked out", "tagged out", "zero energy", "electrical isolation", "pressure isolation", "depressurize", "de-energize", "valves", "isolated", "zero pressure", "energized", "circuit had been isolated", "pressure vessel", "distribution panel", "terminal box", "breaker had not been locked out", "not been isolated"]
     },
     {
         "code": "HOT_WORK",
@@ -40,7 +40,7 @@ IOGP_LSR_DEFINITIONS = [
         "code": "SAFE_LIFTING",
         "name": "Safe Mechanical Lifting",
         "description": "Plan lifting operations and control the area. Never walk under a suspended load.",
-        "keywords": ["lifting", "crane", "rigging", "hoist", "suspended load", "rigging equipment", "slings"]
+        "keywords": ["lifting", "crane", "rigging", "hoist", "suspended load", "rigging equipment", "slings", "crane lift", "lifting area", "lifting zone", "crane was lifting", "suspended component"]
     },
     {
         "code": "BYPASS_SAFETY_CONTROLS",
@@ -52,7 +52,13 @@ IOGP_LSR_DEFINITIONS = [
         "code": "DRIVING",
         "name": "Driving",
         "description": "Follow safe driving rules. Wear seatbelts, obey speed limits, and do not use mobile phones while driving.",
-        "keywords": ["driving", "vehicle", "seatbelt", "speeding", "rollover", "driver", "transport", "truck"]
+        "keywords": ["driving", "vehicle", "seatbelt", "speeding", "rollover", "driver", "transport", "truck", "forklift", "reversing forklift"]
+    },
+    {
+        "code": "WORK_AUTHORIZATION",
+        "name": "Work Authorisation",
+        "description": "Work with a valid permit when required. Confirm that a permit is in place and understand the controls.",
+        "keywords": ["work authorization", "work authorisation", "work permit", "permit to work", "ptw", "valid permit", "restricted area without completing the work permit", "without obtaining the required work permit"]
     },
     {
         "code": "WORKING_WITH_WATER",

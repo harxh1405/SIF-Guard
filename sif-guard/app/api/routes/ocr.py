@@ -16,11 +16,11 @@ async def extract_document_ocr(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="No file provided in request.")
 
     filename = file.filename.lower()
-    allowed_extensions = (".png", ".jpg", ".jpeg", ".pdf")
+    allowed_extensions = (".png", ".jpg", ".jpeg", ".webp", ".pdf")
     if not filename.endswith(allowed_extensions):
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file format '{file.filename}'. Allowed extensions: PNG, JPG, JPEG, PDF."
+            detail=f"Unsupported file format '{file.filename}'. Allowed extensions: PNG, JPG, JPEG, WEBP, PDF."
         )
 
     contents = await file.read()

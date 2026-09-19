@@ -21,8 +21,9 @@ class SIFResultSchema(BaseModel):
     score: float
     confidence: float
     risk_factors: List[str]
-    model_type: Optional[str] = "xgboost"
-    model_version: Optional[str] = "1.0.0"
+    model_type: Optional[str] = "ensemble"
+    model_version: Optional[str] = "1.1.0-hybrid"
+    model_breakdown: Optional[Dict[str, float]] = Field(default_factory=dict)
     top_factors: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
 
 

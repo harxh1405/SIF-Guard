@@ -25,9 +25,14 @@ class OCRPageResult(BaseModel):
 class OCRResultSchema(BaseModel):
     text: str
     confidence: float
-    source_type: str  # 'image' or 'pdf'
+    source_type: str  # 'image', 'pdf', 'camera'
     pages: int
     requires_verification: bool
     warnings: List[str] = Field(default_factory=list)
     page_results: List[OCRPageResult] = Field(default_factory=list)
     ocr_provider: str = "tesseract"
+    method: str = "tesseract"
+    quality_status: str = "good"  # 'good', 'warning', 'poor'
+    quality_reason: Optional[str] = None
+    quality_metrics: Optional[Dict[str, float]] = None
+    source: Optional[str] = None

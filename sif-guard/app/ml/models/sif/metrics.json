@@ -1,14 +1,73 @@
 {
-  "accuracy": 1.0,
-  "precision": 1.0,
-  "recall": 1.0,
-  "f1": 1.0,
-  "roc_auc": 1.0,
-  "pr_auc": 1.0,
-  "false_negatives": 0,
-  "false_positives": 0,
-  "true_positives": 290,
-  "true_negatives": 460,
-  "false_negative_rate": 0.0,
-  "counterfactual_pair_accuracy": 1.0
+  "xgboost": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": [
+      [
+        460,
+        0
+      ],
+      [
+        0,
+        290
+      ]
+    ],
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_positives": 290,
+    "true_negatives": 460
+  },
+  "catboost": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": [
+      [
+        460,
+        0
+      ],
+      [
+        0,
+        290
+      ]
+    ],
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_positives": 290,
+    "true_negatives": 460
+  },
+  "ensemble": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": [
+      [
+        460,
+        0
+      ],
+      [
+        0,
+        290
+      ]
+    ],
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_positives": 290,
+    "true_negatives": 460
+  },
+  "ensemble_weights": {
+    "xgboost": 0.5,
+    "catboost": 0.5
+  },
+  "evaluation_samples": 750
 }

@@ -8,6 +8,7 @@ __pycache__/
 *.egg-info/
 .coverage
 htmlcov/
+catboost_info/
 
 # Databases
 *.db

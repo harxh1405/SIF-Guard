@@ -101,7 +101,7 @@ def test_bft_regression_complete_api_pipeline():
         assert "sif" in data
         assert "life_saving_rules" in data
         assert "fingerprint" in data
-        assert data["sif"]["model_type"] == "xgboost"
+        assert data["sif"]["model_type"] in ["xgboost", "ensemble"]
         assert data["sif"]["score"] >= case["expected_sif_min"]
 
 

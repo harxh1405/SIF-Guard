@@ -291,6 +291,9 @@ class RuleBasedExtractor:
             elif rec_match:
                 recognition_matches.append(rule)
 
+        if "did not remove" in t_lower or "remained securely installed" in t_lower or "was not removed" in t_lower:
+            failed_matches = [m for m in failed_matches if m[0].name != "machine_guarding"]
+
         if failed_matches:
             best_rule, _ = failed_matches[0]
             return best_rule.barrier_category, best_rule.failure_message
@@ -359,10 +362,18 @@ class RuleBasedExtractor:
             hazsub = str(report_metadata["hazardous_substance"])
         elif "h2s" in t_lower or "hydrogen sulfide" in t_lower:
             hazsub = "Hydrogen Sulfide (H2S)"
+        elif "hydrochloric acid" in t_lower:
+            hazsub = "hydrochloric acid"
+        elif "benzene" in t_lower:
+            hazsub = "benzene"
+        elif "nitrogen" in t_lower:
+            hazsub = "nitrogen"
+        elif "crude oil" in t_lower:
+            hazsub = "crude oil"
         elif "hydrocarbon" in t_lower:
             hazsub = "hydrocarbons / flammable gas"
-        elif "chemical" in t_lower or "acid" in t_lower or "solvent" in t_lower:
-            hazsub = "hazardous chemical"
+        elif re.search(r"\b(?:sulfuric|nitric|muriatic)?\s*acid\b", t_lower):
+            hazsub = "hazardous chemical / acid"
 
         # 4. Exposure
         exposure = None
@@ -402,20 +413,26 @@ class RuleBasedExtractor:
 
         # 6. Equipment
         equipment = None
-        if "grinding" in t_lower or "grinder" in t_lower:
-            equipment = "grinding machinery"
+        if "compressor" in t_lower:
+            equipment = "compressor"
         elif "centrifugal pump" in t_lower or "pump" in t_lower:
             equipment = "centrifugal pump"
+        elif "forklift" in t_lower or "fork lift" in t_lower:
+            equipment = "forklift"
+        elif "electrical distribution panel" in t_lower or "electrical panel" in t_lower or "distribution panel" in t_lower:
+            equipment = "electrical panel"
+        elif "storage tank" in t_lower or "tank" in t_lower:
+            equipment = "storage tank / vessel"
+        elif "crane" in t_lower or "hoist" in t_lower or "rigging" in t_lower:
+            equipment = "crane"
+        elif "grinding" in t_lower or "grinder" in t_lower:
+            equipment = "grinding machinery"
         elif "excavation" in t_lower or "trench" in t_lower:
             equipment = "excavation / trench"
-        elif "crane" in t_lower or "hoist" in t_lower or "rigging" in t_lower:
-            equipment = "crane / lifting equipment"
-        elif "vessel" in t_lower or "tank" in t_lower or "storage tank" in t_lower or "pipe" in t_lower or "flange" in t_lower or "process line" in t_lower:
+        elif "vessel" in t_lower or "pipe" in t_lower or "flange" in t_lower or "process line" in t_lower:
             equipment = "vessel / container / process line"
         elif "scaffold" in t_lower or "ladder" in t_lower or "platform" in t_lower:
             equipment = "scaffold / elevated platform / ladder"
-        elif "electrical panel" in t_lower or "breaker" in t_lower:
-            equipment = "electrical panel"
         elif "chair" in t_lower or "desk" in t_lower or "drawer" in t_lower or "office" in t_lower:
             equipment = "office furniture"
 
@@ -423,19 +440,41 @@ class RuleBasedExtractor:
         human_factor = None
         if report_metadata and report_metadata.get("human_factor"):
             human_factor = str(report_metadata["human_factor"])
-        elif any(re.search(p, t_lower) for p in [r"\bprocedure bypassed\b", r"\bnon-compliance\b", r"\bignored safety\b", r"\bdistraction\b", r"\binappropriate positioning\b", r"\bline of fire\b", r"\bloto bypassed\b"]):
+        elif "no unsafe human action" in t_lower or "no human error" in t_lower:
+            human_factor = None
+        elif re.search(r"\b(?:failed to verify|without (?:confirming|verifying)|absence of voltage was not verified)\b", t_lower):
+            human_factor = "failure to verify"
+        elif re.search(r"\b(?:without authorization|unauthorized entry|unauthorized access)\b", t_lower):
+            human_factor = "unauthorized entry"
+        elif re.search(r"\b(?:distract(?:ed|ion))\b", t_lower):
+            human_factor = "distraction"
+        elif re.search(r"\b(?:bypassed (?:the )?(?:required )?safety procedure|bypassed (?:the )?procedure)\b", t_lower):
+            human_factor = "procedure bypass / non-compliance"
+        elif re.search(r"\b(?:ignored (?:the )?(?:required )?permit|ignored the required permit process|procedure non-compliance|non-compliance|ignored safety)\b", t_lower):
+            human_factor = "procedure non-compliance"
+        elif any(re.search(p, t_lower) for p in [r"\binappropriate positioning\b", r"\bloto bypassed\b"]):
             human_factor = "inappropriate positioning / procedure non-compliance"
 
         env_factor = None
         if report_metadata and report_metadata.get("environmental_factor"):
             env_factor = str(report_metadata["environmental_factor"])
+        elif "normal dry conditions" in t_lower or "normal conditions" in t_lower:
+            env_factor = None
+        elif re.search(r"\b(?:strong )?wind\b", t_lower):
+            env_factor = "wind"
+        elif re.search(r"\b(?:heavy )?rain\b|\bwater ingress\b|\bwater (?:accumulat|accumulation)\b", t_lower):
+            env_factor = "rain / water ingress"
+        elif re.search(r"\bpoor ventilation\b|\bunventilated\b", t_lower):
+            env_factor = "poor ventilation"
+        elif re.search(r"\b(?:slippery|wet) surface\b|\bwater on the floor\b|\bslippery floor\b", t_lower):
+            env_factor = "wet / slippery surface"
         elif "excavation" in t_lower or "trench" in t_lower:
             env_factor = "excavation wall instability"
-        elif "confined" in t_lower or "poor ventilation" in t_lower or "storage tank" in t_lower:
+        elif "confined" in t_lower or "storage tank" in t_lower:
             env_factor = "confined space atmosphere"
         elif "elevated" in t_lower or "above ground" in t_lower or "height" in t_lower:
             env_factor = "elevated work location"
-        elif "wet" in t_lower or "slippery" in t_lower or "wind" in t_lower:
+        elif "wet" in t_lower or "slippery" in t_lower:
             env_factor = "adverse environmental condition"
 
         # 8. Barrier & Barrier Failure using taxonomy engine
@@ -477,13 +516,88 @@ class RuleBasedExtractor:
         )
 
 
+class HybridSafetyExtractor:
+    """
+    Hybrid extractor combining Transformer NER, Domain Rules (negation, barrier failure, context),
+    and Entity Resolution with guaranteed fallback to RuleBasedExtractor.
+    """
+
+    def __init__(self):
+        self.rule_fallback = RuleBasedExtractor()
+
+    def extract(self, text: str, report_metadata: Optional[Dict[str, Any]] = None) -> ExtractionSchema:
+        try:
+            from app.services.extraction.transformer.extractor import transformer_extractor
+            from app.services.extraction.rules.barrier_rules import barrier_rule_engine
+            from app.services.extraction.rules.activity_rules import activity_rule_engine
+            from app.services.extraction.rules.hazard_rules import hazard_rule_engine
+            from app.services.extraction.rules.energy_rules import energy_rule_engine
+            from app.services.extraction.rules.exposure_rules import exposure_consequence_engine
+            from app.services.extraction.resolver.resolver import entity_resolver
+            from app.core.logging import logger
+
+            # 1. Run Transformer NER
+            transformer_spans = transformer_extractor.extract(text)
+
+            # 2. Run modular Domain Rules
+            barrier_res = barrier_rule_engine.evaluate(text)
+            activity = activity_rule_engine.evaluate(text)
+            hazard = hazard_rule_engine.evaluate(text)
+            energy = energy_rule_engine.evaluate(text)
+            exposure = exposure_consequence_engine.evaluate_exposure(
+                text,
+                hazard=hazard,
+                activity=activity,
+                barrier_failure=barrier_res.get("barrier_failure")
+            )
+            consequence = exposure_consequence_engine.evaluate_consequence(
+                text,
+                hazard=hazard,
+                activity=activity,
+                barrier_failure=barrier_res.get("barrier_failure")
+            )
+
+            # 3. Fallback complement for any uncaptured fields
+            fallback_res = self.rule_fallback.extract(text, report_metadata)
+
+            final_barrier = barrier_res["barrier"] if barrier_res.get("barrier") is not None else fallback_res.barrier
+            final_failure = barrier_res["barrier_failure"] if barrier_res.get("barrier") is not None else fallback_res.barrier_failure
+
+            rule_res = {
+                "activity": activity or fallback_res.activity,
+                "hazard": hazard or fallback_res.hazard,
+                "barrier": final_barrier,
+                "barrier_failure": final_failure,
+                "all_barriers": barrier_res.get("all_barriers", []),
+                "all_failures": barrier_res.get("all_failures", []),
+                "exposure": exposure or fallback_res.exposure,
+                "energy_source": energy or fallback_res.energy_source,
+                "potential_consequence": consequence or fallback_res.potential_consequence,
+                "hazardous_substance": fallback_res.hazardous_substance,
+                "equipment": fallback_res.equipment,
+                "human_factor": fallback_res.human_factor,
+                "environmental_factor": fallback_res.environmental_factor,
+            }
+            logger.info(f"RULES evaluated: barrier='{rule_res['barrier']}', failure='{rule_res['barrier_failure']}', exposure='{rule_res['exposure']}', consequence='{rule_res['potential_consequence']}'")
+
+            # 4. Resolve entities, canonicalize, and produce ExtractionSchema
+            resolved = entity_resolver.resolve(transformer_spans, rule_res)
+            logger.info(f"RESOLVER canonicalized activity='{resolved.schema.activity}', barrier='{resolved.schema.barrier}', failure='{resolved.schema.barrier_failure}'")
+            return resolved.schema
+        except Exception as e:
+            from app.core.logging import logger
+            logger.warning(f"Hybrid extraction encountered error: {e}. Falling back to RuleBasedExtractor.")
+            return self.rule_fallback.extract(text, report_metadata)
+
+
 class ExtractionService:
 
     def __init__(self, extractor=None):
-        self.extractor = extractor or RuleBasedExtractor()
+        self.extractor = extractor or HybridSafetyExtractor()
 
     def extract(self, text: str, report_metadata: Optional[Dict[str, Any]] = None) -> ExtractionSchema:
         return self.extractor.extract(text, report_metadata)
 
 
 extraction_service = ExtractionService()
+

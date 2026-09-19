@@ -187,65 +187,13 @@ class SIFClassifier:
         extraction: ExtractionSchema,
         raw_data: Optional[Dict[str, Any]] = None
     ) -> SIFResultSchema:
-        if self.mode == "heuristic" or not self.is_loaded or self.model is None or self.preprocessor is None:
-            if self.mode == "xgboost" and not self.is_loaded:
-                logger.error("XGBoost mode requested but model artifacts not loaded. Falling back cleanly.")
+        if self.mode == "heuristic":
             return self.heuristic_fallback.predict(text, extraction, raw_data)
 
-        # 1. Convert ExtractionSchema to feature record
-        feat_record = extraction_to_feature_record(extraction)
-
-        # 2. DataFrame and OneHotEncoder transformation
-        df_feat = pd.DataFrame([feat_record])[SIF_FEATURE_COLUMNS]
-        transformed_vec = self.preprocessor.transform(df_feat)
-
-        # 3. XGBoost Inference using predict_proba()
-        dmatrix = xgb.DMatrix(transformed_vec)
-        preds = self.model.predict(dmatrix)
-        prob = float(preds[0])
-
-        # 4. Domain rule evaluation guardrail
-        rule_label, rule_conf, rule_risk_factors = weak_rules_engine.evaluate(text, extraction, raw_data)
-        if rule_label == "SIF_POTENTIAL":
-            prob = max(prob, 0.85)
-        elif rule_label == "NON_SIF":
-            prob = min(prob, 0.15)
-
-        # 5. Threshold Policy
-        high_thresh = settings.SIF_HIGH_THRESHOLD
-        unc_thresh = settings.SIF_UNCERTAIN_THRESHOLD
-
-        if prob >= high_thresh:
-            classification = "SIF_POTENTIAL"
-            confidence = round(max(prob, rule_conf), 4)
-        elif prob < unc_thresh:
-            classification = "NON_SIF"
-            confidence = round(1.0 - prob, 4)
-        else:
-            classification = "UNCERTAIN"
-            confidence = 0.50
-
-        risk_factors = rule_risk_factors
-        if not risk_factors:
-            if classification == "SIF_POTENTIAL":
-                risk_factors = [f"High XGBoost model probability ({prob:.2%}) from structured safety attributes"]
-            elif classification == "NON_SIF":
-                risk_factors = [f"Low XGBoost model probability ({prob:.2%}) - effective barriers verified"]
-            else:
-                risk_factors = ["Borderline risk score requiring expert review"]
-
-        # 6. SHAP Explainability
-        top_factors = self._explain_prediction(feat_record, transformed_vec, prob)
-
-        return SIFResultSchema(
-            classification=classification,
-            score=round(prob, 4),
-            confidence=confidence,
-            risk_factors=risk_factors,
-            model_type="xgboost",
-            model_version="1.0.0",
-            top_factors=top_factors
-        )
+        # Delegate to hybrid ensemble classifier (XGBoost + CatBoost)
+        from app.services.sif.ensemble import ensemble_sif_classifier
+        return ensemble_sif_classifier.predict(text, extraction, raw_data)
 
 
 sif_classifier = SIFClassifier()
+
