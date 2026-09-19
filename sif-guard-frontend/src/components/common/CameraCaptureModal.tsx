@@ -25,6 +25,7 @@ export const CameraCaptureModal: React.FC<Props> = ({
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [qualityWarning, setQualityWarning] = useState<string | null>(null);
 
   // Enumerate video devices
   useEffect(() => {
@@ -42,6 +43,7 @@ export const CameraCaptureModal: React.FC<Props> = ({
   // Start webcam stream
   const startCamera = async () => {
     setError(null);
+    setQualityWarning(null);
     setCapturedDataUrl(null);
     setCapturedFile(null);
 
@@ -73,7 +75,7 @@ export const CameraCaptureModal: React.FC<Props> = ({
       setError(
         err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
           ? 'Camera permission was denied. Please grant camera access in browser settings or use file upload.'
-          : 'Could not connect to camera device.'
+          : 'Could not connect to camera device. Please ensure camera is not in use by another application.'
       );
     }
   };
@@ -112,6 +114,29 @@ export const CameraCaptureModal: React.FC<Props> = ({
     if (ctx) {
       ctx.drawImage(video, 0, 0, width, height);
 
+      // Client-side quick lighting & contrast screening
+      try {
+        const sampleW = Math.min(width, 320);
+        const sampleH = Math.min(height, 240);
+        const imgData = ctx.getImageData(0, 0, sampleW, sampleH);
+        const data = imgData.data;
+        let totalBrightness = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          totalBrightness += (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+        }
+        const avgBrightness = totalBrightness / (data.length / 4);
+
+        if (avgBrightness < 30) {
+          setQualityWarning('Low Lighting Warning: Image appears dark. Better illumination recommended.');
+        } else if (avgBrightness > 245) {
+          setQualityWarning('Glare Warning: Direct glare detected. Adjust camera angle for clearer OCR.');
+        } else {
+          setQualityWarning(null);
+        }
+      } catch {
+        setQualityWarning(null);
+      }
+
       const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
       setCapturedDataUrl(dataUrl);
 
@@ -129,6 +154,7 @@ export const CameraCaptureModal: React.FC<Props> = ({
   const handleRetake = () => {
     setCapturedDataUrl(null);
     setCapturedFile(null);
+    setQualityWarning(null);
     if (videoRef.current && stream) {
       videoRef.current.play().catch(() => {});
     }
@@ -301,7 +327,7 @@ export const CameraCaptureModal: React.FC<Props> = ({
                 <div
                   style={{
                     position: 'absolute',
-                    inset: '30px',
+                    inset: '24px',
                     border: '2px dashed rgba(77, 206, 160, 0.4)',
                     borderRadius: '8px',
                     pointerEvents: 'none',
@@ -311,12 +337,20 @@ export const CameraCaptureModal: React.FC<Props> = ({
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px' }}>
-                    <div style={{ borderLeft: '3px solid #4DCEA0', borderTop: '3px solid #4DCEA0', width: '20px', height: '20px' }} />
-                    <div style={{ borderRight: '3px solid #4DCEA0', borderTop: '3px solid #4DCEA0', width: '20px', height: '20px' }} />
+                    <div style={{ borderLeft: '3px solid #4DCEA0', borderTop: '3px solid #4DCEA0', width: '22px', height: '22px' }} />
+                    <div style={{ borderRight: '3px solid #4DCEA0', borderTop: '3px solid #4DCEA0', width: '22px', height: '22px' }} />
                   </div>
+
+                  {/* Visual framing instructions */}
+                  <div style={{ textAlign: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: '6px 14px', borderRadius: '20px', alignSelf: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#4DCEA0', fontWeight: 600 }}>
+                      Align report within frame • Ensure bright lighting & clear text
+                    </span>
+                  </div>
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px' }}>
-                    <div style={{ borderLeft: '3px solid #4DCEA0', borderBottom: '3px solid #4DCEA0', width: '20px', height: '20px' }} />
-                    <div style={{ borderRight: '3px solid #4DCEA0', borderBottom: '3px solid #4DCEA0', width: '20px', height: '20px' }} />
+                    <div style={{ borderLeft: '3px solid #4DCEA0', borderBottom: '3px solid #4DCEA0', width: '22px', height: '22px' }} />
+                    <div style={{ borderRight: '3px solid #4DCEA0', borderBottom: '3px solid #4DCEA0', width: '22px', height: '22px' }} />
                   </div>
                 </div>
 
@@ -325,7 +359,7 @@ export const CameraCaptureModal: React.FC<Props> = ({
                     position: 'absolute',
                     top: '14px',
                     left: '16px',
-                    backgroundColor: 'rgba(0,0,0,0.65)',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
                     padding: '4px 10px',
                     borderRadius: '4px',
                     color: '#4DCEA0',
@@ -336,6 +370,30 @@ export const CameraCaptureModal: React.FC<Props> = ({
                 >
                   REC • LIVE CAMERA STREAM
                 </div>
+
+                {qualityWarning && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '16px',
+                      left: '16px',
+                      right: '16px',
+                      backgroundColor: 'rgba(232, 170, 61, 0.95)',
+                      color: '#080E10',
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      zIndex: 10,
+                    }}
+                  >
+                    <AlertCircle size={16} />
+                    <span>{qualityWarning}</span>
+                  </div>
+                )}
               </>
             )}
 

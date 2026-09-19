@@ -28,7 +28,7 @@ def test_camera_capture_ocr_extract():
 
     assert response.status_code == 200
     data = response.json()
-    assert data["source_type"] == "image"
+    assert data["source_type"] in ["camera", "image"]
     assert data["ocr_provider"] == "tesseract"
     assert data["confidence"] > 0.0
     assert len(data["text"]) > 0

@@ -33,9 +33,19 @@ class OILHSSEAdapter(DataSourceAdapter):
         
         data_origin = record.get("data_origin")
         if not data_origin:
+            rec_id_upper = rec_id.upper()
+            src_str = str(record.get("source", "")).lower()
+            src_type = str(record.get("source_type", "")).lower()
+
             if rec_id.startswith(("BFT-", "REC-BFT-", "bft-")) or "bft" in rec_id.lower() or record.get("site") == "Test Facility":
                 data_origin = "synthetic"
-            elif rec_id.startswith(("RAW-", "OCR-", "MANUAL-")):
+            elif rec_id_upper.startswith(("CAM-", "CAMERA-")) or "camera" in src_str or src_type == "camera":
+                data_origin = "CAMERA_CAPTURE"
+            elif rec_id_upper.startswith("IMG-") or src_type == "image":
+                data_origin = "IMAGE_UPLOAD"
+            elif rec_id_upper.startswith("PDF-") or src_type in ("pdf", "pdf_native", "pdf_ocr"):
+                data_origin = "PDF_DOCUMENT"
+            elif rec_id_upper.startswith(("RAW-", "MANUAL-", "OCR-")) or "manual" in src_str:
                 data_origin = "MANUAL_NARRATIVE"
             else:
                 data_origin = "oil_hsse"

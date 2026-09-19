@@ -30,7 +30,7 @@ export const PipelineStatusBadge: React.FC = () => {
     };
   }, []);
 
-  const isHealthy = health?.status === 'ok';
+  const isHealthy = health?.status === 'healthy' || health?.status === 'ok';
 
   return (
     <div
@@ -47,7 +47,7 @@ export const PipelineStatusBadge: React.FC = () => {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <Cpu size={14} color="#F2A933" />
-        <span style={{ fontWeight: 600, color: '#F4F3EE' }}>PIPELINE STATUS</span>
+        <span style={{ fontWeight: 600, color: '#F4F3EE' }}>HYBRID PIPELINE</span>
       </div>
 
       <div style={{ height: '12px', width: '1px', backgroundColor: '#203238' }} />
@@ -55,12 +55,22 @@ export const PipelineStatusBadge: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', color: '#9CA8AA' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
-          <span>OCR</span>
+          <span>Ingestion & OCR</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
-          <span>XGBoost v1.0.0</span>
+          <span>Transformer NER</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
+          <span>Rules Engine</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
+          <span>Ensemble v1.1.0</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -70,7 +80,7 @@ export const PipelineStatusBadge: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#4DCEA0' }} />
-          <span>LSR Mapping</span>
+          <span>IOGP LSR</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>

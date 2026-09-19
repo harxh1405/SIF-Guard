@@ -4,7 +4,15 @@ export interface HealthStatusResponse {
   status: string;
   service: string;
   environment: string;
-  embedding_model: string;
+  embedding_model?: string;
+  components?: {
+    database?: string;
+    sif_model?: string;
+    sif_model_type?: string;
+    embedding_model?: string;
+    ocr_provider?: string;
+    [key: string]: string | undefined;
+  };
   xgboost_model_loaded?: boolean;
   ocr_available?: boolean;
   bge_available?: boolean;

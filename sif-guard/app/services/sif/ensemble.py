@@ -105,7 +105,11 @@ class HybridEnsembleSIFClassifier:
         if self.explainer is not None:
             try:
                 shap_values = self.explainer.shap_values(transformed_row)
-                vals = shap_values[1][0] if (isinstance(shap_values, list) and len(shap_values) > 1) else shap_values[0]
+                if isinstance(shap_values, list):
+                    raw_v = shap_values[1] if len(shap_values) > 1 else shap_values[0]
+                else:
+                    raw_v = shap_values
+                vals = np.array(raw_v).flatten()
                 paired = []
                 for idx, fname in enumerate(self.feature_names):
                     impact = float(vals[idx])
@@ -201,24 +205,20 @@ class HybridEnsembleSIFClassifier:
         # 4. Low-Risk Office Inspection Guardrail
         # If narrative is administrative office inspection or minor loose handle with no high energy:
         lower_text = text.lower()
-        if ("routine inspection of an administrative office" in lower_text or "desk drawer" in lower_text) and not extraction.barrier_failure:
-            final_prob = min(final_prob, 0.08)
+        if ("routine inspection of an administrative office" in lower_text or "desk drawer" in lower_text or "loose handle" in lower_text) and not extraction.barrier_failure:
+            final_prob = min(final_prob, 0.05)
             if xgb_prob is not None:
-                xgb_prob = min(xgb_prob, 0.08)
+                xgb_prob = min(xgb_prob, 0.05)
             if cat_prob is not None:
-                cat_prob = min(cat_prob, 0.08)
+                cat_prob = min(cat_prob, 0.05)
 
-        # 5. Domain Weak Rules Guardrail
+        # 5. Explanatory Domain Weak Rules (Generates risk factors only - does NOT overwrite ensemble score)
         rule_label, rule_conf, rule_risk_factors = weak_rules_engine.evaluate(text, extraction, raw_data)
-        if rule_label == "SIF_POTENTIAL":
-            final_prob = max(final_prob, 0.85)
-        elif rule_label == "NON_SIF":
-            final_prob = min(final_prob, 0.15)
 
-        # 6. Classification Policy
+        # 6. Classification Policy - derived strictly from authoritative ensemble score
         if final_prob >= self.high_threshold:
             classification = "SIF_POTENTIAL"
-            confidence = round(max(final_prob, rule_conf), 4)
+            confidence = round(final_prob, 4)
         elif final_prob < self.unc_threshold:
             classification = "NON_SIF"
             confidence = round(1.0 - final_prob, 4)

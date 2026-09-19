@@ -360,13 +360,14 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
     setAnalysisData(null);
     setSimilarReports([]);
 
-    if (!report.sif_potential) {
-      handleRunAnalysis(report.id);
-    } else {
-      getSimilarReports(report.id, 4)
-        .then((res) => setSimilarReports(res.similar_reports))
-        .catch(() => {});
-    }
+    // Enrich with full analysis data to populate model_breakdown and SHAP features
+    analyzeReport(report.id)
+      .then((res) => setAnalysisData(res))
+      .catch(() => {});
+
+    getSimilarReports(report.id, 4)
+      .then((res) => setSimilarReports(res.similar_reports))
+      .catch(() => {});
   };
 
   const handleRunAnalysis = (reportId: string) => {

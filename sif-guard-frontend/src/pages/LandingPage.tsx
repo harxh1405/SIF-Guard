@@ -1063,10 +1063,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 },
                 {
                   step: '04',
-                  title: 'Calibrated XGBoost',
+                  title: 'XGBoost + CatBoost Ensemble',
                   tag: 'PREDICTIVE ENSEMBLE',
-                  code: 'ISOTONIC CALIBRATION',
-                  desc: 'Evaluates multi-class SIF potential (SIF_POTENTIAL, NON_SIF, UNCERTAIN) with calibrated confidence scores.',
+                  code: 'HYBRID ML v1.1.0',
+                  desc: 'Evaluates multi-class SIF potential with dual-model consensus weighting and SHAP explainability.',
                 },
                 {
                   step: '05',
@@ -1865,7 +1865,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <CountUpNumber end={0.89} decimals={2} />
                 </div>
                 <div style={{ fontSize: '0.78rem', color: t.textSecondary }}>
-                  XGBoost Probability Calibration Index.
+                  Hybrid Ensemble Probability Calibration Index.
                 </div>
               </ParallaxCard>
             </div>

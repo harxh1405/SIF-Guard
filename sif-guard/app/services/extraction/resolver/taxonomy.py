@@ -7,6 +7,7 @@ BARRIER_CANONICAL_MAP = {
     "loto": "energy isolation (LOTO)",
     "lockout": "energy isolation (LOTO)",
     "lockout/tagout": "energy isolation (LOTO)",
+    "lockout / tagout": "energy isolation (LOTO)",
     "energy isolation": "energy isolation (LOTO)",
     "electrical isolation": "energy isolation (LOTO)",
     "pressure isolation": "pressure isolation / depressurization",

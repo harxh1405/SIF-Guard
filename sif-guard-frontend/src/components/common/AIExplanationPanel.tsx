@@ -9,8 +9,11 @@ import {
   AlertOctagon,
   Layers,
   Sparkles,
+  TrendingUp,
+  TrendingDown,
 } from 'lucide-react';
 import type { SIFResultSchema, ExtractionSchema, LSRMatchSchema } from '../../types/api';
+import { EnsembleBreakdownCard } from './EnsembleBreakdownCard';
 
 interface Props {
   sifResult?: SIFResultSchema | null;
@@ -110,7 +113,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 color: 'var(--text-muted)',
               }}
             >
-              XGBoost SIF Classifier (v1.0.0)
+              Hybrid SIF Ensemble (XGBoost + CatBoost v1.1.0-hybrid)
             </div>
             <div
               style={{
@@ -201,6 +204,14 @@ export const AIExplanationPanel: React.FC<Props> = ({
           </div>
         </div>
       </div>
+
+      {/* Dual Model Probability Ensemble Breakdown */}
+      <EnsembleBreakdownCard
+        breakdown={sifResult?.model_breakdown}
+        score={score}
+        classification={status}
+        modelVersion={sifResult?.model_version || '1.1.0-hybrid'}
+      />
 
       {/* Extracted HSE Ontology Entities Grid */}
       {extracted && (
@@ -383,6 +394,110 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 + {rf}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* SHAP Feature Attribution Explorer */}
+      {sifResult?.top_factors && sifResult.top_factors.length > 0 && (
+        <div
+          style={{
+            background: 'var(--surface-elevated)',
+            padding: '18px 20px',
+            borderRadius: '12px',
+            border: '1px solid var(--border-subtle)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              color: 'var(--text-muted)',
+              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={14} color="#F2A933" />
+              <span>SHAP Feature Attribution & Impact Weights</span>
+            </div>
+            <span style={{ fontSize: '0.68rem', color: '#829195', fontFamily: 'var(--font-mono)' }}>
+              Explainable Safety ML (Log-Odds Impact)
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {sifResult.top_factors.map((factor, idx) => {
+              const isPositive = factor.impact > 0;
+              const absImpact = Math.abs(factor.impact);
+              const barWidth = Math.min(100, Math.max(12, Math.round((absImpact / 6.0) * 100)));
+
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: 'var(--bg-dark-surface, #091114)',
+                    border: '1px solid var(--border-subtle, #203238)',
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px' }}>
+                    {isPositive ? (
+                      <TrendingUp size={14} color="var(--danger, #E85D5D)" />
+                    ) : (
+                      <TrendingDown size={14} color="var(--success, #4DCEA0)" />
+                    )}
+                    <span style={{ fontWeight: 600, color: '#F4F3EE', textTransform: 'capitalize' }}>
+                      {factor.feature}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#9CA8AA', fontFamily: 'var(--font-mono)' }}>
+                      ({String(factor.value)})
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, maxWidth: '280px', margin: '0 16px' }}>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '6px',
+                        borderRadius: '3px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${barWidth}%`,
+                          height: '100%',
+                          backgroundColor: isPositive ? 'var(--danger, #E85D5D)' : 'var(--success, #4DCEA0)',
+                          borderRadius: '3px',
+                          marginLeft: isPositive ? '0' : 'auto',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 700,
+                      fontSize: '0.76rem',
+                      color: isPositive ? 'var(--danger, #E85D5D)' : 'var(--success, #4DCEA0)',
+                    }}
+                  >
+                    {isPositive ? `+${factor.impact.toFixed(3)}` : factor.impact.toFixed(3)} SIF impact
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

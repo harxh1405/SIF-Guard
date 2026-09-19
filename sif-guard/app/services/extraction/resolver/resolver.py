@@ -62,21 +62,41 @@ class EntityResolver:
                 source="rule"
             ))
 
-        # 2. Integrate Transformer Evidence
+        # 2. Integrate Transformer Evidence with Documented Priority Strategy:
+        # - Barriers & Barrier Failures: Domain Rules take priority due to context & negation integrity.
+        # - If Rule barrier is absent, Transformer BARRIER is used.
+        # - If both agree on canonical barrier, merge into a single provenance item with source="transformer+rule".
+        # - Equipment, Activity, Hazard: Rules provide base; Transformer enriches when missing.
+        rule_barrier_canonical = canonicalize_barrier(barrier) if barrier else None
+
         for te in transformer_entities:
-            # If transformer detected an entity that agrees with or enriches rule extraction
+            # If transformer detected an entity that enriches rule extraction
             if te.label == "ACTIVITY" and not activity:
                 activity = te.text
             elif te.label in ("EQUIPMENT", "ORG") and not equipment:
                 equipment = te.text
             elif te.label == "HAZARD" and not hazard:
                 hazard = te.text
+            elif te.label == "BARRIER" and not barrier:
+                barrier = te.text
 
-            # Mark dual provenance if both identified the same dimension
-            if te.label == "BARRIER" and barrier and te.text.lower() in barrier.lower():
-                te.source = "transformer+rule"
-            elif te.label == "BARRIER_FAILURE" and barrier_failure and te.text.lower() in barrier_failure.lower():
-                te.source = "transformer+rule"
+            # Check canonical agreement on barrier
+            if te.label == "BARRIER" and rule_barrier_canonical:
+                trans_barrier_canonical = canonicalize_barrier(te.text)
+                if trans_barrier_canonical == rule_barrier_canonical:
+                    # Merge provenance: mark the existing rule evidence as transformer+rule
+                    for pe in provenance_list:
+                        if pe.label == "BARRIER":
+                            pe.source = "transformer+rule"
+                    continue  # Deduplicated / merged
+
+            # Check canonical agreement on barrier_failure
+            if te.label == "BARRIER_FAILURE" and barrier_failure:
+                if te.text.lower() in barrier_failure.lower() or barrier_failure.lower() in te.text.lower():
+                    for pe in provenance_list:
+                        if pe.label == "BARRIER_FAILURE":
+                            pe.source = "transformer+rule"
+                    continue
 
             provenance_list.append(te)
 
@@ -98,10 +118,14 @@ class EntityResolver:
             potential_consequence=consequence
         )
 
+        all_barrs = rule_results.get("all_barriers", [])
+        if canonical_barrier and canonical_barrier not in all_barrs:
+            all_barrs = [canonical_barrier] + all_barrs
+
         return TupleExtractionResult(
             schema=schema,
             provenance=provenance_list,
-            all_barriers=rule_results.get("all_barriers", [canonical_barrier] if canonical_barrier else []),
+            all_barriers=all_barrs if all_barrs else ([canonical_barrier] if canonical_barrier else []),
             all_failures=rule_results.get("all_failures", [barrier_failure] if barrier_failure else [])
         )
 

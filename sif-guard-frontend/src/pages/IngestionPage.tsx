@@ -72,10 +72,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
       if (fileName.endsWith('.pdf')) {
         setSource('pdf');
         processOCR(file);
-      } else if (fileType.includes('image') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+      } else if (fileType.includes('image') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.webp')) {
         setSource('image');
         processOCR(file);
-      } else if (fileName.endsWith('.csv') || fileName.endsWith('.json')) {
+      } else if (fileName.endsWith('.csv') || fileName.endsWith('.json') || fileName.endsWith('.jsonl')) {
         setSource('structured');
         processStructuredFile(file);
       } else {
@@ -91,8 +91,20 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
 
     try {
       const res = await extractDocumentOCR(file);
+      const textToUse = (res.text || res.extracted_text || '').trim();
+
+      // Guard: if OCR returned empty or quality is poor, do not pretend OCR succeeded
+      if (!textToUse || res.quality_status === 'poor') {
+        const reasonDesc = res.quality_reason
+          ? res.quality_reason.replace(/_/g, ' ')
+          : 'no legible text detected';
+        setError(`OCR quality too low — retake recommended (${reasonDesc})`);
+        setOcrResult(null);
+        setStep(1);
+        return;
+      }
+
       setOcrResult(res);
-      const textToUse = res.text || res.extracted_text || '';
       setEditableText(textToUse);
       setRawOcrText(textToUse);
       setStep(3);
@@ -151,21 +163,30 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
     setAnalysisData(null);
 
     try {
-      // 1. Text Processing
-      setAnalysisStage('01 Processing text & domain terminology...');
+      // 1. Text Processing & Normalization
+      setAnalysisStage('01 Normalizing text & domain terminology...');
       await new Promise((r) => setTimeout(r, 200));
 
-      // 2. Submit report to backend
-      setAnalysisStage('02 Extracting 10-dimension safety signals...');
+      // 2. Submit report to backend with source-specific provenance
+      setAnalysisStage('02 Transformer NER & Domain Safety Rules (14 Barrier Check)...');
       const blob = new Blob([editableText], { type: 'text/plain' });
-      const file = new File([blob], source === 'manual_narrative' ? 'manual_narrative.txt' : 'ingested_report.txt', { type: 'text/plain' });
+      const filename = source === 'camera'
+        ? 'camera_capture.txt'
+        : source === 'manual_narrative'
+        ? 'manual_narrative.txt'
+        : source === 'image'
+        ? 'image_upload.txt'
+        : source === 'pdf'
+        ? 'pdf_document.txt'
+        : 'ingested_report.txt';
+      const file = new File([blob], filename, { type: 'text/plain' });
       
-      const importRes = await importReports(file, 'oil_hsse');
+      const importRes = await importReports(file, source === 'camera' ? 'camera_capture' : 'oil_hsse');
 
-      setAnalysisStage('03 Executing XGBoost SIF classifier (v1.0.0)...');
-      await new Promise((r) => setTimeout(r, 200));
+      setAnalysisStage('03 Entity Resolver & Canonical Taxonomy...');
+      await new Promise((r) => setTimeout(r, 150));
 
-      setAnalysisStage('04 Mapping IOGP 9 Life-Saving Rules & Fingerprint...');
+      setAnalysisStage('04 Hybrid XGBoost + CatBoost Ensemble SIF Classification (v1.1.0-hybrid)...');
       
       // Fetch the exact newly created report record using returned first_imported_id
       let targetReportId = importRes.first_imported_id || null;
@@ -185,7 +206,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
         }
       }
 
-      setAnalysisStage('05 Analysis complete.');
+      setAnalysisStage('05 Mapping IOGP 9 Life-Saving Rules & Semantic Precursors...');
+      await new Promise((r) => setTimeout(r, 150));
       setStep(4);
     } catch (err: any) {
       setError(err.message || 'Failed to submit report for analysis');
@@ -358,16 +380,26 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             <div
               style={{
                 fontSize: '0.72rem',
-                color: !isOcrSource ? '#647477' : step > 2 ? '#4DCEA0' : '#9CA8AA',
+                color: !isOcrSource
+                  ? '#647477'
+                  : step === 2
+                  ? '#F2A933'
+                  : step > 2 && ocrResult?.quality_status === 'good'
+                  ? '#4DCEA0'
+                  : step > 2
+                  ? '#E8AA3D'
+                  : '#9CA8AA',
                 fontStyle: !isOcrSource ? 'italic' : 'normal',
               }}
             >
               {!isOcrSource
                 ? '— Skipped (Direct text)'
                 : step === 2
-                ? '→ Processing...'
+                ? '→ Processing image...'
+                : step > 2 && ocrResult?.text?.trim()
+                ? `✓ OCR Complete (${Math.round((ocrResult.confidence || 0) * 100)}%)`
                 : step > 2
-                ? '✓ OCR Complete'
+                ? '✓ Verified'
                 : 'Pending'}
             </div>
           </div>
@@ -566,7 +598,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,.png,.jpg,.jpeg,.csv,.json,.txt"
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.csv,.json,.jsonl,.txt"
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
@@ -575,8 +607,85 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 Drag and drop report document or click to browse
               </h3>
               <p style={{ color: '#9CA8AA', fontSize: '0.82rem', margin: 0 }}>
-                Supports PDF reports, scanned forms, site photo logs (PNG/JPG), and structured CSV/JSON logs.
+                Supports PDF reports, scanned forms, site photo logs (PNG/JPG/WEBP), and structured CSV/JSON/JSONL logs.
               </p>
+            </div>
+          )}
+
+          {/* Mode 2: Live Camera Ready Card */}
+          {source === 'camera' && (
+            <div
+              style={{
+                border: '2px dashed #A855F7',
+                borderRadius: '8px',
+                padding: '44px 24px',
+                textAlign: 'center',
+                backgroundColor: 'rgba(168, 85, 247, 0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(168, 85, 247, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid #A855F7',
+                }}
+              >
+                <Camera size={32} color="#A855F7" />
+              </div>
+              <div>
+                <h3 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: '0 0 6px 0' }}>
+                  Live Field Camera Capture
+                </h3>
+                <p style={{ color: '#9CA8AA', fontSize: '0.85rem', margin: 0, maxWidth: '460px' }}>
+                  Capture incident documentation, safety permits, or field observation logs directly with your camera for multi-pass OCR extraction.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setIsCameraModalOpen(true)}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '6px',
+                    backgroundColor: '#A855F7',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 0 16px rgba(168, 85, 247, 0.3)',
+                  }}
+                >
+                  <Camera size={18} /> Open Live Camera Viewfinder
+                </button>
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  style={{
+                    padding: '12px 20px',
+                    borderRadius: '6px',
+                    backgroundColor: '#112429',
+                    border: '1px solid #203238',
+                    color: '#9CA8AA',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <UploadCloud size={16} /> Select Photo File Instead
+                </button>
+              </div>
             </div>
           )}
 
@@ -695,9 +804,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               </span>
             </div>
 
-            {/* OCR Confidence Badge (ONLY displayed if OCR actually ran) */}
+            {/* OCR Confidence & Quality Badges (ONLY displayed if OCR actually ran) */}
             {isOcrSource && ocrResult && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span
                   style={{
                     fontFamily: 'var(--font-mono)',
@@ -709,7 +818,21 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                     borderRadius: '4px',
                   }}
                 >
-                  OCR Confidence: {Math.round(ocrResult.confidence * 100)}% ({ocrResult.ocr_provider || ocrResult.engine_used || 'tesseract'})
+                  OCR Confidence: {Math.round((ocrResult.confidence || 0) * 100)}% ({ocrResult.method || ocrResult.ocr_provider || ocrResult.engine_used || 'tesseract'})
+                </span>
+
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.78rem',
+                    color: ocrResult.quality_status === 'good' ? '#4DCEA0' : ocrResult.quality_status === 'fair' ? '#E8AA3D' : '#F87171',
+                    backgroundColor: ocrResult.quality_status === 'good' ? 'rgba(77, 206, 160, 0.12)' : ocrResult.quality_status === 'fair' ? 'rgba(232, 170, 61, 0.12)' : 'rgba(248, 113, 113, 0.12)',
+                    border: `1px solid ${ocrResult.quality_status === 'good' ? '#4DCEA0' : ocrResult.quality_status === 'fair' ? '#E8AA3D' : '#F87171'}`,
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Quality: {(ocrResult.quality_status || 'good').toUpperCase()}
                 </span>
               </div>
             )}
@@ -1053,7 +1176,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   >
                     <div>
                       <div style={{ fontSize: '0.72rem', color: '#9CA8AA', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '4px' }}>
-                        SIF Potential Classifier (XGBoost v1.0.0)
+                        Hybrid SIF Ensemble (XGBoost + CatBoost v1.1.0-hybrid)
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <SIFBadge

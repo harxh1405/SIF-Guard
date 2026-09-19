@@ -48,26 +48,39 @@ async def import_reports(
                 try:
                     df = pd.read_csv(io.BytesIO(contents))
                 except Exception:
+                    rec_prefix = "CAM" if ("camera" in filename or source == "camera") else ("MANUAL" if ("manual" in filename or source == "manual_narrative") else "RAW")
+                    origin = "CAMERA_CAPTURE" if rec_prefix == "CAM" else ("MANUAL_NARRATIVE" if rec_prefix == "MANUAL" else "oil_hsse")
                     df = pd.DataFrame([{
                         "report_text": text_str,
-                        "source_record_id": f"RAW-{uuid.uuid4().hex[:6].upper()}",
-                        "site": "Not specified"
+                        "source_record_id": f"{rec_prefix}-{uuid.uuid4().hex[:6].upper()}",
+                        "site": "Not specified",
+                        "data_origin": origin
                     }])
             else:
+                rec_prefix = "CAM" if ("camera" in filename or source == "camera") else ("MANUAL" if ("manual" in filename or source == "manual_narrative") else "RAW")
+                origin = "CAMERA_CAPTURE" if rec_prefix == "CAM" else ("MANUAL_NARRATIVE" if rec_prefix == "MANUAL" else "oil_hsse")
                 df = pd.DataFrame([{
                     "report_text": text_str,
-                    "source_record_id": f"RAW-{uuid.uuid4().hex[:6].upper()}",
-                    "site": "Not specified"
+                    "source_record_id": f"{rec_prefix}-{uuid.uuid4().hex[:6].upper()}",
+                    "site": "Not specified",
+                    "data_origin": origin
                 }])
         elif filename.endswith((".pdf", ".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
             from app.services.ocr.service import ocr_service
             ocr_res = ocr_service.extract(contents, file.filename)
             if not ocr_res.text or not ocr_res.text.strip():
                 raise HTTPException(status_code=400, detail="OCR engine could not extract readable text from document.")
+            if "camera" in filename or source == "camera":
+                rec_prefix, origin = "CAM", "CAMERA_CAPTURE"
+            elif filename.endswith(".pdf"):
+                rec_prefix, origin = "PDF", "PDF_DOCUMENT"
+            else:
+                rec_prefix, origin = "IMG", "IMAGE_UPLOAD"
             df = pd.DataFrame([{
                 "report_text": ocr_res.text.strip(),
-                "source_record_id": f"OCR-{uuid.uuid4().hex[:6].upper()}",
-                "site": "Not specified"
+                "source_record_id": f"{rec_prefix}-{uuid.uuid4().hex[:6].upper()}",
+                "site": "Not specified",
+                "data_origin": origin
             }])
         else:
             text_str = contents.decode("utf-8", errors="ignore").strip()

@@ -12,11 +12,28 @@ export interface ExtractionSchema {
   potential_consequence?: string | null;
 }
 
+export interface FeatureFactorSchema {
+  feature: string;
+  value: string | number;
+  impact: number;
+}
+
+export interface ModelBreakdownSchema {
+  xgboost_probability?: number;
+  catboost_probability?: number;
+  ensemble_probability?: number;
+  [key: string]: number | undefined;
+}
+
 export interface SIFResultSchema {
   classification: 'SIF_POTENTIAL' | 'NON_SIF' | 'UNCERTAIN' | string;
   score: number;
   confidence: number;
   risk_factors: string[];
+  model_type?: string;
+  model_version?: string;
+  model_breakdown?: ModelBreakdownSchema;
+  top_factors?: FeatureFactorSchema[];
 }
 
 export interface LSRMatchSchema {
@@ -248,4 +265,23 @@ export interface HealthResponse {
   service: string;
   environment: string;
   embedding_model: string;
+  components?: {
+    database?: string;
+    sif_model?: string;
+    sif_model_type?: string;
+    embedding_model?: string;
+    ocr_provider?: string;
+    [key: string]: string | undefined;
+  };
 }
+
+export interface NormalizedReport {
+  source_channel: string;
+  raw_text: string;
+  normalized_text: string;
+  metadata?: Record<string, any>;
+  title?: string | null;
+  extraction_confidence: number;
+  ingested_at: string;
+}
+

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getReviewQueue, submitReview } from '../api/review';
-import type { SafetyReportRead } from '../types/api';
+import { analyzeReport } from '../api/reports';
+import type { SafetyReportRead, AnalysisResponse } from '../types/api';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { EmptyState } from '../components/common/EmptyState';
 import { SIFBadge } from '../components/common/SIFBadge';
 import { EvidenceHighlighter } from '../components/common/EvidenceHighlighter';
 import { AIExplanationPanel } from '../components/common/AIExplanationPanel';
+import { EnsembleBreakdownCard } from '../components/common/EnsembleBreakdownCard';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -65,6 +67,16 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
   }, []);
 
   const activeReport = queue[selectedIndex] || null;
+  const [activeAnalysis, setActiveAnalysis] = useState<AnalysisResponse | null>(null);
+
+  useEffect(() => {
+    if (activeReport?.id) {
+      setActiveAnalysis(null);
+      analyzeReport(activeReport.id)
+        .then((res) => setActiveAnalysis(res))
+        .catch(() => {});
+    }
+  }, [activeReport?.id]);
 
   const handleOpenReview = (report: SafetyReportRead) => {
     setSelectedReport(report);
@@ -373,15 +385,19 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
 
               {/* Multi-layered Explanation Panel */}
               <AIExplanationPanel
+                sifResult={activeAnalysis?.sif}
                 sifStatus={activeReport.sif_potential}
                 sifScore={activeReport.sif_confidence}
                 actualSeverity={activeReport.actual_severity}
-                extracted={{
-                  activity: activeReport.activity || null,
-                  hazard: activeReport.hazard || null,
-                  barrier_failure: activeReport.barrier_failure || null,
-                  energy_source: activeReport.energy_source || null,
-                }}
+                extracted={
+                  activeAnalysis?.extraction || {
+                    activity: activeReport.activity || null,
+                    hazard: activeReport.hazard || null,
+                    barrier_failure: activeReport.barrier_failure || null,
+                    energy_source: activeReport.energy_source || null,
+                  }
+                }
+                lsrMatches={activeAnalysis?.life_saving_rules || []}
               />
             </div>
           )}
@@ -432,6 +448,17 @@ export const ReviewQueuePage: React.FC<Props> = ({ onNavigate }) => {
                   "{selectedReport.report_text}"
                 </p>
               </div>
+
+              {activeAnalysis?.sif?.model_breakdown && (
+                <div style={{ marginBottom: '20px' }}>
+                  <EnsembleBreakdownCard
+                    breakdown={activeAnalysis.sif.model_breakdown}
+                    score={activeAnalysis.sif.score}
+                    classification={activeAnalysis.sif.classification}
+                    modelVersion={activeAnalysis.sif.model_version || '1.1.0-hybrid'}
+                  />
+                </div>
+              )}
 
               <form onSubmit={handleSubmitFeedback}>
                 <div style={{ marginBottom: '18px' }}>

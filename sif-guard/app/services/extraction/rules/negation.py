@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 
 # Contextual negation patterns indicating safety control was absent, failed, or omitted
 NEGATION_PRE_PATTERNS = [
-    r"\b(?:not|no|wasn't|was not|were not|weren't|did not|didn't|had not|hadn't)\b(?:\s+\w+){0,3}\s+",
+    r"\b(?:not|no|wasn't|was not|were not|weren't|had not|hadn't)\b(?:\s+\w+){0,3}\s+",
     r"\bwithout\b(?:\s+\w+){0,3}\s+",
     r"\bfailure to\b\s+",
     r"\bfailed to\b\s+",
@@ -15,16 +15,21 @@ NEGATION_PRE_PATTERNS = [
 ]
 
 NEGATION_POST_PATTERNS = [
-    r"\s+(?:was not|were not|wasn't|weren't|not|never)\s+(?:performed|applied|verified|conducted|completed|followed|installed|established|used|obtained|issued)",
+    r"\s+(?:was not|were not|wasn't|weren't|not|never|had not been)\s+(?:performed|applied|verified|conducted|completed|followed|installed|established|used|obtained|issued)",
     r"\s+(?:was|had been)\s+(?:bypassed|removed|defeated|disabled|missing|omitted|breached|skipped|compromised)",
-    r"\s+(?:not confirmed|not verified|not in place)"
+    r"\s+(?:not confirmed|not verified|not in place|not secured)",
+    r"\s+(?:was\s+)?completed after\b.*?\b(?:entered|entry|started|began)\b"
 ]
 
 # Affirmatives/completions that counteract naive keyword matches
 AFFIRMATIVE_PATTERNS = [
     r"\b(?:was|were|had been|properly|fully|correctly)\s+(?:performed|completed|verified|applied|installed|followed|established|used)\b",
     r"\bcompleted\s+(?:20\.9%|0ppm|0%\s*lel|satisfactorily|successfully)\b",
-    r"\bin place and (?:verified|active|functional)\b"
+    r"\bin place and (?:verified|active|functional)\b",
+    r"\bdid not (?:remove|bypass|defeat|breach|open)\b",
+    r"\bremained (?:securely\s+)?installed\b",
+    r"\bwas (?:not|never) removed\b",
+    r"\bremained (?:isolated|in place|active|functional|outside)\b"
 ]
 
 
@@ -43,15 +48,27 @@ class NegationEngine:
         lower_text = text.lower()
         phrase = concept_phrase.lower()
 
+        # Check explicit affirmative non-breach: e.g. "did not remove the coupling guard"
+        if re.search(r"\bdid not (?:remove|bypass|defeat|breach)\b", lower_text) or \
+           re.search(r"\bremained (?:securely\s+)?installed\b", lower_text) or \
+           re.search(r"\bwas not removed\b", lower_text):
+            # Check if this phrase is about the barrier that was NOT removed
+            if any(k in phrase for k in ["guard", "barrier", "interlock", "isolation", "loto"]):
+                return False
+
         # Check post-incident corrective context first
-        if "after the" in lower_text or "following the incident" in lower_text:
-            # If the phrase appears ONLY in the post-incident clause
-            parts = re.split(r"\b(?:after the incident|after the event|following the incident|remedial action|corrective action)\b", lower_text)
+        if "after the" in lower_text or "following the incident" in lower_text or "earlier inspection" in lower_text:
+            parts = re.split(r"\b(?:after the incident|after the event|following the incident|remedial action|corrective action|subsequently)\b", lower_text)
             if len(parts) > 1:
                 pre_event_text = parts[0]
                 post_event_text = parts[1]
                 if phrase in post_event_text and phrase not in pre_event_text:
                     return False  # Corrective action, not original failure
+
+        # Check temporal violation: e.g. "gas test was completed after technician had already entered"
+        if re.search(r"\bcompleted after\b.*?\b(?:entered|entry|started|began)\b", lower_text):
+            if any(k in phrase for k in ["gas", "test", "atmospheric", "monitoring", "isolation"]):
+                return True
 
         # Check explicit post-pattern failures: e.g. "gas testing was not performed", "loto was not applied"
         for post_pat in NEGATION_POST_PATTERNS:
@@ -66,11 +83,11 @@ class NegationEngine:
                 return True
 
         # Check specific phrase-level patterns
-        if re.search(r"without (?:completing |conducting |performing )?(?:the required )?" + re.escape(phrase), lower_text):
+        if re.search(r"without (?:completing |conducting |performing |isolating |confirming )?(?:the required )?" + re.escape(phrase), lower_text):
             return True
-        if re.search(r"no " + re.escape(phrase) + r" (?:was |had been )?(?:performed|conducted|completed|done)", lower_text):
+        if re.search(r"no " + re.escape(phrase) + r" (?:was |had been )?(?:performed|conducted|completed|done|installed)", lower_text):
             return True
-        if re.search(re.escape(phrase) + r" (?:had not been|was not|not) (?:completed|performed)", lower_text):
+        if re.search(re.escape(phrase) + r" (?:had not been|was not|not) (?:completed|performed|verified|isolated|secured)", lower_text):
             return True
 
         # Check if affirmative pattern is present
@@ -83,10 +100,13 @@ class NegationEngine:
         sentences = re.split(r"[.;,]", lower_text)
         for sent in sentences:
             if phrase in sent:
-                if any(neg in sent for neg in ["not performed", "not completed", "not applied", "was not", "had not", "without", "no ", "missing", "bypassed", "removed", "defeated", "breached", "not verified"]):
-                    return True
-                if any(pos in sent for pos in ["was performed", "was completed", "was applied", "was verified", "was installed", "completed satisfactorily"]):
+                # Do not trigger failure on "did not remove"
+                if re.search(r"\bdid not (?:remove|bypass|defeat|breach)\b", sent):
                     return False
+                if any(pos in sent for pos in ["was performed", "was completed", "was applied", "was verified", "was installed", "completed satisfactorily", "remained intact", "remained outside", "confirmed", "remained securely installed", "remained isolated"]):
+                    return False
+                if any(neg in sent for neg in ["not performed", "not completed", "not applied", "was not", "had not", "without", "no ", "missing", "bypassed", "removed", "defeated", "breached", "not verified", "not secured", "not functioning"]):
+                    return True
 
         return False
 

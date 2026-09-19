@@ -76,7 +76,7 @@ export const DesignSystemPage: React.FC = () => {
           <div>
             <span style={{ fontSize: '0.75rem', color: '#9CA8AA', fontFamily: 'var(--font-mono)' }}>SANS-SERIF TECHNICAL UI — INTER / GEIST</span>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: '#9CA8AA', margin: '4px 0', lineHeight: 1.5 }}>
-              SIF-GUARD transforms safety reports into OCR extraction, 10-dimension safety signals, XGBoost SIF potential classification, failed barrier identification, and HDBSCAN precursor patterns.
+              SIF-GUARD transforms safety reports into normalized ingestion, Transformer NER and domain safety rules, hybrid XGBoost + CatBoost SIF classification, failed barrier identification, and HDBSCAN precursor patterns.
             </p>
           </div>
         </div>

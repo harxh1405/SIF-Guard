@@ -62,7 +62,7 @@ export function generateActivityFeedFromReports(
         timeAgo: '2m ago',
         type: 'REPORT_ANALYZED',
         title: 'Report BFT-010 analyzed',
-        description: 'BFT-010 was classified as SIF Potential by XGBoost v1.0.0.',
+        description: 'BFT-010 was classified as SIF Potential by Hybrid Ensemble v1.1.0.',
         severity: 'critical',
         reportId: 'BFT-010',
       },

@@ -83,7 +83,7 @@ export const SifDistributionChart: React.FC<SifDistributionChartProps> = ({
   return (
     <InsightChartWrapper
       title="SIF Potential Risk Distribution"
-      subtitle="XGBoost model classification portfolio across analyzed safety observations."
+      subtitle="Hybrid XGBoost + CatBoost ensemble classification portfolio across safety reports."
       option={option}
       height={280}
       loading={loading}

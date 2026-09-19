@@ -39,6 +39,17 @@ class CorrectiveActionDetector:
             return False
         return phrase.lower() in corrective_part.lower()
 
+    def is_historical_audit_resolved(self, text: str) -> bool:
+        lower = text.lower()
+        has_historical_lead = bool(re.search(r"\b(?:an earlier|a previous|past|historical)\s+(?:inspection|audit|finding|report)\b", lower))
+        has_current_compliance = bool(
+            re.search(r"(?:follow-up\s+inspections?\s+)?(?:confirmed|verified)\s+that\s+(?:the\s+)?(?:new\s+)?controls\s+were\s+being\s+followed", lower) or
+            "controls were being followed" in lower or
+            "all controls were in place and verified" in lower
+        )
+        return has_historical_lead and has_current_compliance
+
 
 corrective_detector = CorrectiveActionDetector()
 corrective_action_filter = corrective_detector
+

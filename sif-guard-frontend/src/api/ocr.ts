@@ -33,7 +33,12 @@ export interface OCRExtractResponse {
   page_results?: OCRPageResult[];
   ocr_provider: string;
   engine_used: string;
+  method?: string;
+  source?: string;
   filename?: string;
+  quality_status?: string;
+  quality_reason?: string;
+  quality_metrics?: Record<string, number>;
 }
 
 export async function extractDocumentOCR(file: File): Promise<OCRExtractResponse> {
