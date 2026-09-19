@@ -1,5 +1,5 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class SafetyNERConfig(BaseSettings):
@@ -9,8 +9,7 @@ class SafetyNERConfig(BaseSettings):
     SAFETY_NER_MIN_CONFIDENCE: float = float(os.getenv("SAFETY_NER_MIN_CONFIDENCE", "0.50"))
     SAFETY_NER_MAX_LENGTH: int = 512
 
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 
 ner_config = SafetyNERConfig()
