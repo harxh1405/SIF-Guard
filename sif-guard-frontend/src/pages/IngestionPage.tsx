@@ -289,15 +289,15 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
   const getSourceBadge = () => {
     switch (source) {
       case 'manual_narrative':
-        return { label: 'MANUAL NARRATIVE', bg: 'rgba(242, 169, 51, 0.15)', color: '#F2A933' };
+        return { label: 'MANUAL NARRATIVE', bg: 'rgba(217, 119, 6, 0.12)', color: '#B45309' };
       case 'pdf':
-        return { label: 'OCR · PDF DOCUMENT', bg: 'rgba(77, 206, 160, 0.15)', color: '#4DCEA0' };
+        return { label: 'OCR · PDF DOCUMENT', bg: 'rgba(5, 150, 105, 0.12)', color: '#047857' };
       case 'image':
-        return { label: 'OCR · FIELD IMAGE', bg: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8' };
+        return { label: 'OCR · FIELD IMAGE', bg: 'rgba(2, 132, 199, 0.12)', color: '#0369A1' };
       case 'camera':
-        return { label: 'CAMERA CAPTURE', bg: 'rgba(168, 85, 247, 0.15)', color: '#A855F7' };
+        return { label: 'CAMERA CAPTURE', bg: 'rgba(126, 34, 206, 0.12)', color: '#6B21A8' };
       case 'structured':
-        return { label: 'STRUCTURED REPORT', bg: 'rgba(232, 170, 61, 0.15)', color: '#E8AA3D' };
+        return { label: 'STRUCTURED REPORT', bg: 'rgba(217, 119, 6, 0.12)', color: '#B45309' };
     }
   };
 
@@ -751,8 +751,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
       {step === 2 && (
         <div
           style={{
-            backgroundColor: 'var(--bg-card, #0D171A)',
-            border: '1px solid var(--border, #203238)',
+            backgroundColor: 'var(--surface, #FFFFFF)',
+            border: '1px solid var(--border, #CBD5E1)',
             borderRadius: '8px',
             padding: '60px 28px',
             textAlign: 'center',
@@ -762,11 +762,11 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             gap: '16px',
           }}
         >
-          <RefreshCw size={36} color="#F2A933" style={{ animation: 'spin 1.2s linear infinite' }} />
-          <h3 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: 0 }}>
+          <RefreshCw size={36} color="var(--warning, #D97706)" style={{ animation: 'spin 1.2s linear infinite' }} />
+          <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-primary, #0F2742)', margin: 0 }}>
             {source === 'structured' ? 'Parsing Structured Data...' : 'OCR Processing & Text Extraction...'}
           </h3>
-          <p style={{ color: '#9CA8AA', fontSize: '0.85rem', margin: 0, maxWidth: '420px' }}>
+          <p style={{ color: 'var(--text-secondary, #64748B)', fontSize: '0.85rem', margin: 0, maxWidth: '420px' }}>
             {source === 'structured'
               ? 'Reading columns and normalizing field attributes.'
               : 'Executing Tesseract OCR engine / PDF text stream parser and evaluating confidence score.'}
@@ -778,8 +778,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
       {step === 3 && (
         <div
           style={{
-            backgroundColor: 'var(--bg-card, #0D171A)',
-            border: '1px solid var(--border, #203238)',
+            backgroundColor: 'var(--surface, #FFFFFF)',
+            border: '1px solid var(--border, #CBD5E1)',
             borderRadius: '8px',
             padding: '24px',
             display: 'flex',
@@ -789,8 +789,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Edit3 size={18} color="#F2A933" />
-              <h3 style={{ fontFamily: 'var(--font-serif)', color: '#F4F3EE', margin: 0 }}>
+              <Edit3 size={18} color="var(--warning, #D97706)" />
+              <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-primary, #0F2742)', margin: 0 }}>
                 Verify Extracted Text Narrative
               </h3>
               <span
@@ -815,9 +815,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: '0.78rem',
-                    color: ocrResult.confidence >= 0.85 ? '#4DCEA0' : '#E8AA3D',
-                    backgroundColor: ocrResult.confidence >= 0.85 ? 'rgba(77, 206, 160, 0.12)' : 'rgba(232, 170, 61, 0.12)',
-                    border: `1px solid ${ocrResult.confidence >= 0.85 ? '#4DCEA0' : '#E8AA3D'}`,
+                    color: ocrResult.confidence >= 0.85 ? 'var(--success, #059669)' : 'var(--warning, #D97706)',
+                    backgroundColor: ocrResult.confidence >= 0.85 ? 'rgba(5, 150, 105, 0.1)' : 'rgba(217, 119, 6, 0.1)',
+                    border: `1px solid ${ocrResult.confidence >= 0.85 ? 'var(--success, #059669)' : 'var(--warning, #D97706)'}`,
                     padding: '4px 10px',
                     borderRadius: '4px',
                   }}
@@ -833,9 +833,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.75rem',
-                  color: '#9CA8AA',
-                  backgroundColor: 'rgba(100, 116, 119, 0.12)',
-                  border: '1px solid #203238',
+                  color: 'var(--text-secondary, #475569)',
+                  backgroundColor: 'var(--background-secondary, #F1F5F9)',
+                  border: '1px solid var(--border, #CBD5E1)',
                   padding: '4px 10px',
                   borderRadius: '4px',
                 }}
@@ -853,10 +853,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                 alignItems: 'center',
                 gap: '10px',
                 padding: '12px 16px',
-                backgroundColor: 'rgba(232, 170, 61, 0.12)',
-                border: '1px solid rgba(232, 170, 61, 0.3)',
+                backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                border: '1px solid rgba(217, 119, 6, 0.3)',
                 borderRadius: '6px',
-                color: '#E8AA3D',
+                color: 'var(--warning, #B45309)',
                 fontSize: '0.82rem',
               }}
             >
@@ -873,11 +873,11 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             rows={10}
             style={{
               width: '100%',
-              backgroundColor: '#091114',
-              border: '1px solid #203238',
+              backgroundColor: 'var(--background-secondary, #F8FAFC)',
+              border: '1px solid var(--border, #CBD5E1)',
               borderRadius: '6px',
               padding: '14px',
-              color: '#F4F3EE',
+              color: 'var(--text-primary, #0F2742)',
               fontSize: '0.9rem',
               fontFamily: 'Inter, sans-serif',
               lineHeight: 1.5,
@@ -890,9 +890,9 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               style={{
                 padding: '8px 16px',
                 borderRadius: '6px',
-                border: '1px solid #203238',
+                border: '1px solid var(--border, #CBD5E1)',
                 backgroundColor: 'transparent',
-                color: '#9CA8AA',
+                color: 'var(--text-secondary, #475569)',
                 fontSize: '0.82rem',
                 cursor: 'pointer',
               }}
@@ -906,8 +906,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               style={{
                 padding: '10px 24px',
                 borderRadius: '6px',
-                backgroundColor: '#F2A933',
-                color: '#080E10',
+                backgroundColor: 'var(--primary, #D97706)',
+                color: '#FFFFFF',
                 border: 'none',
                 fontWeight: 700,
                 cursor: analyzing ? 'wait' : 'pointer',
@@ -929,8 +929,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
           {/* Top Status Header */}
           <div
             style={{
-              backgroundColor: 'var(--bg-card, #0D171A)',
-              border: '1px solid var(--border, #203238)',
+              backgroundColor: 'var(--surface, #FFFFFF)',
+              border: '1px solid var(--border, #CBD5E1)',
               borderRadius: '8px',
               padding: '20px 24px',
               display: 'flex',
@@ -941,10 +941,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <CheckCircle2 size={24} color="#4DCEA0" />
+              <CheckCircle2 size={24} color="var(--success, #059669)" />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: '#F2A933', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary, #D97706)', fontWeight: 700, fontSize: '0.95rem' }}>
                     #{analyzedReport.source_record_id}
                   </span>
                   <span
@@ -961,7 +961,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                     {badge.label}
                   </span>
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#F4F3EE', margin: '2px 0 0 0' }}>
+                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--text-primary, #0F2742)', margin: '2px 0 0 0' }}>
                   Safety Intelligence Analysis
                 </h2>
               </div>
@@ -998,8 +998,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div
                 style={{
-                  backgroundColor: 'var(--bg-card, #0D171A)',
-                  border: '1px solid var(--border, #203238)',
+                  backgroundColor: 'var(--surface, #FFFFFF)',
+                  border: '1px solid var(--border, #CBD5E1)',
                   borderRadius: '8px',
                   padding: '20px',
                   display: 'flex',
@@ -1012,27 +1012,27 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                     style={{
                       fontFamily: 'var(--font-serif)',
                       fontSize: '1rem',
-                      color: '#F4F3EE',
+                      color: 'var(--text-primary, #0F2742)',
                       margin: 0,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
                     }}
                   >
-                    <FileText size={16} color="#F2A933" /> ORIGINAL REPORT
+                    <FileText size={16} color="var(--warning, #D97706)" /> ORIGINAL REPORT
                   </h3>
-                  <span style={{ fontSize: '0.72rem', color: '#9CA8AA', fontFamily: 'var(--font-mono)' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #64748B)', fontFamily: 'var(--font-mono)' }}>
                     Site: {analyzedReport.site || analyzedReport.employer || 'Not specified'}
                   </span>
                 </div>
 
                 <div
                   style={{
-                    backgroundColor: '#091114',
-                    border: '1px solid #203238',
+                    backgroundColor: 'var(--background-secondary, #F8FAFC)',
+                    border: '1px solid var(--border, #CBD5E1)',
                     borderRadius: '6px',
                     padding: '16px',
-                    color: '#F4F3EE',
+                    color: 'var(--text-primary, #0F2742)',
                     fontSize: '0.88rem',
                     lineHeight: 1.6,
                   }}
@@ -1052,7 +1052,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: '#F2A933',
+                        color: 'var(--primary, #D97706)',
                         fontSize: '0.78rem',
                         cursor: 'pointer',
                         padding: 0,
@@ -1066,11 +1066,11 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                         style={{
                           marginTop: '8px',
                           padding: '10px',
-                          backgroundColor: '#050B0D',
-                          border: '1px solid #203238',
+                          backgroundColor: 'var(--background-secondary, #F1F5F9)',
+                          border: '1px solid var(--border, #CBD5E1)',
                           borderRadius: '4px',
                           fontSize: '0.78rem',
-                          color: '#829195',
+                          color: 'var(--text-secondary, #475569)',
                           whiteSpace: 'pre-wrap',
                           wordBreak: 'break-word',
                         }}
@@ -1085,8 +1085,8 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
               {/* Provenance Metadata Card */}
               <div
                 style={{
-                  backgroundColor: 'var(--bg-card, #0D171A)',
-                  border: '1px solid var(--border, #203238)',
+                  backgroundColor: 'var(--surface, #FFFFFF)',
+                  border: '1px solid var(--border, #CBD5E1)',
                   borderRadius: '8px',
                   padding: '16px',
                   display: 'flex',
@@ -1094,27 +1094,27 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                   gap: '10px',
                 }}
               >
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9CA8AA', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted, #64748B)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
                   Ingestion Provenance Metadata
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.82rem' }}>
                   <div>
-                    <span style={{ color: '#647477', display: 'block', fontSize: '0.72rem' }}>Data Origin</span>
-                    <strong style={{ color: '#F4F3EE' }}>{source.toUpperCase()}</strong>
+                    <span style={{ color: 'var(--text-secondary, #64748B)', display: 'block', fontSize: '0.72rem' }}>Data Origin</span>
+                    <strong style={{ color: 'var(--text-primary, #0F2742)' }}>{source.toUpperCase()}</strong>
                   </div>
                   <div>
-                    <span style={{ color: '#647477', display: 'block', fontSize: '0.72rem' }}>OCR Status</span>
-                    <strong style={{ color: isOcrSource ? '#4DCEA0' : '#829195' }}>
+                    <span style={{ color: 'var(--text-secondary, #64748B)', display: 'block', fontSize: '0.72rem' }}>OCR Status</span>
+                    <strong style={{ color: isOcrSource ? 'var(--success, #059669)' : 'var(--text-secondary, #64748B)' }}>
                       {isOcrSource ? 'Executed' : 'Skipped'}
                     </strong>
                   </div>
                   <div>
-                    <span style={{ color: '#647477', display: 'block', fontSize: '0.72rem' }}>Facility / Site</span>
-                    <strong style={{ color: '#F4F3EE' }}>{analyzedReport.site || 'Not specified'}</strong>
+                    <span style={{ color: 'var(--text-secondary, #64748B)', display: 'block', fontSize: '0.72rem' }}>Facility / Site</span>
+                    <strong style={{ color: 'var(--text-primary, #0F2742)' }}>{analyzedReport.site || 'Not specified'}</strong>
                   </div>
                   <div>
-                    <span style={{ color: '#647477', display: 'block', fontSize: '0.72rem' }}>Ingestion ID</span>
-                    <strong style={{ color: '#F2A933', fontFamily: 'var(--font-mono)' }}>{analyzedReport.id}</strong>
+                    <span style={{ color: 'var(--text-secondary, #64748B)', display: 'block', fontSize: '0.72rem' }}>Ingestion ID</span>
+                    <strong style={{ color: 'var(--primary, #D97706)', fontFamily: 'var(--font-mono)' }}>{analyzedReport.id}</strong>
                   </div>
                 </div>
               </div>
@@ -1158,7 +1158,7 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.72rem', color: '#9CA8AA', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #475569)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '4px' }}>
                         SIF Potential Classifier (XGBoost v1.0.0)
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1172,10 +1172,10 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#9CA8AA', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #475569)', fontFamily: 'var(--font-mono)' }}>
                         Model Confidence Score
                       </div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#F4F3EE', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary, #0F2742)', fontFamily: 'var(--font-mono)' }}>
                         {Math.round(confPct)}%
                       </div>
                     </div>
@@ -1191,18 +1191,18 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
                     alignItems: 'flex-start',
                     gap: '12px',
                     padding: '16px',
-                    backgroundColor: 'rgba(232, 93, 93, 0.12)',
-                    border: '1px solid rgba(232, 93, 93, 0.3)',
+                    backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                    border: '1px solid rgba(220, 38, 38, 0.3)',
                     borderRadius: '8px',
-                    color: '#E85D5D',
+                    color: 'var(--danger, #DC2626)',
                   }}
                 >
                   <ShieldAlert size={22} style={{ flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '2px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '2px', color: 'var(--danger, #DC2626)' }}>
                       FAILED BARRIER: {analyzedReport.barrier_failure}
                     </div>
-                    <div style={{ fontSize: '0.82rem', opacity: 0.9 }}>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary, #475569)' }}>
                       Critical safety control defect identified in narrative. Immediate verifications required.
                     </div>
                   </div>
@@ -1241,22 +1241,22 @@ export const IngestionPage: React.FC<Props> = ({ onNavigate }) => {
 
               {/* 5. Similar Reports (BGE Cosine Similarity) */}
               {analysisData?.similar_reports && analysisData.similar_reports.length > 0 && (
-                <div style={{ backgroundColor: 'var(--bg-card, #0D171A)', border: '1px solid var(--border, #203238)', borderRadius: '8px', padding: '18px' }}>
-                  <h4 style={{ fontSize: '0.85rem', color: '#F4F3EE', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
-                    <Layers size={15} color="#F2A933" /> BGE Semantic Match Signals
+                <div style={{ backgroundColor: 'var(--surface, #FFFFFF)', border: '1px solid var(--border, #CBD5E1)', borderRadius: '8px', padding: '18px' }}>
+                  <h4 style={{ fontSize: '0.85rem', color: 'var(--text-primary, #0F2742)', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
+                    <Layers size={15} color="var(--warning, #D97706)" /> BGE Semantic Match Signals
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {analysisData.similar_reports.map((sim, idx) => (
-                      <div key={idx} style={{ padding: '10px', borderRadius: '6px', backgroundColor: '#091114', border: '1px solid #203238', fontSize: '0.82rem' }}>
+                      <div key={idx} style={{ padding: '10px', borderRadius: '6px', backgroundColor: 'var(--background-secondary, #F8FAFC)', border: '1px solid var(--border, #CBD5E1)', fontSize: '0.82rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#F2A933' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--primary, #D97706)' }}>
                             #{sim.source_record_id}
                           </span>
-                          <span style={{ color: '#4DCEA0', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+                          <span style={{ color: 'var(--success, #059669)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
                             {Math.round(sim.similarity * 100)}% Similarity
                           </span>
                         </div>
-                        <p style={{ margin: 0, color: '#9CA8AA', lineHeight: 1.4 }}>{sim.report_text}</p>
+                        <p style={{ margin: 0, color: 'var(--text-secondary, #475569)', lineHeight: 1.4 }}>{sim.report_text}</p>
                       </div>
                     ))}
                   </div>

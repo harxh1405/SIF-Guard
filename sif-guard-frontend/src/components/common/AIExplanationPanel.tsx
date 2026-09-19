@@ -87,7 +87,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#0B0806',
+              color: '#FFFFFF',
               flexShrink: 0,
             }}
           >
@@ -415,7 +415,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 gap: '6px',
               }}
             >
-              <Layers size={14} color="#F2A933" /> Matched IOGP Life-Saving Rules
+              <Layers size={14} color="var(--warning)" /> Matched IOGP Life-Saving Rules
             </div>
 
             {/* Primary Match */}
@@ -424,8 +424,8 @@ export const AIExplanationPanel: React.FC<Props> = ({
                 style={{
                   padding: '14px 16px',
                   borderRadius: '10px',
-                  background: 'rgba(242, 169, 51, 0.1)',
-                  border: '1px solid rgba(242, 169, 51, 0.4)',
+                  background: 'rgba(217, 119, 6, 0.08)',
+                  border: '1px solid rgba(217, 119, 6, 0.3)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -436,7 +436,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
                     style={{
                       fontSize: '0.65rem',
                       fontWeight: 800,
-                      color: '#F2A933',
+                      color: 'var(--warning)',
                       textTransform: 'uppercase',
                       fontFamily: 'var(--font-mono)',
                       display: 'block',
@@ -445,14 +445,14 @@ export const AIExplanationPanel: React.FC<Props> = ({
                   >
                     Primary Rule Match
                   </span>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#F4F3EE' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {primaryMatch.rule_name}
                   </span>
                 </div>
                 <span
                   style={{
                     fontSize: '0.9rem',
-                    color: '#F2A933',
+                    color: 'var(--warning)',
                     fontWeight: 800,
                     fontFamily: 'var(--font-mono)',
                   }}
@@ -465,7 +465,7 @@ export const AIExplanationPanel: React.FC<Props> = ({
             {/* Secondary Related Matches */}
             {secondaryMatches.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '0.7rem', color: '#9CA8AA', fontWeight: 600, fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600, fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
                   Related Safety Signals
                 </div>
                 {secondaryMatches.map((m, idx) => (
@@ -477,15 +477,14 @@ export const AIExplanationPanel: React.FC<Props> = ({
                       alignItems: 'center',
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      background: 'rgba(17, 36, 41, 0.4)',
-                      border: '1px solid #203238',
-                      opacity: 0.85,
+                      background: 'var(--background-secondary)',
+                      border: '1px solid var(--border)',
                     }}
                   >
-                    <span style={{ fontSize: '0.82rem', color: '#9CA8AA', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontWeight: 600 }}>
                       {m.rule_name}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: '#647477', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                       {(m.score * 100).toFixed(0)}%
                     </span>
                   </div>

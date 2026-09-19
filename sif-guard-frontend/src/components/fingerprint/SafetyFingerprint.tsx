@@ -17,27 +17,27 @@ interface SafetyFingerprintProps {
   height?: number | string;
 }
 
-// Custom Node component with dark industrial aesthetic for ReactFlow
+// Custom Node component with clear aesthetic for ReactFlow
 const CustomFingerprintNode: React.FC<NodeProps> = ({ data }) => {
   const isBarrier = data.type === 'FAILED BARRIER';
   const isConsequence = data.type === 'POTENTIAL CONSEQUENCE';
   const isLsr = data.type === 'LIFE-SAVING RULE';
 
   const borderColor = isBarrier
-    ? '#E54F4F'
+    ? 'var(--danger)'
     : isConsequence
-    ? '#E8AA3D'
+    ? 'var(--warning)'
     : isLsr
-    ? '#F2A933'
-    : '#4DCEA0';
+    ? 'var(--warning)'
+    : 'var(--success)';
 
   const bgColor = isBarrier
-    ? 'rgba(229, 79, 79, 0.12)'
+    ? 'rgba(220, 38, 38, 0.08)'
     : isConsequence
-    ? 'rgba(232, 170, 61, 0.12)'
+    ? 'rgba(217, 119, 6, 0.08)'
     : isLsr
-    ? 'rgba(242, 169, 51, 0.12)'
-    : 'rgba(17, 36, 41, 0.9)';
+    ? 'rgba(217, 119, 6, 0.08)'
+    : 'var(--surface-elevated)';
 
   return (
     <div
@@ -47,8 +47,8 @@ const CustomFingerprintNode: React.FC<NodeProps> = ({ data }) => {
         borderRadius: '6px',
         padding: '10px 14px',
         minWidth: '180px',
-        color: '#F4F3EE',
-        boxShadow: `0 4px 16px rgba(0, 0, 0, 0.4)`,
+        color: 'var(--text-primary)',
+        boxShadow: `0 2px 8px rgba(0, 0, 0, 0.08)`,
         fontFamily: 'var(--font-sans, sans-serif)',
       }}
     >
@@ -177,33 +177,33 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
       {/* Header with View Switcher */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <ShieldAlert size={20} color="#F2A933" />
+          <ShieldAlert size={20} color="var(--warning)" />
           <div>
             <h4
               style={{
                 fontFamily: 'var(--font-display, var(--font-sans))',
                 fontSize: '1.05rem',
                 margin: 0,
-                color: '#F4F3EE',
+                color: 'var(--text-primary)',
               }}
             >
               SAFETY FINGERPRINT
             </h4>
-            <span style={{ fontSize: '0.72rem', color: '#9CA8AA' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
               Deterministic Precursor Incident Sequence & Barrier Failure Flow
             </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px', backgroundColor: '#091114', padding: '3px', borderRadius: '6px', border: '1px solid #203238' }}>
+        <div style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--background-secondary)', padding: '3px', borderRadius: '6px', border: '1px solid var(--border)' }}>
           <button
             onClick={() => setViewMode('card')}
             style={{
               padding: '5px 12px',
               borderRadius: '4px',
               border: 'none',
-              backgroundColor: viewMode === 'card' ? '#F2A933' : 'transparent',
-              color: viewMode === 'card' ? '#080E10' : '#9CA8AA',
+              backgroundColor: viewMode === 'card' ? 'var(--primary)' : 'transparent',
+              color: viewMode === 'card' ? '#FFFFFF' : 'var(--text-secondary)',
               fontSize: '0.75rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -221,8 +221,8 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
               padding: '5px 12px',
               borderRadius: '4px',
               border: 'none',
-              backgroundColor: viewMode === 'dag' ? '#F2A933' : 'transparent',
-              color: viewMode === 'dag' ? '#080E10' : '#9CA8AA',
+              backgroundColor: viewMode === 'dag' ? 'var(--primary)' : 'transparent',
+              color: viewMode === 'dag' ? '#FFFFFF' : 'var(--text-secondary)',
               fontSize: '0.75rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -249,16 +249,16 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
         const isUncertainBarrier = barrierFailure.toLowerCase().includes('uncertain');
 
         const barrierColor = isNoBarrierFailure
-          ? '#4DCEA0'
+          ? 'var(--success)'
           : isUncertainBarrier
-          ? '#E8AA3D'
-          : '#E54F4F';
+          ? 'var(--warning)'
+          : 'var(--danger)';
 
         const barrierBg = isNoBarrierFailure
-          ? 'rgba(77, 206, 160, 0.08)'
+          ? 'rgba(5, 150, 105, 0.08)'
           : isUncertainBarrier
-          ? 'rgba(232, 170, 61, 0.12)'
-          : 'rgba(229, 79, 79, 0.12)';
+          ? 'rgba(217, 119, 6, 0.08)'
+          : 'rgba(220, 38, 38, 0.08)';
 
         const barrierBadgeText = isNoBarrierFailure
           ? 'NO DEFECT DETECTED'
@@ -272,33 +272,33 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Top Triplet Row: Activity -> Hazard -> Exposure */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', alignItems: 'center' }}>
-              <div style={{ backgroundColor: '#091114', border: '1px solid #4DCEA0', borderRadius: '8px', padding: '12px 14px' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#4DCEA0', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ backgroundColor: 'var(--background-secondary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Activity size={12} /> Activity / Task
                 </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#F4F3EE' }}>{activity}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activity}</div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', color: '#4DCEA0' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)' }}>
                 <ArrowRight size={18} />
               </div>
 
-              <div style={{ backgroundColor: '#091114', border: '1px solid #4DCEA0', borderRadius: '8px', padding: '12px 14px' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#4DCEA0', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ backgroundColor: 'var(--background-secondary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Flame size={12} /> Hazard
                 </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#F4F3EE' }}>{hazard}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>{hazard}</div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', color: '#4DCEA0' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)' }}>
                 <ArrowRight size={18} />
               </div>
 
-              <div style={{ backgroundColor: '#091114', border: '1px solid #4DCEA0', borderRadius: '8px', padding: '12px 14px' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#4DCEA0', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
+              <div style={{ backgroundColor: 'var(--background-secondary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
                   Exposure Mode
                 </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#F4F3EE' }}>{exposure}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>{exposure}</div>
               </div>
             </div>
 
@@ -324,34 +324,34 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
                 <div style={{ fontSize: '0.68rem', fontWeight: 800, color: barrierColor, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <AlertTriangle size={14} /> BARRIER STATUS
                 </div>
-                <div style={{ fontSize: '1rem', fontWeight: 800, color: '#F4F3EE' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                   {barrierFailure}
                 </div>
               </div>
-              <div style={{ fontSize: '0.72rem', color: barrierColor, fontWeight: 700, fontFamily: 'var(--font-mono)', backgroundColor: `${barrierColor}22`, padding: '4px 10px', borderRadius: '4px' }}>
+              <div style={{ fontSize: '0.72rem', color: barrierColor, fontWeight: 700, fontFamily: 'var(--font-mono)', backgroundColor: 'rgba(220, 38, 38, 0.12)', padding: '4px 10px', borderRadius: '4px' }}>
                 {barrierBadgeText}
               </div>
             </div>
 
             {/* Vertical Linkage Arrow */}
-            <div style={{ display: 'flex', justifyContent: 'center', color: '#E8AA3D', margin: '-4px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--warning)', margin: '-4px 0' }}>
               <ArrowDown size={20} />
             </div>
 
             {/* Bottom Dual Card: Consequence & Primary LSR */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '12px' }}>
-              <div style={{ backgroundColor: '#091114', border: '1px solid #E8AA3D', borderRadius: '8px', padding: '12px 14px' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#E8AA3D', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
+              <div style={{ backgroundColor: 'var(--background-secondary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--warning)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
                   Potential Consequence
                 </div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#F4F3EE' }}>{consequence}</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>{consequence}</div>
               </div>
 
-              <div style={{ backgroundColor: '#091114', border: '1px solid #F2A933', borderRadius: '8px', padding: '12px 14px' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#F2A933', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ backgroundColor: 'var(--background-secondary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--warning)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Layers size={12} /> Primary LSR Rule
                 </div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: lsrRules.length > 0 ? '#F2A933' : '#9CA8AA', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: lsrRules.length > 0 ? 'var(--warning)' : 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                   {primaryLsrText}
                 </div>
               </div>
@@ -362,7 +362,7 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
 
       {/* Mode 2: Interactive ReactFlow Canvas */}
       {viewMode === 'dag' && (
-        <div style={{ width: '100%', height: '320px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #203238' }}>
+        <div style={{ width: '100%', height: '320px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border)' }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -371,8 +371,8 @@ export const SafetyFingerprint: React.FC<SafetyFingerprintProps> = ({
             fitView
             attributionPosition="bottom-right"
           >
-            <Background color="#203238" gap={16} size={1} />
-            <Controls style={{ backgroundColor: '#0D171A', borderColor: '#203238', color: '#F4F3EE' }} />
+            <Background color="var(--border)" gap={16} size={1} />
+            <Controls style={{ backgroundColor: 'var(--surface-elevated)', borderColor: 'var(--border)', color: 'var(--text-primary)' }} />
           </ReactFlow>
         </div>
       )}
