@@ -1,5 +1,5 @@
 # Root-level Dockerfile for SIF-Guard Backend deployment on Render
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

@@ -1,5 +1,5 @@
 # Multi-purpose Production Dockerfile for SIF-Guard Backend on Render / Cloud
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # Prevent Python from writing .pyc files and enable unbuffered terminal logging
 ENV PYTHONDONTWRITEBYTECODE=1 \
