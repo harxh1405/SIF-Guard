@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: sif-guard-backend
+    env: docker
+    dockerfilePath: ./sif-guard/Dockerfile
+    dockerContext: ./sif-guard
+    plan: starter
+    region: oregon
+    branch: atul
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        value: sqlite:///./sif_guard.db
+      - key: SIF_CLASSIFIER_MODE
+        value: xgboost
+      - key: OCR_PROVIDER
+        value: tesseract
+      - key: EMBEDDING_MODEL
+        value: BAAI/bge-base-en-v1.5
