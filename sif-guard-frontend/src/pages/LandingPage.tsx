@@ -406,6 +406,15 @@ const SEARCHABLE_ITEMS: SearchItem[] = [
   },
 ];
 
+const LANDING_NAV_ITEMS = [
+  { id: 'main-content', label: 'Home' },
+  { id: 'safety-topics', label: 'Topics & LSRs' },
+  { id: 'precursor-feed', label: 'Precursor Audits' },
+  { id: 'facilities', label: 'Monitored Facilities' },
+  { id: 'statutory', label: 'Statutory Standards' },
+  { id: 'about-oil', label: 'About Oil India Ltd' },
+];
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   onEnterPlatform,
 }) => {
@@ -417,19 +426,92 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [activeSearchFilter, setActiveSearchFilter] = useState<{ query: string; category: string } | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '');
+      if (LANDING_NAV_ITEMS.some((item) => item.id === hash)) {
+        return hash;
+      }
+    }
+    return 'main-content';
+  });
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  // Monitor window scroll to keep navbar locked and elevated at top
+  // Monitor window scroll to keep navbar locked and dynamically highlight the active section
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 40);
+
+      // If user scrolled near the bottom, highlight the footer section
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+      if (scrollHeight - scrollY - clientHeight < 120) {
+        setActiveSection('about-oil');
+        return;
+      }
+
+      // If user is at the top of the page, highlight Home
+      if (scrollY < 180) {
+        setActiveSection('main-content');
+        return;
+      }
+
+      // Track sections using getBoundingClientRect for precise active section detection
+      let currentSection = 'main-content';
+      for (const item of LANDING_NAV_ITEMS) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          // Navbar height is 50px; trigger active when top of section reaches within 140px of viewport top
+          if (rect.top <= 140) {
+            currentSection = item.id;
+          }
+        }
+      }
+
+      setActiveSection(currentSection);
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Scroll to initial hash target if present in URL
+    if (window.location.hash) {
+      const initialId = window.location.hash.replace('#', '');
+      const targetEl = document.getElementById(initialId);
+      if (targetEl) {
+        setTimeout(() => {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+      }
+    }
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (LANDING_NAV_ITEMS.some((item) => item.id === hash)) {
+        setActiveSection(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
+
+  const scrollToSection = (sectionId: string) => {
+    setIsMobileMenuOpen(false);
+    setActiveSection(sectionId);
+    const targetEl = document.getElementById(sectionId);
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+  };
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -579,7 +661,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <header className="india-main-header">
         <div className="india-gov-wrap india-header-inner">
           {/* Emblem & Portal Title */}
-          <div className="india-emblem-group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div
+            className="india-emblem-group"
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setActiveSection('main-content');
+              window.history.pushState(null, '', '#main-content');
+            }}
+          >
             <div className="india-emblem-box" title="National Safety Core">
               <div className="india-emblem-circle">
                 <span className="india-lion-icon">🏛️</span>
@@ -741,7 +830,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Compact Brand Badge (Reveals on Scroll) */}
           <div
             className={`india-nav-brand ${isScrolled ? 'visible' : ''}`}
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setActiveSection('main-content');
+              window.history.pushState(null, '', '#main-content');
+            }}
             title="Return to top of portal"
           >
             <span className="india-nav-brand-icon">🏛️</span>
@@ -749,12 +842,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <ul className={`india-nav-list ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-            <li><a href="#main-content" className="india-nav-link active" onClick={() => setIsMobileMenuOpen(false)}>Home</a></li>
-            <li><a href="#safety-topics" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Topics &amp; LSRs</a></li>
-            <li><a href="#precursor-feed" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Precursor Audits</a></li>
-            <li><a href="#facilities" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Monitored Facilities</a></li>
-            <li><a href="#statutory" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Statutory Standards</a></li>
-            <li><a href="#about-oil" className="india-nav-link" onClick={() => setIsMobileMenuOpen(false)}>About Oil India Ltd</a></li>
+            {LANDING_NAV_ITEMS.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  className={`india-nav-link ${activeSection === item.id ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(item.id);
+                  }}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
             <li className="india-nav-mobile-login">
               <button
                 type="button"
@@ -845,7 +946,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <ArrowRight size={16} />
                 </button>
 
-                <a href="#precursor-feed" className="india-btn-secondary">
+                <a
+                  href="#precursor-feed"
+                  className="india-btn-secondary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('precursor-feed');
+                  }}
+                >
                   <span>View Live Audit Stream</span>
                 </a>
               </div>
@@ -958,7 +1066,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span className="india-section-category">LIFE-SAVING RULES &amp; STATUTORY FOCUS AREAS</span>
               <h2 className="india-section-title">Critical Safety Defenses under Active Surveillance</h2>
             </div>
-            <a href="#precursor-feed" className="india-view-all-link">
+            <a
+              href="#precursor-feed"
+              className="india-view-all-link"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('precursor-feed');
+              }}
+            >
               View Audit Ledger <ChevronRight size={14} />
             </a>
           </div>

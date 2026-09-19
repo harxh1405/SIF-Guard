@@ -624,17 +624,6 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
             overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--primary), transparent)',
-              opacity: 0.7,
-            }}
-          />
           <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
             TOTAL REPORTS
           </div>
@@ -659,17 +648,6 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
             overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--danger), transparent)',
-              opacity: 0.7,
-            }}
-          />
           <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
             SIF PRECURSORS
           </div>
@@ -694,17 +672,6 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
             overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--warning), transparent)',
-              opacity: 0.7,
-            }}
-          />
           <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
             AVG. DENSITY
           </div>
@@ -729,17 +696,6 @@ export const AnalyticsPage: React.FC<Props> = ({ onNavigate }) => {
             overflow: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: '16px',
-              right: '16px',
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent, var(--primary), transparent)',
-              opacity: 0.7,
-            }}
-          />
           <div className="micro-label" style={{ marginBottom: '8px', color: 'var(--text-muted)' }}>
             HIGH-RISK SITES
           </div>

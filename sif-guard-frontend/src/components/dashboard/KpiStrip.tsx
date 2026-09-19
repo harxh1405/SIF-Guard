@@ -15,11 +15,7 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
       value: summary?.total_reports ? summary.total_reports.toLocaleString() : '1,284',
       change: '+12% BASELINE',
       period: 'OISD-156 Compliance Baseline',
-      topColor: '#205493',
-      badgeBg: '#ECFDF5',
-      badgeColor: '#065F46',
-      badgeBorder: '#6EE7B7',
-      icon: <FileText size={16} color="#205493" />,
+      icon: <FileText size={16} color="var(--primary)" />,
     },
     {
       id: 'sif',
@@ -27,11 +23,7 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
       value: summary?.sif_precursor_count ? summary.sif_precursor_count.toString() : '38',
       change: '+15% DENSITY',
       period: 'High Potential Risk Signals',
-      topColor: '#DC2626',
-      badgeBg: '#FEF2F2',
-      badgeColor: '#991B1B',
-      badgeBorder: '#FCA5A5',
-      icon: <AlertTriangle size={16} color="#DC2626" />,
+      icon: <AlertTriangle size={16} color="var(--primary)" />,
     },
     {
       id: 'barriers',
@@ -39,11 +31,7 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
       value: summary?.top_barrier_failures ? summary.top_barrier_failures.length.toString() : '17',
       change: '+8% BYPASSED',
       period: 'Active Barrier Controls Failure',
-      topColor: '#D97706',
-      badgeBg: '#FFFBEB',
-      badgeColor: '#92400E',
-      badgeBorder: '#FCD34D',
-      icon: <ShieldOff size={16} color="#D97706" />,
+      icon: <ShieldOff size={16} color="var(--primary)" />,
     },
     {
       id: 'patterns',
@@ -51,11 +39,7 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
       value: summary?.emerging_patterns ? summary.emerging_patterns.length.toString() : '6',
       change: 'HDBSCAN',
       period: 'Systemic Precursor Patterns',
-      topColor: '#205493',
-      badgeBg: '#E6F0FA',
-      badgeColor: '#1E3A8A',
-      badgeBorder: '#93C5FD',
-      icon: <GitBranch size={16} color="#205493" />,
+      icon: <GitBranch size={16} color="var(--primary)" />,
     },
     {
       id: 'locations',
@@ -63,11 +47,7 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
       value: summary?.sites ? summary.sites.toString() : '8',
       change: 'CATEGORY-I',
       period: 'Assam & Rajasthan Installations',
-      topColor: '#059669',
-      badgeBg: '#ECFDF5',
-      badgeColor: '#065F46',
-      badgeBorder: '#6EE7B7',
-      icon: <MapPin size={16} color="#059669" />,
+      icon: <MapPin size={16} color="var(--primary)" />,
     },
   ];
 
@@ -87,9 +67,8 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
           onClick={() => onKpiClick && onKpiClick(kpi.id as any)}
           style={{
             backgroundColor: '#FFFFFF',
-            border: '1px solid #D1D5DB',
-            borderTop: `3px solid ${kpi.topColor}`,
-            borderRadius: '3px',
+            border: '1px solid var(--border)',
+            borderRadius: '4px',
             padding: '16px 18px',
             display: 'flex',
             flexDirection: 'column',
@@ -97,18 +76,16 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
             cursor: onKpiClick ? 'pointer' : 'default',
             transition: 'border-color 0.15s ease',
             position: 'relative',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
             minHeight: '130px',
           }}
           onMouseEnter={(e) => {
             if (onKpiClick) {
-              e.currentTarget.style.borderColor = '#205493';
+              e.currentTarget.style.borderColor = 'var(--primary)';
             }
           }}
           onMouseLeave={(e) => {
             if (onKpiClick) {
-              e.currentTarget.style.borderColor = '#D1D5DB';
-              e.currentTarget.style.borderTopColor = kpi.topColor;
+              e.currentTarget.style.borderColor = 'var(--border)';
             }
           }}
         >
@@ -147,12 +124,12 @@ export const KpiStrip: React.FC<KpiStripProps> = ({ summary, onKpiClick }) => {
             <span
               style={{
                 fontSize: '0.68rem',
-                fontWeight: 700,
-                color: kpi.badgeColor,
-                backgroundColor: kpi.badgeBg,
-                border: `1px solid ${kpi.badgeBorder}`,
+                fontWeight: 600,
+                color: '#4B5563',
+                backgroundColor: '#F3F4F6',
+                border: '1px solid #E5E7EB',
                 padding: '2px 6px',
-                borderRadius: '2px',
+                borderRadius: '3px',
                 fontFamily: 'var(--font-mono, monospace)',
                 letterSpacing: '0.02em',
               }}

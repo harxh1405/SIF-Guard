@@ -84,13 +84,12 @@ export const InsightChartWrapper: React.FC<InsightChartWrapperProps> = ({
       style={{
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border)',
-        borderTop: '3.5px solid #003366',
         borderRadius: 'var(--radius-md)',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        boxShadow: 'var(--shadow-card)',
+        boxShadow: 'none',
       }}
     >
       {(title || subtitle || headerAction) && (

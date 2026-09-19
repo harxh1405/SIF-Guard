@@ -61,12 +61,11 @@ export const ExecutiveInsightHeader: React.FC<ExecutiveInsightHeaderProps> = ({
       style={{
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border)',
-        borderTop: `4px solid ${style.topBorder}`,
         borderRadius: 'var(--radius-md)',
         padding: '22px 26px',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: 'var(--shadow-card)',
+        boxShadow: 'none',
         marginBottom: '20px',
       }}
     >

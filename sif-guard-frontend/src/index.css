@@ -19,33 +19,33 @@
   --gov-green-light: #F0FDF4;
   --gov-red: #DC2626;
   --gov-red-light: #FEF2F2;
-  --gov-border: #D1D5DB;
-  --gov-border-subtle: #E5E7EB;
+  --gov-border: #E5E7EB;
+  --gov-border-subtle: #F3F4F6;
 
-  /* Aliases for UI Components */
-  --background: #F1F3F5;
+  /* Aliases for UI Components - Unified Pure Canvas */
+  --background: #FFFFFF;
   --background-secondary: #FFFFFF;
   --surface: #FFFFFF;
-  --surface-elevated: #FFFFFF;
-  --surface-hover: #F8FAFC;
+  --surface-elevated: #F9FAFB;
+  --surface-hover: #F9FAFB;
 
-  --bg-primary: #F1F3F5;
+  --bg-primary: #FFFFFF;
   --bg-secondary: #FFFFFF;
   --bg-header: #FFFFFF;
   --bg-sidebar: #0D233A;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F8FAFC;
+  --bg-card-hover: #F9FAFB;
   --bg-glass-panel: #FFFFFF;
   --bg-input: #FFFFFF;
   --bg-badge: #F3F4F6;
 
-  /* Borders & Dividers */
-  --border: #D1D5DB;
-  --border-subtle: #E5E7EB;
-  --border-color: #D1D5DB;
+  /* Borders & Dividers - Clean Subtle Separation */
+  --border: #E5E7EB;
+  --border-subtle: #F3F4F6;
+  --border-color: #E5E7EB;
   --border-hover: #205493;
-  --border-glass: #D1D5DB;
-  --border-glass-specular: rgba(0, 0, 0, 0.05);
+  --border-glass: #E5E7EB;
+  --border-glass-specular: rgba(0, 0, 0, 0.02);
 
   /* Semantic Colors */
   --amber: #D97706;
@@ -109,13 +109,13 @@
   --radius-xl: 4px;
   --radius-pill: 3px;
 
-  /* Shadows & Elevations - Flat Official Look */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.15);
-  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.12);
+  /* Shadows & Elevations - Flat Seamless Look */
+  --shadow-card: none;
+  --shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-primary: none;
-  --shadow-glass: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-glass-elevated: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-glass: none;
+  --shadow-glass-elevated: 0 2px 8px rgba(0, 0, 0, 0.04);
 
   /* Shimmer / Skeleton */
   --skeleton-start: #f1f5f9;
@@ -874,44 +874,19 @@ h1, h2, h3, h4, h5, h6 {
    NATIONAL PORTAL UTILITIES & CARDS
    ========================================================================== */
 .gov-tricolor-strip {
-  height: 4px;
-  width: 100%;
-  background: linear-gradient(
-    90deg,
-    #ff9933 0%,
-    #ff9933 33.33%,
-    #ffffff 33.33%,
-    #ffffff 66.66%,
-    #128807 66.66%,
-    #128807 100%
-  );
-  flex-shrink: 0;
+  display: none;
 }
 
 .gov-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--primary);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
 }
 
 .gov-card:hover {
-  box-shadow: 0 6px 18px rgba(0, 51, 102, 0.09);
-  border-color: #94a3b8;
-}
-
-.gov-card-amber {
-  border-top-color: #ff9933;
-}
-
-.gov-card-red {
-  border-top-color: #dc2626;
-}
-
-.gov-card-green {
-  border-top-color: #16a34a;
+  border-color: #cbd5e1;
 }
 
 .gov-badge {

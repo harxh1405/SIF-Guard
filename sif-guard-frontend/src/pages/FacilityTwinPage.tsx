@@ -221,9 +221,7 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
                 fontWeight: viewMode === '3d' ? 700 : 500,
                 fontSize: '11.5px',
                 cursor: 'pointer',
-                boxShadow: viewMode === '3d'
-                  ? (isLight ? '0 1px 4px rgba(0, 51, 102, 0.25)' : '0 2px 8px rgba(255, 115, 0, 0.35)')
-                  : 'none',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -247,9 +245,7 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
                 fontWeight: viewMode === '2d' ? 700 : 500,
                 fontSize: '11.5px',
                 cursor: 'pointer',
-                boxShadow: viewMode === '2d'
-                  ? (isLight ? '0 1px 4px rgba(0, 51, 102, 0.25)' : '0 2px 8px rgba(255, 115, 0, 0.35)')
-                  : 'none',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -384,13 +380,11 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
             minWidth: 0,
             height: '100%',
             position: 'relative',
-            borderRadius: '14px',
+            borderRadius: 'var(--radius-md)',
             overflow: 'hidden',
             backgroundColor: isLight ? '#e2e8f0' : '#070b12',
-            border: `1px solid ${isLight ? 'rgba(203, 213, 225, 0.9)' : 'rgba(255, 255, 255, 0.12)'}`,
-            boxShadow: isLight
-              ? '0 8px 24px rgba(0, 51, 102, 0.08)'
-              : '0 16px 48px rgba(0, 0, 0, 0.6)',
+            border: `1px solid ${isLight ? 'var(--border)' : 'rgba(255, 255, 255, 0.12)'}`,
+            boxShadow: 'none',
           }}
         >
           {viewMode === '3d' ? (
@@ -539,11 +533,9 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
                   backgroundColor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(10, 18, 30, 0.92)',
                   backdropFilter: 'blur(24px)',
                   WebkitBackdropFilter: 'blur(24px)',
-                  borderRadius: '14px',
-                  border: `1px solid ${isLight ? 'rgba(203, 213, 225, 0.85)' : 'rgba(255, 255, 255, 0.12)'}`,
-                  boxShadow: isLight
-                    ? '0 12px 28px rgba(0, 51, 102, 0.08)'
-                    : '0 16px 40px rgba(0, 0, 0, 0.55)',
+                  borderRadius: 'var(--radius-md)',
+                  border: `1px solid ${isLight ? 'var(--border)' : 'rgba(255, 255, 255, 0.12)'}`,
+                  boxShadow: 'none',
                   padding: selectedZone ? '0' : '12px 14px',
                   display: 'flex',
                   flexDirection: 'column',

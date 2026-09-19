@@ -112,39 +112,39 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
       {/* Official Gazette Statutory Advisory Banner */}
       <div
         style={{
-          backgroundColor: '#FFF9E6',
-          border: '1px solid #D97706',
-          borderRadius: '3px',
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
           padding: '10px 16px',
           fontSize: '0.78rem',
-          color: '#92400E',
+          color: 'var(--text-secondary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '12px',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span
             style={{
-              fontWeight: 800,
-              backgroundColor: '#D97706',
-              color: '#FFFFFF',
-              padding: '3px 8px',
-              borderRadius: '2px',
+              fontWeight: 700,
+              backgroundColor: '#F3F4F6',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+              padding: '2px 7px',
+              borderRadius: '3px',
               fontSize: '0.68rem',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.05em',
               fontFamily: 'var(--font-mono)',
             }}
           >
             STATUTORY ADVISORY
           </span>
-          <span style={{ fontWeight: 600 }}>
+          <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
             Mandatory real-time precursor surveillance and barrier verification active across Category-I installations pursuant to OISD Standard 156 and DGMS regulations.
           </span>
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', color: '#B45309' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 600, whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
           GAZETTE REF: OIL/HSE/2026-Q3
         </span>
       </div>
@@ -262,17 +262,16 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
           style={{
             backgroundColor: 'var(--bg-card)',
             border: '1px solid var(--border)',
-            borderTop: '3.5px solid #003366',
             borderRadius: 'var(--radius-md)',
             padding: '20px 22px',
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: 'var(--shadow-card)',
+            boxShadow: 'none',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <GitBranch size={17} color="#ff9933" />
+              <GitBranch size={17} color="#003366" />
               <h3
                 style={{
                   fontFamily: 'var(--font-sans)',
@@ -306,28 +305,23 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {(summary?.emerging_patterns || []).slice(0, 3).map((pat) => (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {(summary?.emerging_patterns || []).slice(0, 3).map((pat, idx, arr) => (
               <div
                 key={pat.id}
                 onClick={() => onNavigate('clusters')}
                 style={{
-                  backgroundColor: 'var(--surface-hover)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '6px',
-                  padding: '12px 14px',
+                  padding: '11px 8px',
+                  borderBottom: idx < arr.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+                  borderRadius: '4px',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease',
+                  transition: 'background-color 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#003366';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 51, 102, 0.08)';
+                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-subtle)';
-                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
-                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -338,19 +332,19 @@ export const DashboardPage: React.FC<Props> = ({ onNavigate }) => {
                     style={{
                       fontSize: '0.68rem',
                       fontFamily: 'var(--font-mono)',
-                      color: '#dc2626',
-                      backgroundColor: '#fef2f2',
-                      border: '1px solid #fecaca',
+                      color: 'var(--text-secondary)',
+                      backgroundColor: '#F3F4F6',
+                      border: '1px solid var(--border)',
                       padding: '1px 6px',
                       borderRadius: '4px',
-                      fontWeight: 800,
+                      fontWeight: 700,
                     }}
                   >
                     {pat.report_count} REPORTS
                   </span>
                 </div>
-                <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '0 0 6px 0', lineHeight: 1.35 }}>
-                  Primary barrier failure: <strong style={{ color: '#b45309' }}>{pat.dominant_barrier_failure || 'Pressure Isolation'}</strong>
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: 1.35 }}>
+                  Primary barrier failure: <strong style={{ color: 'var(--text-primary)' }}>{pat.dominant_barrier_failure || 'Pressure Isolation'}</strong>
                 </p>
                 <div style={{ display: 'flex', gap: '10px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   <span>Activity: {pat.dominant_activity || 'Maintenance'}</span>

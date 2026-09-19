@@ -31,18 +31,17 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
       style={{
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border)',
-        borderTop: '3.5px solid #003366',
         borderRadius: 'var(--radius-md)',
         padding: '20px 22px',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        boxShadow: 'var(--shadow-card)',
+        boxShadow: 'none',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Activity size={17} color="#ff9933" />
+          <Activity size={17} color="#003366" />
           <h3
             style={{
               fontFamily: 'var(--font-sans)',
@@ -60,10 +59,10 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
           style={{
             fontFamily: 'var(--font-mono, monospace)',
             fontSize: '0.67rem',
-            fontWeight: 800,
-            color: '#b45309',
-            backgroundColor: '#fef3c7',
-            border: '1px solid #fde68a',
+            fontWeight: 700,
+            color: 'var(--text-secondary)',
+            backgroundColor: '#F3F4F6',
+            border: '1px solid var(--border)',
             padding: '2px 8px',
             borderRadius: '4px',
           }}
@@ -72,8 +71,8 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', maxHeight: '340px' }}>
-        {items.map((item) => (
+      <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '340px' }}>
+        {items.map((item, idx) => (
           <div
             key={item.id}
             onClick={() => item.reportId && onSelectReport && onSelectReport(item.reportId)}
@@ -81,25 +80,20 @@ export const IntelligenceActivityFeed: React.FC<IntelligenceActivityFeedProps> =
               display: 'flex',
               alignItems: 'flex-start',
               gap: '12px',
-              padding: '10px 14px',
-              borderRadius: '6px',
-              backgroundColor: 'var(--surface-hover)',
-              border: '1px solid var(--border-subtle)',
+              padding: '11px 8px',
+              borderRadius: '4px',
+              borderBottom: idx < items.length - 1 ? '1px solid var(--border-subtle)' : 'none',
               cursor: item.reportId && onSelectReport ? 'pointer' : 'default',
-              transition: 'all 0.15s ease',
+              transition: 'background-color 0.15s ease',
             }}
             onMouseEnter={(e) => {
               if (item.reportId && onSelectReport) {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#003366';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 51, 102, 0.08)';
+                e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
               }
             }}
             onMouseLeave={(e) => {
               if (item.reportId && onSelectReport) {
-                e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
-                e.currentTarget.style.borderColor = 'var(--border-subtle)';
-                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.backgroundColor = 'transparent';
               }
             }}
           >

@@ -780,7 +780,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                 cursor: 'pointer',
                 background: viewMode === 'ALL' ? 'var(--surface-elevated)' : 'transparent',
                 color: viewMode === 'ALL' ? 'var(--text-primary)' : 'var(--text-muted)',
-                boxShadow: viewMode === 'ALL' ? '0 2px 6px rgba(0,0,0,0.2)' : 'none',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -797,7 +797,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                 cursor: 'pointer',
                 background: viewMode === 'PRIORITY' ? 'rgba(255, 106, 0, 0.18)' : 'transparent',
                 color: viewMode === 'PRIORITY' ? 'var(--primary-bright)' : 'var(--text-muted)',
-                boxShadow: viewMode === 'PRIORITY' ? '0 2px 6px rgba(0,0,0,0.2)' : 'none',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -814,7 +814,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                 cursor: 'pointer',
                 background: viewMode === 'SIF_ONLY' ? 'rgba(232, 93, 93, 0.18)' : 'transparent',
                 color: viewMode === 'SIF_ONLY' ? 'var(--danger)' : 'var(--text-muted)',
-                boxShadow: viewMode === 'SIF_ONLY' ? '0 2px 6px rgba(0,0,0,0.2)' : 'none',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -831,7 +831,7 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
                 cursor: 'pointer',
                 background: viewMode === 'UNCERTAIN_ONLY' ? 'rgba(255, 179, 71, 0.18)' : 'transparent',
                 color: viewMode === 'UNCERTAIN_ONLY' ? 'var(--warning)' : 'var(--text-muted)',
-                boxShadow: viewMode === 'UNCERTAIN_ONLY' ? '0 2px 6px rgba(0,0,0,0.2)' : 'none',
+                boxShadow: 'none',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -1108,9 +1108,9 @@ export const ReportsExplorerPage: React.FC<Props> = ({ onNavigate }) => {
           style={{
             overflow: 'hidden',
             width: '100%',
-            borderRadius: '16px',
+            borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+            boxShadow: 'none',
           }}
         >
           <div style={{ width: '100%', overflowX: 'auto' }}>
