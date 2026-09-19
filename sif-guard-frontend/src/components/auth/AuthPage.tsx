@@ -208,7 +208,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
               border: '1px solid rgba(255, 106, 0, 0.2)',
             }}
           >
-            Oil India Limited — SIH 2026
+            Oil India Limited
           </div>
         </div>
 

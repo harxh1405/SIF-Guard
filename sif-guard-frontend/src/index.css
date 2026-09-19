@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap');
 
+html, body, #root {
+  background-color: #0B0C0E !important;
+  color: #F4F5F7;
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
 /* ==========================================================================
    DESIGN TOKENS - PREMIUM DARK SAAS ORANGE & GREEN SYSTEM
    ========================================================================== */
@@ -929,9 +937,211 @@ textarea::placeholder {
   position: sticky;
   top: 120px;
   align-self: flex-start;
+  .desktop-nav {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   CINEMATIC INDUSTRIAL LANDING PAGE UTILITIES
+   ========================================================================== */
+
+.bg-micro-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+[data-theme="light"] .bg-micro-grid {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+}
+
+.telemetry-hud-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  width: min(1200px, 88vw);
+  min-height: 48px;
+  padding: 8px 24px;
+  border-radius: 8px;
+  background: rgba(18, 16, 14, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .telemetry-hud-container {
+  border-radius: 8px;
+  background: rgba(250, 248, 245, 0.85);
+  border: 1px solid rgba(195, 182, 168, 0.45);
+  box-shadow: 0 2px 12px rgba(40, 30, 20, 0.04);
+}
+
+.telemetry-hud-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 115, 0, 0.08), transparent);
+  animation: telemetry-sweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes telemetry-sweep {
+  0% {
+    left: -60%;
+  }
+  50%, 100% {
+    left: 140%;
+  }
+}
+
+.ghost-watermark-text {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.025);
+}
+
+[data-theme="light"] .ghost-watermark-text {
+  color: rgba(0, 0, 0, 0.03);
+}
+
+.conduit-stream-line {
+  position: relative;
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(255, 115, 0, 0.45) 0%, rgba(255, 115, 0, 0.1) 80%, transparent 100%);
+  margin: 0 auto;
+}
+
+.conduit-stream-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #FF7300;
+  box-shadow: 0 0 8px #FF7300;
+  animation: conduit-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes conduit-pulse {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Pipeline Animated Flow Conduits */
+.pipeline-track-connector {
+  position: relative;
+  height: 2px;
+  background: rgba(255, 115, 0, 0.15);
+  overflow: hidden;
+}
+
+.pipeline-track-connector::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #FF7300, transparent);
+  animation: pipeline-flow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pipeline-flow {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+
+/* Nav Link Hover Underline */
+.nav-link-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-link-btn:hover {
+  transform: translateY(-1px);
+}
+
+.nav-link-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #FF7300;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 1px;
+}
+
+.nav-link-btn:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Sticky Operational Indicator for Section 4 */
+.pinned-story-nav {
+  position: sticky;
+  top: 120px;
+  align-self: flex-start;
 }
 
 @media (max-width: 960px) {
+  .hero-grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-instrument-wrap {
+    margin-top: 24px !important;
+    justify-content: center !important;
+  }
   .pinned-story-layout {
     grid-template-columns: 1fr !important;
   }
@@ -942,5 +1152,384 @@ textarea::placeholder {
   }
 }
 
+@media (min-width: 860px) {
+  .desktop-nav-menu {
+    display: flex !important;
+  }
+}
 
+/* ==========================================================================
+   JAMIE MCKAYE EDITORIAL SYSTEM UTILITIES
+   ========================================================================== */
 
+.trace-node {
+  display: none !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.trace-node-active {
+  border-color: #FF7300 !important;
+  background-color: #FF7300 !important;
+  box-shadow: 0 0 10px rgba(255, 115, 0, 0.65) !important;
+  transform: scale(1.25);
+}
+
+[data-wreveal] {
+  opacity: 0.35;
+  transform: translateY(14px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+[data-wreveal].revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .trace-node {
+    display: block !important;
+  }
+  .md-show-brand-sub {
+    display: inline-block !important;
+  }
+  .md-show-details-tag {
+    display: inline-block !important;
+  }
+}
+
+/* ==========================================================================
+   JAMIE MCKAYE EXACT DESIGN SYSTEM TOKENS & UTILITIES
+   ========================================================================== */
+
+:root {
+  --color-ink-0: #0b0c0e;
+  --color-ink-1: #121316;
+  --color-ink-2: #1a1c20;
+  --color-paper-0: #fafbfd;
+  --color-paper-1: #ccd1d8;
+  --color-paper-2: #8a919b;
+  --color-hairline: rgba(244, 245, 247, 0.1);
+  --color-hairline-strong: rgba(244, 245, 247, 0.18);
+  --color-chrome-hi: #e9ebef;
+  --color-chrome-mid: #aeb4bd;
+  --color-chrome-lo: #6e747d;
+  --ease-instrument: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chrome-text {
+  background: linear-gradient(170deg, var(--color-chrome-hi) 8%, var(--color-chrome-mid) 46%, var(--color-chrome-lo) 72%, var(--color-chrome-hi) 100%);
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+.chrome-rule {
+  background: linear-gradient(90deg, transparent 0%, var(--color-chrome-lo) 18%, var(--color-chrome-hi) 50%, var(--color-chrome-lo) 82%, transparent 100%);
+  border: 0;
+  height: 1px;
+}
+
+.label-mono {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-paper-2);
+}
+
+.panel {
+  background: linear-gradient(180deg, var(--color-ink-2), var(--color-ink-1) 60%);
+  border: 1px solid var(--color-hairline);
+  position: relative;
+  box-shadow: inset 0 1px rgba(244, 245, 247, 0.06), 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.ticks {
+  background-image: 
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong)),
+    linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong));
+  background-position: 0 0, 0 0, 100% 0, 100% 0, 0 100%, 0 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  background-size: 9px 1px, 1px 9px, 9px 1px, 1px 9px, 9px 1px, 1px 9px, 9px 1px, 1px 9px;
+}
+
+/* Three Doors Hover Sweep */
+.door .door-sweep {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease-instrument);
+}
+
+.door:hover .door-sweep {
+  transform: scaleX(1);
+}
+
+/* ==========================================================================
+   READER PRISM 3D INSTRUMENT (HERO RIGHT COLUMN)
+   ========================================================================== */
+
+.ReaderPrism-prism {
+  isolation: isolate;
+  width: 100%;
+  max-width: 490px;
+  margin-inline: auto;
+  position: relative;
+}
+
+.ReaderPrism-topline {
+  color: var(--color-paper-1);
+  letter-spacing: 0.015em;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  display: flex;
+}
+
+.ReaderPrism-aperture {
+  width: 21px;
+  height: 21px;
+  stroke: var(--color-chrome-mid);
+  stroke-width: 1px;
+}
+
+.ReaderPrism-stage {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  perspective: 1200px;
+  touch-action: pan-y;
+  height: 308px;
+  position: relative;
+}
+
+.ReaderPrism-orbit {
+  border: 1px solid rgba(233, 235, 239, 0.1);
+  border-radius: 50%;
+  width: 85%;
+  height: 72%;
+  position: absolute;
+  top: 18%;
+  left: 7%;
+  transform: rotate(-28deg);
+  pointer-events: none;
+}
+
+.ReaderPrism-orbit:after {
+  content: "";
+  border-radius: inherit;
+  border: 1px solid rgba(233, 235, 239, 0.04);
+  position: absolute;
+  inset: -15%;
+}
+
+.ReaderPrism-stack {
+  width: 76%;
+  height: 234px;
+  transform-style: preserve-3d;
+  transition: transform 0.65s var(--ease-instrument);
+  position: absolute;
+  top: 35px;
+  left: 9%;
+}
+
+.ReaderPrism-sheet {
+  backface-visibility: hidden;
+  border: 1px solid rgba(233, 235, 239, 0.48);
+  border-radius: 3px;
+  padding: 18px 22px;
+  transition: transform 0.85s var(--ease-instrument), opacity 0.65s, border-color 0.65s;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.ReaderPrism-sheet:after {
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.2), transparent 36%, rgba(255, 255, 255, 0.04) 65%, transparent);
+  position: absolute;
+  inset: 0;
+}
+
+.ReaderPrism-human {
+  color: #151619;
+  background: linear-gradient(140deg, #fafbfd 0%, #d7dbe1 66%, #aeb4bd 100%);
+}
+
+.ReaderPrism-search {
+  background: linear-gradient(135deg, #30353d, #121316 75%);
+}
+
+.ReaderPrism-agents {
+  background: linear-gradient(145deg, #25292f, #101114 70%);
+}
+
+.ReaderPrism-paperTop,
+.ReaderPrism-paperFoot,
+.ReaderPrism-codeTop {
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+}
+
+.ReaderPrism-paperTop {
+  border-bottom: 1px solid rgba(21, 22, 25, 0.2);
+  padding-bottom: 9px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ReaderPrism-paperHeadline {
+  z-index: 1;
+  letter-spacing: -0.055em;
+  margin-top: 15px;
+  font-size: 34px;
+  font-weight: 650;
+  line-height: 0.99;
+  position: relative;
+}
+
+.ReaderPrism-paperHeadline > span {
+  color: #565d66;
+}
+
+.ReaderPrism-paperField {
+  opacity: 0.48;
+  width: 100%;
+  position: absolute;
+  bottom: 36px;
+  right: -36px;
+}
+
+.ReaderPrism-paperField svg {
+  stroke: #515b6a;
+  stroke-width: 0.65px;
+  width: 100%;
+}
+
+.ReaderPrism-paperFoot {
+  border-top: 1px solid rgba(21, 22, 25, 0.2);
+  padding-top: 8px;
+  font-size: 8px;
+  position: absolute;
+  bottom: 15px;
+  left: 22px;
+  right: 22px;
+}
+
+.ReaderPrism-paperFoot > span:last-child {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ReaderPrism-codeTop {
+  font-family: var(--font-mono);
+  color: #ccd1d8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  padding-bottom: 10px;
+  font-size: 9px;
+}
+
+.ReaderPrism-sheet pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  color: #e9ebef;
+  margin-top: 15px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.ReaderPrism-codeFoot {
+  color: #aeb4bd;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  padding-top: 9px;
+  font-size: 9px;
+  position: absolute;
+  bottom: 14px;
+  left: 22px;
+  right: 22px;
+}
+
+.ReaderPrism-controls {
+  border-bottom: 1px solid var(--color-hairline-strong);
+  grid-template-columns: repeat(3, 1fr);
+  display: grid;
+  position: relative;
+}
+
+.ReaderPrism-controls button {
+  min-height: 48px;
+  color: var(--color-paper-2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: -1px;
+  font-size: 13px;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  display: flex;
+}
+
+.ReaderPrism-controls button:hover {
+  color: var(--color-paper-0);
+  background: rgba(250, 251, 253, 0.03);
+}
+
+.ReaderPrism-controls button[aria-pressed="true"] {
+  color: var(--color-paper-0);
+  border-color: var(--color-paper-0);
+}
+
+.ReaderPrism-description {
+  min-height: 163px;
+  padding-top: 23px;
+}
+
+.ReaderPrism-surface {
+  color: var(--color-paper-2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.025em;
+  font-size: 10px;
+}
+
+.ReaderPrism-description h2 {
+  letter-spacing: -0.025em;
+  margin-top: 6px;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-paper-0);
+}
+
+.ReaderPrism-explanation {
+  max-width: 42ch;
+  color: var(--color-paper-1);
+  min-height: 42px;
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ReaderPrism-description a {
+  color: var(--color-paper-0);
+  text-decoration: underline;
+  text-decoration-color: var(--color-chrome-lo);
+  text-underline-offset: 5px;
+  align-items: center;
+  gap: 18px;
+  padding-block: 10px;
+  font-size: 12px;
+  display: inline-flex;
+}
+
+.ReaderPrism-description a:hover {
+  text-decoration-color: var(--color-paper-0);
+}
