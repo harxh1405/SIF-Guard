@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import type { FacilityRiskSummary, DemoSimulationResponse, ZoneIncident } from '../types/facility';
-import { getFacilityOverview, resetDemoData } from '../api/facility';
+import { getFacilityOverview /*, resetDemoData */ } from '../api/facility';
 import { FacilityMetricsHUD } from '../components/facility/FacilityMetricsHUD';
 import { FacilitySvg } from '../components/facility/FacilitySvg';
 import { RefineryCanvas } from '../components/facility/3d/RefineryCanvas';
@@ -12,7 +12,6 @@ import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import {
   Zap,
-  RotateCcw,
   RefreshCw,
   ShieldAlert,
   Box,
@@ -37,14 +36,13 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
   const [hoveredZoneId, setHoveredZoneId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
   const [isDemoModalOpen, setIsDemoModalOpen] = useState<boolean>(false);
-  const [isResetting, setIsResetting] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'zones' | 'timeline'>('zones');
   const [simulationToast, setSimulationToast] = useState<{ title: string; zone: string } | null>(null);
 
   // Layout toggles
   const [isImmersionMode, setIsImmersionMode] = useState<boolean>(false);
   const [isDeckCollapsed, setIsDeckCollapsed] = useState<boolean>(false);
-  const [canvasResetSignal, setCanvasResetSignal] = useState<number>(0);
+  const [canvasResetSignal] = useState<number>(0);
 
   const isLight = theme === 'light';
 
@@ -81,6 +79,7 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
     };
   }, []);
 
+  /*
   const handleResetDemo = async () => {
     setIsResetting(true);
     setSelectedZoneId(null);
@@ -96,6 +95,7 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
       setIsResetting(false);
     }
   };
+  */
 
   const handleSimulationSuccess = (res: DemoSimulationResponse) => {
     setSummary(res.updated_facility_summary);
@@ -179,16 +179,16 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
               <Sparkles size={11} /> {viewMode === '3d' ? '3D WEBGL ACTIVE' : '2D MAP ACTIVE'}
             </div>
           </div>
-          <p
-            className="section-subtitle"
-            style={{
-              margin: '2px 0 0 0',
-              fontSize: '12px',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            Real-time deterministic barrier degradation modeling, precursor flare propagation, and equipment telemetry.
-          </p>
+          {/* <p */}
+          {/*   className="section-subtitle" */}
+          {/*   style={{ */}
+          {/*     margin: '2px 0 0 0', */}
+          {/*     fontSize: '12px', */}
+          {/*     color: 'var(--text-secondary)', */}
+          {/*   }} */}
+          {/* > */}
+          {/*   Real-time deterministic barrier degradation modeling, precursor flare propagation, and equipment telemetry. */}
+          {/* </p> */}
         </div>
 
         {/* Action Controls & Toolbar */}
@@ -280,27 +280,27 @@ export const FacilityTwinPage: React.FC<FacilityTwinPageProps> = ({ theme = 'dar
           </button>
 
           {/* Reset Demo Data */}
-          <button
-            onClick={handleResetDemo}
-            disabled={isResetting}
-            style={{
-              padding: '6px 11px',
-              borderRadius: '8px',
-              backgroundColor: isLight ? '#ffffff' : 'var(--surface-elevated)',
-              border: `1px solid ${isLight ? '#cbd5e1' : 'var(--border)'}`,
-              color: 'var(--text-secondary)',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              cursor: isResetting ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              transition: 'all 0.15s ease',
-            }}
-            title="Reset active simulated demo incidents"
-          >
-            <RotateCcw size={13} /> Reset
-          </button>
+          {/* <button */}
+          {/*   onClick={handleResetDemo} */}
+          {/*   disabled={isResetting} */}
+          {/*   style={{ */}
+          {/*     padding: '6px 11px', */}
+          {/*     borderRadius: '8px', */}
+          {/*     backgroundColor: isLight ? '#ffffff' : 'var(--surface-elevated)', */}
+          {/*     border: `1px solid ${isLight ? '#cbd5e1' : 'var(--border)'}`, */}
+          {/*     color: 'var(--text-secondary)', */}
+          {/*     fontSize: '11.5px', */}
+          {/*     fontWeight: 600, */}
+          {/*     cursor: isResetting ? 'not-allowed' : 'pointer', */}
+          {/*     display: 'flex', */}
+          {/*     alignItems: 'center', */}
+          {/*     gap: '5px', */}
+          {/*     transition: 'all 0.15s ease', */}
+          {/*   }} */}
+          {/*   title="Reset active simulated demo incidents" */}
+          {/* > */}
+          {/*   <RotateCcw size={13} /> Reset */}
+          {/* </button> */}
 
           {/* Refresh Telemetry */}
           <button
